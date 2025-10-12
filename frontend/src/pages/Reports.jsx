@@ -31,7 +31,7 @@ const Reports = () => {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/daily-reports');
+      const response = await axios.get(`${API}/daily-reports`);
       setReports(response.data);
     } catch (error) {
       console.error('Błąd pobierania raportów:', error);
