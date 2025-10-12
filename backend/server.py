@@ -706,6 +706,202 @@ async def delete_daily_report(report_id: str):
     return {"message": "Raport usunięty pomyślnie"}
 
 
+# ============= GMAIL INTEGRATION =============
+
+from fastapi import Request, Response
+from fastapi.responses import RedirectResponse
+import gmail_service
+
+class GmailCredentials(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_email: str
+    token: str
+    refresh_token: Optional[str] = None
+    token_uri: str = "https://oauth2.googleapis.com/token"
+    scopes: list = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+@api_router.get("/gmail/auth/start")
+async def gmail_auth_start():
+    """Start Gmail OAuth flow"""
+    try:
+        flow = gmail_service.create_oauth_flow()
+        authorization_url, state = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent'
+        )
+        return {"authorization_url": authorization_url, "state": state}
+    except Exception as e:
+        logger.error(f"Error starting Gmail auth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/gmail/auth/callback")
+async def gmail_auth_callback(request: Request):
+    """Handle Gmail OAuth callback"""
+    try:
+        # Get the full URL with query parameters
+        code = request.query_params.get('code')
+        
+        if not code:
+            raise HTTPException(status_code=400, detail="No authorization code provided")
+        
+        flow = gmail_service.create_oauth_flow()
+        flow.fetch_token(code=code)
+        
+        credentials = flow.credentials
+        
+        # Get user email from Gmail API
+        service = gmail_service.get_gmail_service({
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token
+        })
+        profile = service.users().getProfile(userId='me').execute()
+        user_email = profile['emailAddress']
+        
+        # Save credentials to database
+        credentials_data = {
+            "id": str(uuid.uuid4()),
+            "user_email": user_email,
+            "token": credentials.token,
+            "refresh_token": credentials.refresh_token,
+            "token_uri": credentials.token_uri,
+            "scopes": list(credentials.scopes),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Update existing or insert new
+        await db.gmail_credentials.update_one(
+            {"user_email": user_email},
+            {"$set": credentials_data},
+            upsert=True
+        )
+        
+        # Redirect to frontend mail page
+        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '')
+        return RedirectResponse(url=f"{frontend_url}/mail?connected=true")
+        
+    except Exception as e:
+        logger.error(f"Error in Gmail callback: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/gmail/status")
+async def gmail_status():
+    """Check if Gmail is connected"""
+    try:
+        # For now, check if any credentials exist
+        credentials = await db.gmail_credentials.find_one({}, {"_id": 0})
+        
+        if credentials:
+            return {
+                "connected": True,
+                "email": credentials.get("user_email")
+            }
+        return {"connected": False}
+        
+    except Exception as e:
+        logger.error(f"Error checking Gmail status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/gmail/emails")
+async def get_gmail_emails(max_results: int = 50, page_token: Optional[str] = None):
+    """Get list of emails"""
+    try:
+        # Get credentials from database
+        credentials = await db.gmail_credentials.find_one({}, {"_id": 0})
+        
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Gmail not connected")
+        
+        result = await gmail_service.list_emails(credentials, max_results, page_token)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error getting emails: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/gmail/emails/{message_id}")
+async def get_gmail_email(message_id: str):
+    """Get single email"""
+    try:
+        credentials = await db.gmail_credentials.find_one({}, {"_id": 0})
+        
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Gmail not connected")
+        
+        email = await gmail_service.get_email(credentials, message_id)
+        return email
+        
+    except Exception as e:
+        logger.error(f"Error getting email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class EmailSend(BaseModel):
+    to: str
+    subject: str
+    body: str
+
+
+@api_router.post("/gmail/send")
+async def send_gmail_email(email: EmailSend):
+    """Send an email"""
+    try:
+        credentials = await db.gmail_credentials.find_one({}, {"_id": 0})
+        
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Gmail not connected")
+        
+        result = await gmail_service.send_email(
+            credentials,
+            email.to,
+            email.subject,
+            email.body
+        )
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/gmail/emails/{message_id}/read")
+async def mark_gmail_read(message_id: str):
+    """Mark email as read"""
+    try:
+        credentials = await db.gmail_credentials.find_one({}, {"_id": 0})
+        
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Gmail not connected")
+        
+        result = await gmail_service.mark_as_read(credentials, message_id)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error marking email as read: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/gmail/disconnect")
+async def disconnect_gmail():
+    """Disconnect Gmail"""
+    try:
+        result = await db.gmail_credentials.delete_many({})
+        return {"success": True, "deleted_count": result.deleted_count}
+    except Exception as e:
+        logger.error(f"Error disconnecting Gmail: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============= ROOT ENDPOINT =============
 
 @api_router.get("/")
