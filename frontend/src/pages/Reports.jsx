@@ -44,9 +44,9 @@ const Reports = () => {
     e.preventDefault();
     try {
       if (editingReport) {
-        await api.put(`/daily-reports/${editingReport.id}`, formData);
+        await axios.put(`${API}/daily-reports/${editingReport.id}`, formData);
       } else {
-        await api.post('/daily-reports', formData);
+        await axios.post(`${API}/daily-reports`, formData);
       }
       setIsDialogOpen(false);
       resetForm();
