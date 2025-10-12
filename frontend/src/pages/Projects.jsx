@@ -344,7 +344,17 @@ const Projects = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleOpenMaterials(project)}
+                            title="Notatka materiałów"
+                            data-testid={`materials-project-${project.id}`}
+                          >
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleEdit(project)}
+                            title="Edytuj"
                             data-testid={`edit-project-${project.id}`}
                           >
                             <Edit className="h-4 w-4" />
@@ -353,6 +363,7 @@ const Projects = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(project.id)}
+                            title="Usuń"
                             data-testid={`delete-project-${project.id}`}
                           >
                             <Trash2 className="h-4 w-4 text-red-500" />
