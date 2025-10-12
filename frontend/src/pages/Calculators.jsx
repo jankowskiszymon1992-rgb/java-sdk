@@ -9,65 +9,6 @@ import PowerCalculator from '../components/calculators/PowerCalculator';
 import ElectricalTips from '../components/calculators/ElectricalTips';
 
 const Calculators = () => {
-  const calculators = [
-    {
-      id: 'basic',
-      title: 'Kalkulator Podstawowy',
-      icon: Calculator,
-      component: BasicCalculator,
-      bgColor: 'from-blue-50 to-blue-100',
-      textColor: 'text-blue-900',
-    },
-    {
-      id: 'wire',
-      title: 'Dobór Przewodów',
-      icon: Cable,
-      component: WireCalculator,
-      bgColor: 'from-yellow-50 to-yellow-100',
-      textColor: 'text-yellow-900',
-    },
-    {
-      id: 'voltage-drop',
-      title: 'Spadek Napięcia',
-      icon: TrendingDown,
-      component: VoltageDropCalculator,
-      bgColor: 'from-red-50 to-red-100',
-      textColor: 'text-red-900',
-    },
-    {
-      id: 'breaker',
-      title: 'Dobór Bezpieczników',
-      icon: Shield,
-      component: BreakerCalculator,
-      bgColor: 'from-green-50 to-green-100',
-      textColor: 'text-green-900',
-    },
-    {
-      id: 'ohm',
-      title: 'Prawo Ohma',
-      icon: Zap,
-      component: OhmLawCalculator,
-      bgColor: 'from-purple-50 to-purple-100',
-      textColor: 'text-purple-900',
-    },
-    {
-      id: 'power',
-      title: 'Kalkulator Mocy',
-      icon: Power,
-      component: PowerCalculator,
-      bgColor: 'from-orange-50 to-orange-100',
-      textColor: 'text-orange-900',
-    },
-    {
-      id: 'tips',
-      title: 'Wskazówki i Normy',
-      icon: Lightbulb,
-      component: ElectricalTips,
-      bgColor: 'from-indigo-50 to-indigo-100',
-      textColor: 'text-indigo-900',
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div>
@@ -76,22 +17,96 @@ const Calculators = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {calculators.map((calc) => {
-          const Component = calc.component;
-          return (
-            <Card key={`calc-${calc.id}`} className="hover:shadow-xl transition-shadow">
-              <CardHeader className={`bg-gradient-to-r ${calc.bgColor} border-b`}>
-                <CardTitle className={`flex items-center space-x-2 ${calc.textColor}`}>
-                  <calc.icon className="h-5 w-5" />
-                  <span className="text-base">{calc.title}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <Component key={`component-${calc.id}`} />
-              </CardContent>
-            </Card>
-          );
-        })}
+        {/* Basic Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-blue-900">
+              <Calculator className="h-5 w-5" />
+              <span className="text-base">Kalkulator Podstawowy</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <BasicCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Wire Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-yellow-900">
+              <Cable className="h-5 w-5" />
+              <span className="text-base">Dobór Przewodów</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <WireCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Voltage Drop Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-red-900">
+              <TrendingDown className="h-5 w-5" />
+              <span className="text-base">Spadek Napięcia</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <VoltageDropCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Breaker Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-green-900">
+              <Shield className="h-5 w-5" />
+              <span className="text-base">Dobór Bezpieczników</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <BreakerCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Ohm Law Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-purple-900">
+              <Zap className="h-5 w-5" />
+              <span className="text-base">Prawo Ohma</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <OhmLawCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Power Calculator */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-orange-900">
+              <Power className="h-5 w-5" />
+              <span className="text-base">Kalkulator Mocy</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <PowerCalculator />
+          </CardContent>
+        </Card>
+
+        {/* Electrical Tips */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-indigo-50 to-indigo-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-indigo-900">
+              <Lightbulb className="h-5 w-5" />
+              <span className="text-base">Wskazówki i Normy</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <ElectricalTips />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
