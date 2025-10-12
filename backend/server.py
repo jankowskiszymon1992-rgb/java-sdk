@@ -491,6 +491,221 @@ async def delete_photo(photo_id: str):
     return {"message": "Zdjęcie usunięte pomyślnie"}
 
 
+# ============= VOICE REPORTS =============
+
+class DailyReport(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    date: str  # ISO date string
+    title: str  # Nazwa klienta lub tytuł
+    work_description: str  # Opis wykonanych prac
+    materials_used: str  # Zużyte materiały
+    additional_info: str  # Dodatkowe informacje
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class DailyReportCreate(BaseModel):
+    date: str
+    title: str
+    work_description: str
+    materials_used: str
+    additional_info: str
+
+
+class DailyReportUpdate(BaseModel):
+    date: Optional[str] = None
+    title: Optional[str] = None
+    work_description: Optional[str] = None
+    materials_used: Optional[str] = None
+    additional_info: Optional[str] = None
+
+
+class VoiceTranscript(BaseModel):
+    transcript: str  # Tekst z Web Speech API
+    command_type: str  # "work_hours" lub "daily_report"
+
+
+# AI Processing with Emergent LLM Key
+async def process_voice_transcript(transcript: str, command_type: str):
+    """Przetwarza transkrypcję głosową za pomocą AI"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    
+    if command_type == "work_hours":
+        system_message = """Jesteś asystentem który analizuje polski tekst o godzinach pracy.
+Wyciągnij z tekstu:
+- Imiona i nazwiska pracowników
+- Liczbę przepracowanych godzin dla każdego
+- Datę (jeśli podana, inaczej dzisiejsza)
+
+Odpowiedz w formacie JSON:
+{
+  "date": "2025-01-12",
+  "workers": [
+    {"name": "Bartosz Kowalski", "hours": 9.0},
+    {"name": "Norbert Fronckow iak", "hours": 9.0}
+  ]
+}"""
+    else:  # daily_report
+        system_message = """Jesteś asystentem który analizuje polski tekst o raporcie dziennym.
+Wyciągnij z tekstu:
+- Nazwę klienta (tytuł)
+- Opis wykonanych prac
+- Zużyte materiały (lista)
+- Dodatkowe informacje
+- Datę (jeśli podana, inaczej dzisiejsza)
+
+Odpowiedz w formacie JSON:
+{
+  "date": "2025-01-12",
+  "title": "Jan Kowalski",
+  "work_description": "Rozciągnięcie instalacji oświetlenia garaż, wykopanie 20m przyłącza",
+  "materials_used": "Kabel 5x10 30m, Puszki 20szt, Bezpieczniki B16 8szt, Paliwo 6 litrów",
+  "additional_info": "3 osoby, 9 godzin, koparka 5 godzin, podnośnik 3 godziny. Praca przebiegła bez żadnych problemów."
+}"""
+    
+    chat = LlmChat(
+        api_key=api_key,
+        session_id=f"voice-{uuid.uuid4()}",
+        system_message=system_message
+    ).with_model("openai", "gpt-4o-mini")
+    
+    user_message = UserMessage(text=transcript)
+    response = await chat.send_message(user_message)
+    
+    # Parse JSON response
+    import json
+    try:
+        # Extract JSON from response (handle markdown code blocks)
+        response_text = response.strip()
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        return json.loads(response_text)
+    except Exception as e:
+        logger.error(f"Failed to parse AI response: {e}, response: {response}")
+        raise HTTPException(status_code=500, detail=f"Błąd parsowania odpowiedzi AI: {str(e)}")
+
+
+@api_router.post("/voice/process")
+async def process_voice(data: VoiceTranscript):
+    """Przetwarza transkrypcję głosową i automatycznie zapisuje dane"""
+    try:
+        result = await process_voice_transcript(data.transcript, data.command_type)
+        
+        if data.command_type == "work_hours":
+            # Automatycznie zapisz godziny pracy
+            work_hours_ids = []
+            for worker in result.get("workers", []):
+                work_hour_data = {
+                    "id": str(uuid.uuid4()),
+                    "date": result.get("date", datetime.now().date().isoformat()),
+                    "hours": worker["hours"],
+                    "project_id": None,  # Można później przypisać
+                    "worker_name": worker["name"],
+                    "notes": "Dodane przez asystenta głosowego",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.work_hours.insert_one(work_hour_data)
+                work_hours_ids.append(work_hour_data["id"])
+            
+            return {
+                "success": True,
+                "type": "work_hours",
+                "data": result,
+                "saved_ids": work_hours_ids
+            }
+        
+        else:  # daily_report
+            # Sprawdź czy klient istnieje w bazie
+            client = await db.clients.find_one(
+                {"name": {"$regex": result.get("title", ""), "$options": "i"}},
+                {"_id": 0}
+            )
+            
+            report_data = {
+                "id": str(uuid.uuid4()),
+                "date": result.get("date", datetime.now().date().isoformat()),
+                "title": result.get("title", "Bez tytułu"),
+                "work_description": result.get("work_description", ""),
+                "materials_used": result.get("materials_used", ""),
+                "additional_info": result.get("additional_info", ""),
+                "client_id": client["id"] if client else None,
+                "client_found": bool(client),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.daily_reports.insert_one(report_data)
+            
+            return {
+                "success": True,
+                "type": "daily_report",
+                "data": result,
+                "saved_id": report_data["id"],
+                "client_found": bool(client)
+            }
+    
+    except Exception as e:
+        logger.error(f"Error processing voice: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# CRUD for Daily Reports
+
+@api_router.get("/daily-reports", response_model=List[DailyReport])
+async def get_daily_reports():
+    reports = await db.daily_reports.find({}, {"_id": 0}).sort("date", -1).to_list(length=None)
+    return [deserialize_doc(report) for report in reports]
+
+
+@api_router.get("/daily-reports/{report_id}", response_model=DailyReport)
+async def get_daily_report(report_id: str):
+    report = await db.daily_reports.find_one({"id": report_id}, {"_id": 0})
+    if not report:
+        raise HTTPException(status_code=404, detail="Raport nie znaleziony")
+    return deserialize_doc(report)
+
+
+@api_router.post("/daily-reports", response_model=DailyReport)
+async def create_daily_report(report: DailyReportCreate):
+    report_data = report.model_dump()
+    report_data["id"] = str(uuid.uuid4())
+    report_data["created_at"] = datetime.now(timezone.utc).isoformat()
+    report_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.daily_reports.insert_one(report_data)
+    return deserialize_doc(report_data)
+
+
+@api_router.put("/daily-reports/{report_id}", response_model=DailyReport)
+async def update_daily_report(report_id: str, report: DailyReportUpdate):
+    existing = await db.daily_reports.find_one({"id": report_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Raport nie znaleziony")
+    
+    update_data = {k: v for k, v in report.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.daily_reports.update_one({"id": report_id}, {"$set": update_data})
+    
+    updated_report = await db.daily_reports.find_one({"id": report_id}, {"_id": 0})
+    return deserialize_doc(updated_report)
+
+
+@api_router.delete("/daily-reports/{report_id}")
+async def delete_daily_report(report_id: str):
+    result = await db.daily_reports.delete_one({"id": report_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Raport nie znaleziony")
+    return {"message": "Raport usunięty pomyślnie"}
+
+
 # ============= ROOT ENDPOINT =============
 
 @api_router.get("/")
