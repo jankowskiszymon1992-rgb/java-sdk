@@ -110,7 +110,7 @@ const BasicCalculator = () => {
           </div>
 
           {/* Buttons */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-3">
             {/* Row 1 */}
             <Button onClick={handleClear} className={clearButtonClass}>
               C
