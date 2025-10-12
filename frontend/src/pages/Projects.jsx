@@ -28,6 +28,8 @@ const Projects = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [formData, setFormData] = useState({
     client_id: '',
     title: '',
