@@ -44,6 +44,8 @@ function App() {
             <Route path="workhours" element={<WorkHours />} />
             <Route path="calculators" element={<Calculators />} />
             <Route path="photos" element={<Photos />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="reports/voice" element={<VoiceReport />} />
           </Route>
         </Routes>
       </BrowserRouter>
