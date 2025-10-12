@@ -10,6 +10,7 @@ import Calculators from './pages/Calculators';
 import Photos from './pages/Photos';
 import Reports from './pages/Reports';
 import VoiceReport from './pages/VoiceReport';
+import Mail from './pages/Mail';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
 import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder } from './utils/notifications';
