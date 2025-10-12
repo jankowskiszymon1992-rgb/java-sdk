@@ -910,7 +910,7 @@ async def root():
 
 
 # Gmail OAuth callback endpoint (without /api prefix to match Google Console)
-@app.get("/auth/google/callback")
+@app.get("/auth/google")
 async def gmail_oauth_callback(request: Request):
     """Handle Gmail OAuth callback - matches Google Console redirect URI"""
     try:
