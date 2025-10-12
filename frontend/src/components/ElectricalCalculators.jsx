@@ -171,15 +171,15 @@ const ElectricalCalculators = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full">
       <Tabs defaultValue="wire" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-          <TabsTrigger value="wire">Przewody</TabsTrigger>
-          <TabsTrigger value="drop">Spadek U</TabsTrigger>
-          <TabsTrigger value="breaker">Bezpieczniki</TabsTrigger>
-          <TabsTrigger value="ohm">Prawo Ohma</TabsTrigger>
-          <TabsTrigger value="power">Moc</TabsTrigger>
-          <TabsTrigger value="tips">Wskazówki</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 gap-1">
+          <TabsTrigger value="wire" className="text-xs sm:text-sm">Przewody</TabsTrigger>
+          <TabsTrigger value="drop" className="text-xs sm:text-sm">Spadek U</TabsTrigger>
+          <TabsTrigger value="breaker" className="text-xs sm:text-sm">Bezpieczniki</TabsTrigger>
+          <TabsTrigger value="ohm" className="text-xs sm:text-sm">Ohm</TabsTrigger>
+          <TabsTrigger value="power" className="text-xs sm:text-sm">Moc</TabsTrigger>
+          <TabsTrigger value="tips" className="text-xs sm:text-sm">Porady</TabsTrigger>
         </TabsList>
 
         {/* Wire Size Calculator */}
