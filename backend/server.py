@@ -137,6 +137,33 @@ class WorkHourUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+class Photo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    project_id: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    image_data: str  # base64 encoded image
+    taken_date: str  # ISO date string
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class PhotoCreate(BaseModel):
+    project_id: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    image_data: str
+    taken_date: str
+
+
+class PhotoUpdate(BaseModel):
+    project_id: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    taken_date: Optional[str] = None
+
+
 # ============= HELPER FUNCTIONS =============
 
 def serialize_doc(doc):
