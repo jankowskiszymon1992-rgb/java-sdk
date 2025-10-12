@@ -47,6 +47,7 @@ function App() {
             <Route path="photos" element={<Photos />} />
             <Route path="reports" element={<Reports />} />
             <Route path="reports/voice" element={<VoiceReport />} />
+            <Route path="mail" element={<Mail />} />
           </Route>
         </Routes>
       </BrowserRouter>
