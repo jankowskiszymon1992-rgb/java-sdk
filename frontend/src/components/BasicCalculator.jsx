@@ -90,10 +90,9 @@ const BasicCalculator = () => {
   const clearButtonClass = `${buttonClass} bg-red-500 hover:bg-red-600 text-white border-0`;
 
   return (
-    <div className="w-full">
-      <div className="space-y-4">
-          {/* Display */}
-          <div className="bg-gray-900 text-white rounded-lg p-6 text-right">
+    <div className="w-full space-y-4">
+      {/* Display */}
+      <div className="bg-gray-900 text-white rounded-lg p-6 text-right">
             <div className="text-sm text-gray-400 h-6">
               {previousValue !== null && operation ? `${previousValue} ${operation}` : ''}
             </div>
