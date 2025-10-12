@@ -909,56 +909,6 @@ async def root():
     return {"message": "API Aplikacji dla Elektryka - Działa!"}
 
 
-# Gmail OAuth callback endpoint (without /api prefix to match Google Console)
-@app.get("/auth/google")
-async def gmail_oauth_callback(request: Request):
-    """Handle Gmail OAuth callback - matches Google Console redirect URI"""
-    try:
-        code = request.query_params.get('code')
-        
-        if not code:
-            raise HTTPException(status_code=400, detail="No authorization code provided")
-        
-        flow = gmail_service.create_oauth_flow()
-        flow.fetch_token(code=code)
-        
-        credentials = flow.credentials
-        
-        # Get user email from Gmail API
-        service = gmail_service.get_gmail_service({
-            'token': credentials.token,
-            'refresh_token': credentials.refresh_token
-        })
-        profile = service.users().getProfile(userId='me').execute()
-        user_email = profile['emailAddress']
-        
-        # Save credentials to database
-        credentials_data = {
-            "id": str(uuid.uuid4()),
-            "user_email": user_email,
-            "token": credentials.token,
-            "refresh_token": credentials.refresh_token,
-            "token_uri": credentials.token_uri,
-            "scopes": list(credentials.scopes),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }
-        
-        # Update existing or insert new
-        await db.gmail_credentials.update_one(
-            {"user_email": user_email},
-            {"$set": credentials_data},
-            upsert=True
-        )
-        
-        # Redirect to frontend mail page
-        return RedirectResponse(url="https://elektron-dashboard.preview.emergentagent.com/mail?connected=true")
-        
-    except Exception as e:
-        logger.error(f"Error in Gmail callback: {e}")
-        return RedirectResponse(url=f"https://elektron-dashboard.preview.emergentagent.com/mail?error={str(e)}")
-
-
 # Include the router in the main app
 app.include_router(api_router)
 
