@@ -163,12 +163,11 @@ const BasicCalculator = () => {
             <Button onClick={() => handleNumber(0)} className={`${numberButtonClass} col-span-2`}>
               0
             </Button>
-            <Button onClick={handleDecimal} className={numberButtonClass}>
-              .
-            </Button>
-          </div>
-        </div>
+        <Button onClick={handleDecimal} className={numberButtonClass}>
+          .
+        </Button>
       </div>
+    </div>
   );
 };
 
