@@ -169,7 +169,6 @@ const BasicCalculator = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
