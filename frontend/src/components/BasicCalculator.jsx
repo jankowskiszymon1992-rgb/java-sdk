@@ -170,8 +170,8 @@ const BasicCalculator = () => {
             </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
