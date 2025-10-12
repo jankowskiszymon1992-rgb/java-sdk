@@ -79,7 +79,7 @@ const Calculators = () => {
         {calculators.map((calc) => {
           const Component = calc.component;
           return (
-            <Card key={calc.id} className="hover:shadow-xl transition-shadow">
+            <Card key={`calc-${calc.id}`} className="hover:shadow-xl transition-shadow">
               <CardHeader className={`bg-gradient-to-r ${calc.bgColor} border-b`}>
                 <CardTitle className={`flex items-center space-x-2 ${calc.textColor}`}>
                   <calc.icon className="h-5 w-5" />
@@ -87,7 +87,7 @@ const Calculators = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <Component />
+                <Component key={`component-${calc.id}`} />
               </CardContent>
             </Card>
           );
