@@ -93,16 +93,16 @@ const BasicCalculator = () => {
     <div className="w-full space-y-4">
       {/* Display */}
       <div className="bg-gray-900 text-white rounded-lg p-6 text-right">
-            <div className="text-sm text-gray-400 h-6">
-              {previousValue !== null && operation ? `${previousValue} ${operation}` : ''}
-            </div>
-            <div className="text-4xl font-bold break-all" data-testid="calculator-display">
-              {display}
-            </div>
-          </div>
+        <div className="text-sm text-gray-400 h-6">
+          {previousValue !== null && operation ? `${previousValue} ${operation}` : ''}
+        </div>
+        <div className="text-4xl font-bold break-all" data-testid="calculator-display">
+          {display}
+        </div>
+      </div>
 
-          {/* Buttons */}
-          <div className="grid grid-cols-4 gap-3">
+      {/* Buttons */}
+      <div className="grid grid-cols-4 gap-3">
             {/* Row 1 */}
             <Button onClick={handleClear} className={clearButtonClass}>
               C
