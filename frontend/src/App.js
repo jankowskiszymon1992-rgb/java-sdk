@@ -7,6 +7,7 @@ import Clients from './pages/Clients';
 import Projects from './pages/Projects';
 import WorkHours from './pages/WorkHours';
 import Calculators from './pages/Calculators';
+import Photos from './pages/Photos';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
 import { requestNotificationPermission, startReminderService } from './utils/notifications';
