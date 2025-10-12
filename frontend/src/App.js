@@ -23,6 +23,8 @@ function App() {
           console.log('Notifications enabled');
           // Start reminder service for upcoming projects
           startReminderService();
+          // Schedule daily report reminder at 18:00
+          scheduleDailyReportReminder();
         }
       });
     }, 5000);
