@@ -378,6 +378,14 @@ const Projects = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Materials Notes Modal */}
+      <MaterialsNotesModal
+        open={materialsModalOpen}
+        onOpenChange={setMaterialsModalOpen}
+        project={selectedProject}
+        onSave={loadData}
+      />
     </div>
   );
 };
