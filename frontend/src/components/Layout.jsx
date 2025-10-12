@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Users, Briefcase, Clock, LayoutDashboard, Zap, Wifi, WifiOff, Calculator, Camera, FileText } from 'lucide-react';
+import { Users, Briefcase, Clock, LayoutDashboard, Zap, Wifi, WifiOff, Calculator, Camera, FileText, Mail } from 'lucide-react';
 
 const Layout = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
