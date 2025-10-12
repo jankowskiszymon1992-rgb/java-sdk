@@ -134,6 +134,11 @@ const Projects = () => {
     }
   };
 
+  const handleOpenMaterials = (project) => {
+    setSelectedProject(project);
+    setMaterialsModalOpen(true);
+  };
+
   const filteredProjects = activeTab === 'all' 
     ? projects 
     : projects.filter(p => p.status === activeTab);
