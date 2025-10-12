@@ -61,7 +61,7 @@ const Reports = () => {
     if (!window.confirm('Czy na pewno chcesz usunąć ten raport?')) return;
     
     try {
-      await api.delete(`/daily-reports/${id}`);
+      await axios.delete(`${API}/daily-reports/${id}`);
       fetchReports();
     } catch (error) {
       console.error('Błąd usuwania raportu:', error);
