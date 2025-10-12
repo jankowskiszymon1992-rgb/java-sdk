@@ -101,3 +101,78 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Uporczywy błąd React Runtime - NotFoundError: Failed to execute 'removeChild' on 'Node' występujący na stronie /calculators"
+
+backend:
+  - task: "Backend API"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend działa poprawnie, nie wymaga zmian"
+
+frontend:
+  - task: "React removeChild Error Fix"
+    implemented: true
+    working: true
+    file: "package.json, /frontend/src/pages/Calculators.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Użytkownik zgłosił błąd: NotFoundError removeChild na stronie kalkulatorów"
+      - working: true
+        agent: "main"
+        comment: "Naprawiono przez aktualizację @radix-ui/react-select z 2.2.2 do 2.2.6. Problem wynikał z niekompatybilności React 19 ze starszą wersją Radix UI. React 19 zmienił sposób obsługi refs (z special property na regular prop), co powodowało błędy DOM manipulation w Radix UI 2.2.2. Upgrade do 2.2.6 rozwiązał problem."
+  
+  - task: "Calculators Page"
+    implemented: true
+    working: true
+    file: "/frontend/src/pages/Calculators.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Wszystkie kalkulatory działają poprawnie. Select komponenty otwierają się bez błędów. Przetestowano: voltage select, material select. Brak błędów removeChild w konsoli."
+  
+  - task: "Photos Page"
+    implemented: true
+    working: true
+    file: "/frontend/src/pages/Photos.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Strona Photos ładuje się poprawnie bez błędów"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+  fix_date: "2025-01-12"
+
+test_plan:
+  current_focus:
+    - "React removeChild Error Fix - RESOLVED"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
+  - agent: "troubleshoot"
+    message: "Root cause: React 19 zmienił handling refs (special property -> regular prop), co psuje DOM manipulation w Radix UI 2.2.2. Fix: upgrade do @radix-ui/react-select@2.2.6+"
