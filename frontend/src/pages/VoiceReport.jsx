@@ -107,7 +107,7 @@ const VoiceReport = () => {
     setResult(null);
 
     try {
-      const response = await api.post('/voice/process', {
+      const response = await axios.post(`${API}/voice/process`, {
         transcript: transcript,
         command_type: commandType
       });
