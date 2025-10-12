@@ -8,9 +8,11 @@ import Projects from './pages/Projects';
 import WorkHours from './pages/WorkHours';
 import Calculators from './pages/Calculators';
 import Photos from './pages/Photos';
+import Reports from './pages/Reports';
+import VoiceReport from './pages/VoiceReport';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
-import { requestNotificationPermission, startReminderService } from './utils/notifications';
+import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder } from './utils/notifications';
 
 function App() {
   useEffect(() => {
