@@ -84,11 +84,11 @@ const BasicCalculator = () => {
     }
   };
 
-  const buttonClass = "h-16 text-xl font-semibold transition-all hover:scale-105";
-  const numberButtonClass = `${buttonClass} bg-white hover:bg-gray-100 border-2`;
-  const operationButtonClass = `${buttonClass} bg-yellow-500 hover:bg-yellow-600 text-white`;
-  const equalsButtonClass = `${buttonClass} bg-green-600 hover:bg-green-700 text-white`;
-  const clearButtonClass = `${buttonClass} bg-red-500 hover:bg-red-600 text-white`;
+  const buttonClass = "h-16 text-xl font-bold transition-all hover:scale-105 flex items-center justify-center";
+  const numberButtonClass = `${buttonClass} bg-white hover:bg-gray-100 border-2 border-gray-300 text-gray-900`;
+  const operationButtonClass = `${buttonClass} bg-yellow-500 hover:bg-yellow-600 text-white border-0`;
+  const equalsButtonClass = `${buttonClass} bg-green-600 hover:bg-green-700 text-white border-0`;
+  const clearButtonClass = `${buttonClass} bg-red-500 hover:bg-red-600 text-white border-0`;
 
   return (
     <Card className="max-w-md mx-auto">
