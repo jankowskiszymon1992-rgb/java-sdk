@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calculator, Zap } from 'lucide-react';
 import BasicCalculator from '../components/BasicCalculator';
 import ElectricalCalculators from '../components/ElectricalCalculators';
@@ -13,26 +11,33 @@ const Calculators = () => {
         <p className="text-gray-600 mt-1">Narzędzia do obliczeń i planowania</p>
       </div>
 
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="basic" className="flex items-center space-x-2">
-            <Calculator className="h-4 w-4" />
-            <span>Podstawowy</span>
-          </TabsTrigger>
-          <TabsTrigger value="electrical" className="flex items-center space-x-2">
-            <Zap className="h-4 w-4" />
-            <span>Elektryczny</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Basic Calculator Card */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-blue-900">
+              <Calculator className="h-6 w-6" />
+              <span>Kalkulator Podstawowy</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <BasicCalculator />
+          </CardContent>
+        </Card>
 
-        <TabsContent value="basic" className="mt-6">
-          <BasicCalculator />
-        </TabsContent>
-
-        <TabsContent value="electrical" className="mt-6">
-          <ElectricalCalculators />
-        </TabsContent>
-      </Tabs>
+        {/* Electrical Calculators Card */}
+        <Card className="hover:shadow-xl transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-b">
+            <CardTitle className="flex items-center space-x-2 text-yellow-900">
+              <Zap className="h-6 w-6" />
+              <span>Kalkulatory Elektryczne</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ElectricalCalculators />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
