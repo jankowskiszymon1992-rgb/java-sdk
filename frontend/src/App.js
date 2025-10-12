@@ -37,6 +37,7 @@ function App() {
             <Route path="clients" element={<Clients />} />
             <Route path="projects" element={<Projects />} />
             <Route path="workhours" element={<WorkHours />} />
+            <Route path="calculators" element={<Calculators />} />
           </Route>
         </Routes>
       </BrowserRouter>
