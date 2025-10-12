@@ -92,3 +92,38 @@ export const startReminderService = () => {
   checkUpcomingProjects(); // Check immediately
   setInterval(checkUpcomingProjects, 60 * 60 * 1000); // Check every hour
 };
+
+// Schedule daily report reminder at 18:00
+export const scheduleDailyReportReminder = () => {
+  const checkTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    // Trigger at 18:00 (6 PM)
+    if (hours === 18 && minutes === 0) {
+      showNotification('Zrób raport dzienny 📝', {
+        body: 'Czas na zapisanie raportu z dzisiejszego dnia pracy!',
+        tag: 'daily-report-reminder',
+        requireInteraction: true,
+        data: {
+          url: '/reports/voice',
+        },
+        actions: [
+          {
+            action: 'open-voice',
+            title: 'Nagraj raport'
+          },
+          {
+            action: 'dismiss',
+            title: 'Przypomnij później'
+          }
+        ]
+      });
+    }
+  };
+  
+  // Check every minute
+  checkTime(); // Check immediately
+  setInterval(checkTime, 60 * 1000); // Check every minute
+};
