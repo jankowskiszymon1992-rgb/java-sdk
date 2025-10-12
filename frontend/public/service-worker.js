@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v2-radix-fix';
+const CACHE_NAME = 'elektron-v3-mail-update';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
