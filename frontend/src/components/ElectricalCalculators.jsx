@@ -192,7 +192,7 @@ const ElectricalCalculators = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="wire-current">Prąd obciążenia (A)</Label>
                   <Input
@@ -268,7 +268,7 @@ const ElectricalCalculators = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="drop-current">Prąd (A)</Label>
                   <Input
@@ -343,7 +343,7 @@ const ElectricalCalculators = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="breaker-power">Moc (W)</Label>
                   <Input
@@ -411,7 +411,7 @@ const ElectricalCalculators = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="ohm-voltage">Napięcie (V)</Label>
                   <div className="flex space-x-2">
@@ -498,7 +498,7 @@ const ElectricalCalculators = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="power-voltage">Napięcie (V)</Label>
                   <Input
