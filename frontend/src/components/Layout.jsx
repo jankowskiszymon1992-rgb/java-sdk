@@ -1,7 +1,23 @@
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Users, Briefcase, Clock, LayoutDashboard, Zap } from 'lucide-react';
+import { Users, Briefcase, Clock, LayoutDashboard, Zap, Wifi, WifiOff } from 'lucide-react';
 
 const Layout = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/clients', icon: Users, label: 'Klienci' },
@@ -18,6 +34,19 @@ const Layout = () => {
             <div className="flex items-center space-x-3">
               <Zap className="h-8 w-8 text-yellow-500" />
               <h1 className="text-2xl font-bold text-gray-900">Elektron</h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              {isOnline ? (
+                <div className="flex items-center space-x-2 text-green-600 text-sm">
+                  <Wifi className="h-4 w-4" />
+                  <span className="hidden sm:inline">Online</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 text-orange-600 text-sm font-medium bg-orange-50 px-3 py-1 rounded-full">
+                  <WifiOff className="h-4 w-4" />
+                  <span>Tryb offline</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
