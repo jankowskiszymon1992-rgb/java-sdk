@@ -109,6 +109,7 @@ class ProjectUpdate(BaseModel):
     end_date: Optional[str] = None
     location: Optional[str] = None
     estimated_hours: Optional[float] = None
+    materials_notes: Optional[list] = None
 
 
 class WorkHour(BaseModel):
