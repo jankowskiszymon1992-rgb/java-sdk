@@ -176,3 +176,5 @@ agent_communication:
     message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
   - agent: "troubleshoot"
     message: "Root cause: React 19 zmienił handling refs (special property -> regular prop), co psuje DOM manipulation w Radix UI 2.2.2. Fix: upgrade do @radix-ui/react-select@2.2.6+"
+  - agent: "main"
+    message: "Zaimplementowano funkcjonalność raportów głosowych: nowa zakładka Raporty, Web Speech API dla rozpoznawania mowy, AI przetwarzanie przez Emergent LLM Key (GPT-4o-mini), automatyczne zapisywanie w bazie, powiadomienia push o 18:00"
