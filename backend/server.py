@@ -426,6 +426,71 @@ async def get_workhours_summary(start_date: Optional[str] = None, end_date: Opti
     }
 
 
+# ============= PHOTOS ENDPOINTS =============
+
+@api_router.post("/photos", response_model=Photo)
+async def create_photo(photo_input: PhotoCreate):
+    # Verify project exists if project_id provided
+    if photo_input.project_id:
+        project = await db.projects.find_one({"id": photo_input.project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Zlecenie nie znalezione")
+    
+    photo_obj = Photo(**photo_input.model_dump())
+    doc = serialize_doc(photo_obj.model_dump())
+    await db.photos.insert_one(doc)
+    return photo_obj
+
+
+@api_router.get("/photos")
+async def get_photos(project_id: Optional[str] = None):
+    query = {}
+    if project_id:
+        query["project_id"] = project_id
+    
+    photos = await db.photos.find(query, {"_id": 0}).to_list(10000)
+    
+    # Enrich with project data
+    for photo in photos:
+        if photo.get("project_id"):
+            project = await db.projects.find_one({"id": photo["project_id"]}, {"_id": 0})
+            if project:
+                photo["project"] = deserialize_doc(project)
+        deserialize_doc(photo)
+    
+    return photos
+
+
+@api_router.get("/photos/{photo_id}", response_model=Photo)
+async def get_photo(photo_id: str):
+    photo = await db.photos.find_one({"id": photo_id}, {"_id": 0})
+    if not photo:
+        raise HTTPException(status_code=404, detail="Zdjęcie nie znalezione")
+    return deserialize_doc(photo)
+
+
+@api_router.put("/photos/{photo_id}", response_model=Photo)
+async def update_photo(photo_id: str, photo_update: PhotoUpdate):
+    existing = await db.photos.find_one({"id": photo_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Zdjęcie nie znalezione")
+    
+    update_data = {k: v for k, v in photo_update.model_dump().items() if v is not None}
+    
+    await db.photos.update_one({"id": photo_id}, {"$set": update_data})
+    
+    updated_photo = await db.photos.find_one({"id": photo_id}, {"_id": 0})
+    return deserialize_doc(updated_photo)
+
+
+@api_router.delete("/photos/{photo_id}")
+async def delete_photo(photo_id: str):
+    result = await db.photos.delete_one({"id": photo_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Zdjęcie nie znalezione")
+    return {"message": "Zdjęcie usunięte pomyślnie"}
+
+
 # ============= ROOT ENDPOINT =============
 
 @api_router.get("/")
