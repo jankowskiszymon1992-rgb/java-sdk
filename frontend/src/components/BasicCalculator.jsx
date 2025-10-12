@@ -91,13 +91,13 @@ const BasicCalculator = () => {
   const clearButtonClass = `${buttonClass} bg-red-500 hover:bg-red-600 text-white border-0`;
 
   return (
-    <Card className="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+    <Card className="max-w-lg mx-auto shadow-lg">
+      <CardHeader className="bg-gray-50">
+        <CardTitle className="flex items-center justify-between text-xl">
           <span>Kalkulator Podstawowy</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <div className="space-y-4">
           {/* Display */}
           <div className="bg-gray-900 text-white rounded-lg p-6 text-right">
