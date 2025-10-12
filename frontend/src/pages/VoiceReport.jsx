@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Mic, MicOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import api from '../api/api';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const VoiceReport = () => {
   const [isListening, setIsListening] = useState(false);
