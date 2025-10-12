@@ -39,6 +39,22 @@ module.exports = {
           ],
         };
       }
+
+      // Copy service worker to build folder
+      const CopyPlugin = require('copy-webpack-plugin');
+      if (!webpackConfig.plugins) {
+        webpackConfig.plugins = [];
+      }
+      webpackConfig.plugins.push(
+        new CopyPlugin({
+          patterns: [
+            {
+              from: path.resolve(__dirname, 'public/service-worker.js'),
+              to: path.resolve(__dirname, 'build'),
+            },
+          ],
+        })
+      );
       
       return webpackConfig;
     },
