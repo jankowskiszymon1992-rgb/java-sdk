@@ -31,3 +31,12 @@ export const workHoursApi = {
   delete: (id) => axios.delete(`${API}/workhours/${id}`),
   getSummary: (params) => axios.get(`${API}/workhours/summary/stats`, { params }),
 };
+
+// Photos API
+export const photosApi = {
+  getAll: (params) => axios.get(`${API}/photos`, { params }),
+  getOne: (id) => axios.get(`${API}/photos/${id}`),
+  create: (data) => axios.post(`${API}/photos`, data),
+  update: (id, data) => axios.put(`${API}/photos/${id}`, data),
+  delete: (id) => axios.delete(`${API}/photos/${id}`),
+};
