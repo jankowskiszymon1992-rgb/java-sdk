@@ -17,7 +17,7 @@ const Layout = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <Zap className="h-8 w-8 text-yellow-500" />
-              <h1 className="text-2xl font-bold text-gray-900">ElektroApp</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Elektron</h1>
             </div>
           </div>
         </div>
