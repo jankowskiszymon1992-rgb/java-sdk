@@ -23,6 +23,7 @@ const Layout = () => {
     { to: '/clients', icon: Users, label: 'Klienci' },
     { to: '/projects', icon: Briefcase, label: 'Zlecenia' },
     { to: '/workhours', icon: Clock, label: 'Godziny pracy' },
+    { to: '/reports', icon: FileText, label: 'Raporty' },
     { to: '/calculators', icon: Calculator, label: 'Kalkulatory' },
     { to: '/photos', icon: Camera, label: 'Zdjęcia' },
   ];
