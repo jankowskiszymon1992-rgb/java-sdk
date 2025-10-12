@@ -209,14 +209,14 @@ const Photos = () => {
               <div>
                 <Label htmlFor="project">Zlecenie (opcjonalne)</Label>
                 <Select
-                  value={formData.project_id}
-                  onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                  value={formData.project_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, project_id: value === "none" ? "" : value })}
                 >
                   <SelectTrigger data-testid="photo-project-select">
                     <SelectValue placeholder="Wybierz zlecenie" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Brak przypisania</SelectItem>
+                    <SelectItem value="none">Brak przypisania</SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.title}
