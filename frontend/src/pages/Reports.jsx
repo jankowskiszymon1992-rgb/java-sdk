@@ -290,6 +290,30 @@ const Reports = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">Czy na pewno chcesz usunąć ten raport? Ta operacja jest nieodwracalna.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Usuń
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
