@@ -85,14 +85,22 @@ const WorkHours = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+    setEntryToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (entryToDelete) {
       try {
-        await workHoursApi.delete(id);
+        await workHoursApi.delete(entryToDelete);
         toast.success('Wpis usunięty pomyślnie');
         loadData();
       } catch (error) {
         console.error('Błąd usuwania wpisu:', error);
         toast.error('Nie udało się usunąć wpisu');
+      } finally {
+        setDeleteDialogOpen(false);
+        setEntryToDelete(null);
       }
     }
   };
