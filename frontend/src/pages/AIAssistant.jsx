@@ -235,6 +235,34 @@ const AIAssistant = () => {
     }
   };
 
+  const speakText = (text, index) => {
+    // Stop any current speech
+    window.speechSynthesis.cancel();
+    
+    if (speakingIndex === index) {
+      // If already speaking this message, stop it
+      setSpeakingIndex(null);
+      return;
+    }
+    
+    // Start speaking
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pl-PL';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    
+    utterance.onend = () => {
+      setSpeakingIndex(null);
+    };
+    
+    utterance.onerror = () => {
+      setSpeakingIndex(null);
+    };
+    
+    setSpeakingIndex(index);
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <div className="max-w-5xl mx-auto h-[calc(100vh-120px)] flex flex-col">
       <div className="mb-4">
