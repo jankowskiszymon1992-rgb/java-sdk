@@ -18,6 +18,7 @@ const VoiceReport = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [supported, setSupported] = useState(true);
+  const [micPermission, setMicPermission] = useState(null); // 'granted', 'denied', 'prompt', null
   
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
