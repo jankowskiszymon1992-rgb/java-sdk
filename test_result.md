@@ -116,6 +116,30 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend działa poprawnie, nie wymaga zmian"
+  
+  - task: "AI Assistant Chat Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ POST /api/ai/chat endpoint działa poprawnie. Testowano z polskim tekstem 'Witaj! Kim jesteś?'. AI odpowiada używając Claude Sonnet 4 (claude-3-7-sonnet-20250219), session_id jest prawidłowo obsługiwany, odpowiedź jest sensowna i profesjonalna w kontekście asystenta biznesowego dla elektryka. Dane są zapisywane w MongoDB w kolekcji ai_conversations."
+  
+  - task: "AI Assistant History Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ POST /api/ai/history endpoint działa poprawnie. Pobiera historię konwersacji dla podanego session_id, zwraca prawidłową strukturę danych z polami: session_id, conversations, count. Historia jest prawidłowo zapisywana i pobierana z MongoDB. Testowano z session_id 'test_session_123' i limit 10."
 
 frontend:
   - task: "React removeChild Error Fix"
