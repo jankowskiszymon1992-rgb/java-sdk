@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Trash2, Loader2, User, Mic, MicOff } from 'lucide-react';
+import { Bot, Send, Trash2, Loader2, User, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import axios from 'axios';
 
@@ -18,6 +18,7 @@ const AIAssistant = () => {
   const audioChunksRef = useRef([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [speakingIndex, setSpeakingIndex] = useState(null);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
