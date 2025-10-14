@@ -12,4 +12,6 @@ root.render(
 );
 
 // Register service worker for PWA functionality
-serviceWorkerRegistration.register();
+// TEMPORARILY DISABLED to fix cache issues
+serviceWorkerRegistration.unregister();
+
