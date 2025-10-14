@@ -1021,9 +1021,9 @@ import tempfile
 async def voice_to_text(audio: UploadFile = File(...)):
     """Convert voice audio to text using OpenAI Whisper"""
     try:
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        api_key = os.environ.get('OPENAI_API_KEY')
         if not api_key:
-            raise HTTPException(status_code=500, detail="Brak klucza API")
+            raise HTTPException(status_code=500, detail="Brak klucza OpenAI API")
         
         # Save uploaded audio to temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
