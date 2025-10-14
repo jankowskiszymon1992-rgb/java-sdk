@@ -103,14 +103,22 @@ const Projects = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Czy na pewno chcesz usunąć to zlecenie?')) {
+    setProjectToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (projectToDelete) {
       try {
-        await projectsApi.delete(id);
+        await projectsApi.delete(projectToDelete);
         toast.success('Zlecenie usunięte pomyślnie');
         loadData();
       } catch (error) {
         console.error('Błąd usuwania zlecenia:', error);
         toast.error('Nie udało się usunąć zlecenia');
+      } finally {
+        setDeleteDialogOpen(false);
+        setProjectToDelete(null);
       }
     }
   };
