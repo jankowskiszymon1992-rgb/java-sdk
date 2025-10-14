@@ -92,14 +92,22 @@ const Photos = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Czy na pewno chcesz usunąć to zdjęcie?')) {
+    setPhotoToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (photoToDelete) {
       try {
-        await photosApi.delete(id);
+        await photosApi.delete(photoToDelete);
         toast.success('Zdjęcie usunięte pomyślnie');
         loadData();
       } catch (error) {
         console.error('Błąd usuwania zdjęcia:', error);
         toast.error('Nie udało się usunąć zdjęcia');
+      } finally {
+        setDeleteDialogOpen(false);
+        setPhotoToDelete(null);
       }
     }
   };
