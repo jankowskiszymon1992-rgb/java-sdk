@@ -195,6 +195,18 @@ frontend:
       - working: true
         agent: "main"
         comment: "Strona Photos ładuje się poprawnie bez błędów"
+  
+  - task: "AI Assistant Page"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/AIAssistant.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Zaimplementowano stronę AI Assistant z interfejsem czatu, integracją z Claude Sonnet 4 przez backend, zapisywaniem historii, obsługą session_id. Wymaga testów frontendu."
 
 metadata:
   created_by: "main_agent"
