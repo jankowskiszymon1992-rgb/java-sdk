@@ -196,11 +196,20 @@ const VoiceReport = () => {
             )}
           </div>
 
-          {isListening && (
+          {isRecording && (
             <div className="text-center">
               <div className="inline-flex items-center gap-2 text-red-600 animate-pulse">
                 <div className="w-3 h-3 bg-red-600 rounded-full"></div>
                 <span className="font-medium">Nagrywanie w toku...</span>
+              </div>
+            </div>
+          )}
+
+          {processing && (
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 text-blue-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="font-medium">Przetwarzanie nagrania...</span>
               </div>
             </div>
           )}
