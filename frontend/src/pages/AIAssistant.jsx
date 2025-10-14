@@ -177,7 +177,7 @@ const AIAssistant = () => {
 
         <CardContent className="flex-1 flex flex-col pt-6 overflow-hidden">
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-gray-500 py-12">
                 <Bot className="h-16 w-16 mx-auto mb-4 text-gray-400" />
