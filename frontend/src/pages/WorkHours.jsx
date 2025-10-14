@@ -16,6 +16,8 @@ const WorkHours = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
   const [editingEntry, setEditingEntry] = useState(null);
   const [summary, setSummary] = useState({ total_hours: 0, total_entries: 0 });
   const [formData, setFormData] = useState({
