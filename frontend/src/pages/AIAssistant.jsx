@@ -15,7 +15,6 @@ const AIAssistant = () => {
   const [sessionId, setSessionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
