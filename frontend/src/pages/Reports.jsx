@@ -60,14 +60,22 @@ const Reports = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć ten raport?')) return;
-    
-    try {
-      await axios.delete(`${API}/daily-reports/${id}`);
-      fetchReports();
-    } catch (error) {
-      console.error('Błąd usuwania raportu:', error);
-      alert('Błąd usuwania raportu');
+    setReportToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (reportToDelete) {
+      try {
+        await axios.delete(`${API}/daily-reports/${reportToDelete}`);
+        fetchReports();
+      } catch (error) {
+        console.error('Błąd usuwania raportu:', error);
+        alert('Błąd usuwania raportu');
+      } finally {
+        setDeleteDialogOpen(false);
+        setReportToDelete(null);
+      }
     }
   };
 
