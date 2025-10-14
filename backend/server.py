@@ -1011,6 +1011,51 @@ async def delete_chat_history(session_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============= VOICE (WHISPER) =============
+
+from fastapi import File, UploadFile
+import openai
+import tempfile
+
+@api_router.post("/ai/voice-to-text")
+async def voice_to_text(audio: UploadFile = File(...)):
+    """Convert voice audio to text using OpenAI Whisper"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Brak klucza API")
+        
+        # Save uploaded audio to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+        
+        try:
+            # Use OpenAI Whisper API
+            client = openai.OpenAI(api_key=api_key)
+            with open(temp_audio_path, "rb") as audio_file:
+                transcript = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                    language="pl"
+                )
+            
+            return {
+                "text": transcript.text,
+                "success": True
+            }
+            
+        finally:
+            # Clean up temp file
+            import os as os_module
+            os_module.unlink(temp_audio_path)
+        
+    except Exception as e:
+        logger.error(f"Error in voice-to-text: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd przetwarzania audio: {str(e)}")
+
+
 # ============= ROOT ENDPOINT =============
 
 @api_router.get("/")
