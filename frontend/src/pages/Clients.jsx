@@ -77,14 +77,22 @@ const Clients = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Czy na pewno chcesz usunąć tego klienta?')) {
+    setClientToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (clientToDelete) {
       try {
-        await clientsApi.delete(id);
+        await clientsApi.delete(clientToDelete);
         toast.success('Klient usunięty pomyślnie');
         loadClients();
       } catch (error) {
         console.error('Błąd usuwania klienta:', error);
         toast.error('Nie udało się usunąć klienta');
+      } finally {
+        setDeleteDialogOpen(false);
+        setClientToDelete(null);
       }
     }
   };
