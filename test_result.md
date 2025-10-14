@@ -199,9 +199,10 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
   fix_date: "2025-01-12"
+  ai_test_date: "2025-10-14"
 
 test_plan:
   current_focus:
