@@ -118,6 +118,19 @@ const VoiceReport = () => {
     };
   }, []);
 
+  const requestMicPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      setMicPermission('granted');
+      setError(null);
+    } catch (err) {
+      console.error('Error requesting mic permission:', err);
+      setMicPermission('denied');
+      setError('Nie udało się uzyskać dostępu do mikrofonu. Sprawdź uprawnienia w ustawieniach przeglądarki.');
+    }
+  };
+
   const startListening = () => {
     if (!recognitionRef.current || !supported) return;
     
