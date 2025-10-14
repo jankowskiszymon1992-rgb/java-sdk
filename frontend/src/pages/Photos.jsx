@@ -15,6 +15,8 @@ const Photos = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [photoToDelete, setPhotoToDelete] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const fileInputRef = useRef(null);
