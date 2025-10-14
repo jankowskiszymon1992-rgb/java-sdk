@@ -31,14 +31,27 @@ const AIAssistant = () => {
     }
   }, []);
 
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    scrollToBottom();
+  useLayoutEffect(() => {
+    // Scroll to bottom when messages change - React 19 compatible
+    if (chatContainerRef.current) {
+      const scrollHeight = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback(() => {
+    // Defensive scroll with proper null checks
+    if (chatContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, []);
 
   const loadChatHistory = async (sid) => {
     try {
