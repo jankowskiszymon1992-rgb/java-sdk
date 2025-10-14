@@ -359,22 +359,39 @@ const AIAssistant = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter dla nowej linii)"
                 className="flex-1 min-h-[60px] max-h-[200px] resize-none"
-                disabled={loading}
+                disabled={loading || isRecording}
               />
-              <Button
-                onClick={sendMessage}
-                disabled={loading || !inputText.trim()}
-                className="bg-blue-600 hover:bg-blue-700 px-6"
-              >
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={loading}
+                  className={`${
+                    isRecording 
+                      ? 'bg-red-600 hover:bg-red-700' 
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  } px-6`}
+                >
+                  {isRecording ? (
+                    <MicOff className="h-5 w-5" />
+                  ) : (
+                    <Mic className="h-5 w-5" />
+                  )}
+                </Button>
+                <Button
+                  onClick={sendMessage}
+                  disabled={loading || !inputText.trim() || isRecording}
+                  className="bg-blue-600 hover:bg-blue-700 px-6"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Powered by Claude Sonnet 4 • Konwersacja jest zapisywana
+              Powered by Claude Sonnet 4 + OpenAI Whisper • {isRecording ? '🔴 Nagrywanie...' : 'Konwersacja jest zapisywana'}
             </p>
           </div>
         </CardContent>
