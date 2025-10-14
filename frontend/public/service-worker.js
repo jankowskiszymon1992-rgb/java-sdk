@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v4-ai-assistant-fix';
+const CACHE_NAME = 'elektron-v5-react19-fix';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
