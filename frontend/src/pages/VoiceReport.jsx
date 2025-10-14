@@ -285,8 +285,8 @@ const VoiceReport = () => {
             {!isListening ? (
               <Button
                 onClick={startListening}
-                disabled={!supported || processing}
-                className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 text-lg"
+                disabled={!supported || processing || micPermission === 'denied'}
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 text-lg disabled:opacity-50"
               >
                 <Mic className="h-6 w-6 mr-2" />
                 Rozpocznij nagrywanie
