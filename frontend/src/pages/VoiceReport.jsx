@@ -21,136 +21,72 @@ const VoiceReport = () => {
   const audioChunksRef = useRef([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if browser supports Web Speech API
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setSupported(false);
-      setError('Twoja przeglądarka nie obsługuje rozpoznawania mowy. Użyj Chrome lub Edge.');
-      return;
-    }
-
-    // Check microphone permission
-    const checkMicPermission = async () => {
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-          setMicPermission(permissionStatus.state);
-          
-          permissionStatus.onchange = () => {
-            setMicPermission(permissionStatus.state);
-          };
-        } else {
-          // Jeśli Permissions API nie jest dostępne, spróbuj uzyskać dostęp bezpośrednio
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop());
-            setMicPermission('granted');
-          } catch (err) {
-            setMicPermission('prompt');
-          }
-        }
-      } catch (error) {
-        console.error('Error checking mic permission:', error);
-        setMicPermission('prompt');
-      }
-    };
-
-    checkMicPermission();
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'pl-PL';
-    recognition.maxAlternatives = 1;
-
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-
-      setTranscript(prev => prev + finalTranscript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      
-      let errorMessage = 'Błąd rozpoznawania mowy';
-      
-      if (event.error === 'not-allowed') {
-        errorMessage = 'Brak dostępu do mikrofonu. Upewnij się, że aplikacja ma uprawnienia do mikrofonu w ustawieniach przeglądarki/telefonu.';
-        setMicPermission('denied');
-      } else if (event.error === 'no-speech') {
-        errorMessage = 'Nie wykryto mowy. Spróbuj ponownie.';
-      } else if (event.error === 'audio-capture') {
-        errorMessage = 'Nie znaleziono mikrofonu. Sprawdź połączenia sprzętowe.';
-      } else if (event.error === 'network') {
-        errorMessage = 'Brak połączenia z internetem. Rozpoznawanie mowy wymaga dostępu do sieci.';
-      } else {
-        errorMessage = `Błąd: ${event.error}`;
-      }
-      
-      setError(errorMessage);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, []);
-
-  const requestMicPermission = async () => {
+  const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-      setMicPermission('granted');
+      const recorder = new MediaRecorder(stream);
+      
+      audioChunksRef.current = [];
+      
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await processVoiceInput(audioBlob);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
       setError(null);
-    } catch (err) {
-      console.error('Error requesting mic permission:', err);
-      setMicPermission('denied');
-      setError('Nie udało się uzyskać dostępu do mikrofonu. Sprawdź uprawnienia w ustawieniach przeglądarki.');
-    }
-  };
-
-  const startListening = () => {
-    if (!recognitionRef.current || !supported) return;
-    
-    setTranscript('');
-    setResult(null);
-    setError(null);
-    
-    try {
-      recognitionRef.current.start();
-      setIsListening(true);
     } catch (error) {
-      console.error('Error starting recognition:', error);
-      setError('Nie udało się uruchomić rozpoznawania mowy');
+      console.error('Error starting recording:', error);
+      setError('Nie udało się rozpocząć nagrywania. Sprawdź uprawnienia mikrofonu.');
     }
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
     }
   };
+
+  const processVoiceInput = async (audioBlob) => {
+    setProcessing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      
+      // Convert voice to text using Whisper
+      const response = await axios.post(`${API}/ai/voice-to-text`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      const transcribedText = response.data.text;
+      
+      if (transcribedText) {
+        setTranscript(prev => prev + ' ' + transcribedText);
+      }
+    } catch (error) {
+      console.error('Error processing voice:', error);
+      setError('Nie udało się przetworzyć nagrania głosowego');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const startListening = startRecording;
+  const stopListening = stopRecording;
 
   const processTranscript = async () => {
     if (!transcript.trim()) {
