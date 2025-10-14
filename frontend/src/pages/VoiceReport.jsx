@@ -176,10 +176,10 @@ const VoiceReport = () => {
           {getInstructions()}
 
           <div className="flex justify-center gap-4">
-            {!isListening ? (
+            {!isRecording ? (
               <Button
                 onClick={startListening}
-                disabled={!supported || processing || micPermission === 'denied'}
+                disabled={processing}
                 className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 text-lg disabled:opacity-50"
               >
                 <Mic className="h-6 w-6 mr-2" />
