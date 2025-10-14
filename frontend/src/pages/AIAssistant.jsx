@@ -252,8 +252,6 @@ const AIAssistant = () => {
                 </div>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {error && (
