@@ -49,6 +49,7 @@ function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="reports/voice" element={<VoiceReport />} />
             <Route path="mail" element={<Mail />} />
+            <Route path="ai-assistant" element={<AIAssistant />} />
           </Route>
         </Routes>
       </BrowserRouter>
