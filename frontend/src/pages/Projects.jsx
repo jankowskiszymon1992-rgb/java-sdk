@@ -26,6 +26,8 @@ const Projects = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [materialsModalOpen, setMaterialsModalOpen] = useState(false);
