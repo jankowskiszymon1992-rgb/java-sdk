@@ -223,6 +223,39 @@ const VoiceReport = () => {
         </Alert>
       )}
 
+      {micPermission === 'denied' && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Brak dostępu do mikrofonu.</strong>
+            <br />
+            Aby użyć funkcji rozpoznawania mowy, musisz zezwolić na dostęp do mikrofonu:
+            <ul className="list-disc ml-4 mt-2 space-y-1">
+              <li>Na telefonie: Otwórz Ustawienia → Aplikacje → Przeglądarka → Uprawnienia → włącz Mikrofon</li>
+              <li>W przeglądarce: Kliknij ikonę kłódki/informacji obok adresu strony → Uprawnienia → Mikrofon → Zezwól</li>
+            </ul>
+            <Button onClick={requestMicPermission} className="mt-3" size="sm">
+              Ponów próbę dostępu do mikrofonu
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {micPermission === 'prompt' && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Wymagane uprawnienia do mikrofonu.</strong>
+            <br />
+            Kliknij przycisk poniżej, aby zezwolić na dostęp do mikrofonu.
+            <br />
+            <Button onClick={requestMicPermission} className="mt-3" size="sm">
+              Zezwól na dostęp do mikrofonu
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b">
           <CardTitle className="flex items-center gap-2 text-green-900">
