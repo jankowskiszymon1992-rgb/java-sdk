@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Trash2, Loader2, User } from 'lucide-react';
+import { Bot, Send, Trash2, Loader2, User, Mic, MicOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import axios from 'axios';
 
@@ -13,6 +13,9 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [sessionId, setSessionId] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const audioChunksRef = useRef([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const chatContainerRef = useRef(null);
