@@ -902,6 +902,115 @@ async def disconnect_gmail():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============= AI ASSISTANT =============
+
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class ChatMessage(BaseModel):
+    text: str
+    session_id: Optional[str] = None
+
+class ChatHistoryQuery(BaseModel):
+    session_id: str
+    limit: int = 50
+
+@api_router.post("/ai/chat")
+async def ai_chat(message: ChatMessage):
+    """Send message to AI Assistant and get response"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Brak klucza API dla AI")
+        
+        # Generate session ID if not provided
+        session_id = message.session_id or str(uuid.uuid4())
+        
+        # Initialize LLM Chat with Claude Sonnet 4
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=session_id,
+            system_message="""Jesteś inteligentnym asystentem biznesowym dla elektryka prowadzącego firmę.
+            
+Twoja rola:
+- Pomagasz w analizie finansowej i biznesowej
+- Odpowiadasz na pytania o projekty, klientów, wydatki
+- Doradzasz w sprawach związanych z prowadzeniem firmy elektrycznej
+- Pomagasz w planowaniu i organizacji pracy
+
+Komunikujesz się po polsku, jesteś pomocny, konkretny i profesjonalny.
+Jeśli nie masz wystarczających danych, zapytaj o nie."""
+        ).with_model("anthropic", "claude-3-7-sonnet-20250219")
+        
+        # Create user message
+        user_message = UserMessage(text=message.text)
+        
+        # Send message and get response
+        response = await chat.send_message(user_message)
+        
+        # Save conversation to database
+        conversation_entry = {
+            "id": str(uuid.uuid4()),
+            "session_id": session_id,
+            "user_message": message.text,
+            "ai_response": response,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "model": "claude-3-7-sonnet-20250219"
+        }
+        
+        await db.ai_conversations.insert_one(conversation_entry)
+        
+        return {
+            "response": response,
+            "session_id": session_id,
+            "timestamp": conversation_entry["timestamp"]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in AI chat: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd AI: {str(e)}")
+
+
+@api_router.post("/ai/history")
+async def get_chat_history(query: ChatHistoryQuery):
+    """Get chat history for a session"""
+    try:
+        conversations = await db.ai_conversations.find(
+            {"session_id": query.session_id},
+            {"_id": 0}
+        ).sort("timestamp", -1).limit(query.limit).to_list(query.limit)
+        
+        # Reverse to get chronological order
+        conversations.reverse()
+        
+        return {
+            "session_id": query.session_id,
+            "conversations": conversations,
+            "count": len(conversations)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting chat history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/ai/history/{session_id}")
+async def delete_chat_history(session_id: str):
+    """Delete chat history for a session"""
+    try:
+        result = await db.ai_conversations.delete_many({"session_id": session_id})
+        return {
+            "message": f"Usunięto {result.deleted_count} wiadomości",
+            "deleted_count": result.deleted_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Error deleting chat history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============= ROOT ENDPOINT =============
 
 @api_router.get("/")
