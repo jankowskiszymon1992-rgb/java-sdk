@@ -337,16 +337,31 @@ const AIAssistant = () => {
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{message.text}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                    }`}
-                  >
-                    {new Date(message.timestamp).toLocaleTimeString('pl-PL', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p
+                      className={`text-xs ${
+                        message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                      }`}
+                    >
+                      {new Date(message.timestamp).toLocaleTimeString('pl-PL', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    {message.type === 'ai' && (
+                      <button
+                        onClick={() => speakText(message.text, index)}
+                        className="ml-2 p-1 hover:bg-gray-200 rounded transition-colors"
+                        title={speakingIndex === index ? "Zatrzymaj" : "Słuchaj"}
+                      >
+                        {speakingIndex === index ? (
+                          <VolumeX className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <Volume2 className="h-4 w-4 text-gray-600" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {message.type === 'user' && (
