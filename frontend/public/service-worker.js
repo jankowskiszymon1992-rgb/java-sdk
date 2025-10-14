@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v5-react19-fix';
+const CACHE_NAME = 'elektron-v6-react18-stable';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
