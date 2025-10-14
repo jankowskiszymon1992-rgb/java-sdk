@@ -223,3 +223,7 @@ agent_communication:
     message: "Problem z mikrofonem na Androidzie - błąd not-allowed"
   - agent: "main"
     message: "KROK 1 UKOŃCZONY: Naprawiono obsługę uprawnień mikrofonu. Dodano: 1) Sprawdzanie statusu uprawnień (Permissions API + fallback), 2) Szczegółowe komunikaty o błędach (not-allowed, no-speech, audio-capture, network), 3) Przycisk do żądania uprawnień z instrukcjami dla użytkowników Android, 4) Lepsze komunikaty błędów z instrukcjami jak włączyć mikrofon w ustawieniach"
+  - agent: "user"
+    message: "Przetestuj nowy AI Assistant endpoint: POST /api/ai/chat i POST /api/ai/history"
+  - agent: "testing"
+    message: "✅ TESTY AI ASSISTANT ZAKOŃCZONE POMYŚLNIE: Oba endpointy działają poprawnie. POST /api/ai/chat odpowiada używając Claude Sonnet 4, session_id jest obsługiwany, dane zapisywane w MongoDB. POST /api/ai/history pobiera historię konwersacji. Testowano z polskim tekstem 'Witaj! Kim jesteś?' i session_id 'test_session_123'. Wszystkie wymagania spełnione: status 200, sensowna odpowiedź AI, prawidłowe zapisywanie w bazie, obsługa session_id."
