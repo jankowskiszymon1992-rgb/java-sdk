@@ -133,6 +133,21 @@ frontend:
         agent: "main"
         comment: "Naprawiono przez aktualizację @radix-ui/react-select z 2.2.2 do 2.2.6. Problem wynikał z niekompatybilności React 19 ze starszą wersją Radix UI. React 19 zmienił sposób obsługi refs (z special property na regular prop), co powodowało błędy DOM manipulation w Radix UI 2.2.2. Upgrade do 2.2.6 rozwiązał problem."
   
+  - task: "Microphone Permissions for Voice Reports (Android)"
+    implemented: true
+    working: true
+    file: "/frontend/src/pages/VoiceReport.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Błąd not-allowed na Androidzie - brak dostępu do mikrofonu"
+      - working: true
+        agent: "main"
+        comment: "Zaimplementowano pełną obsługę uprawnień mikrofonu: sprawdzanie Permissions API, żądanie uprawnień przez getUserMedia, szczegółowe komunikaty błędów (not-allowed, no-speech, audio-capture, network), instrukcje dla użytkowników Android jak włączyć uprawnienia, przycisk do ponownej próby uzyskania dostępu"
+  
   - task: "Calculators Page"
     implemented: true
     working: true
