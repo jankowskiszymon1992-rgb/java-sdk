@@ -139,6 +139,94 @@ const AIAssistant = () => {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      
+      audioChunksRef.current = [];
+      
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await processVoiceInput(audioBlob);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setError(null);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      setError('Nie udało się rozpocząć nagrywania. Sprawdź uprawnienia mikrofonu.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const processVoiceInput = async (audioBlob) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      
+      // Convert voice to text using Whisper
+      const response = await axios.post(`${API}/ai/voice-to-text`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      const transcribedText = response.data.text;
+      
+      if (transcribedText) {
+        // Set the transcribed text and send it
+        setInputText(transcribedText);
+        
+        // Automatically send the message
+        const userMessage = {
+          type: 'user',
+          text: transcribedText,
+          timestamp: new Date().toISOString()
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+
+        const chatResponse = await axios.post(`${API}/ai/chat`, {
+          text: transcribedText,
+          session_id: sessionId
+        });
+
+        const aiMessage = {
+          type: 'ai',
+          text: chatResponse.data.response,
+          timestamp: chatResponse.data.timestamp
+        };
+
+        setMessages(prev => [...prev, aiMessage]);
+        setInputText('');
+      }
+    } catch (error) {
+      console.error('Error processing voice:', error);
+      setError('Nie udało się przetworzyć nagrania głosowego');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
