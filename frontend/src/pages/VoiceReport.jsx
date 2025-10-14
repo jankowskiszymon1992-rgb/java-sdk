@@ -162,7 +162,7 @@ const VoiceReport = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Typ komendy
             </label>
-            <Select value={commandType} onValueChange={setCommandType} disabled={isListening}>
+            <Select value={commandType} onValueChange={setCommandType} disabled={isRecording}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
