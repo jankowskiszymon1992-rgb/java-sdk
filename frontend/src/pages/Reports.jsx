@@ -15,6 +15,8 @@ const Reports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
   const [editingReport, setEditingReport] = useState(null);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
