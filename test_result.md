@@ -178,3 +178,7 @@ agent_communication:
     message: "Root cause: React 19 zmienił handling refs (special property -> regular prop), co psuje DOM manipulation w Radix UI 2.2.2. Fix: upgrade do @radix-ui/react-select@2.2.6+"
   - agent: "main"
     message: "Zaimplementowano funkcjonalność raportów głosowych: nowa zakładka Raporty, Web Speech API dla rozpoznawania mowy, AI przetwarzanie przez Emergent LLM Key (GPT-4o-mini), automatyczne zapisywanie w bazie, powiadomienia push o 18:00"
+  - agent: "user"
+    message: "Problem z mikrofonem na Androidzie - błąd not-allowed"
+  - agent: "main"
+    message: "KROK 1 UKOŃCZONY: Naprawiono obsługę uprawnień mikrofonu. Dodano: 1) Sprawdzanie statusu uprawnień (Permissions API + fallback), 2) Szczegółowe komunikaty o błędach (not-allowed, no-speech, audio-capture, network), 3) Przycisk do żądania uprawnień z instrukcjami dla użytkowników Android, 4) Lepsze komunikaty błędów z instrukcjami jak włączyć mikrofon w ustawieniach"
