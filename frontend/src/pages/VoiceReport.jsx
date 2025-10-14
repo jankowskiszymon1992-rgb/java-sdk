@@ -31,6 +31,34 @@ const VoiceReport = () => {
       return;
     }
 
+    // Check microphone permission
+    const checkMicPermission = async () => {
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+          setMicPermission(permissionStatus.state);
+          
+          permissionStatus.onchange = () => {
+            setMicPermission(permissionStatus.state);
+          };
+        } else {
+          // Jeśli Permissions API nie jest dostępne, spróbuj uzyskać dostęp bezpośrednio
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop());
+            setMicPermission('granted');
+          } catch (err) {
+            setMicPermission('prompt');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking mic permission:', error);
+        setMicPermission('prompt');
+      }
+    };
+
+    checkMicPermission();
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
@@ -57,7 +85,23 @@ const VoiceReport = () => {
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
-      setError(`Błąd rozpoznawania mowy: ${event.error}`);
+      
+      let errorMessage = 'Błąd rozpoznawania mowy';
+      
+      if (event.error === 'not-allowed') {
+        errorMessage = 'Brak dostępu do mikrofonu. Upewnij się, że aplikacja ma uprawnienia do mikrofonu w ustawieniach przeglądarki/telefonu.';
+        setMicPermission('denied');
+      } else if (event.error === 'no-speech') {
+        errorMessage = 'Nie wykryto mowy. Spróbuj ponownie.';
+      } else if (event.error === 'audio-capture') {
+        errorMessage = 'Nie znaleziono mikrofonu. Sprawdź połączenia sprzętowe.';
+      } else if (event.error === 'network') {
+        errorMessage = 'Brak połączenia z internetem. Rozpoznawanie mowy wymaga dostępu do sieci.';
+      } else {
+        errorMessage = `Błąd: ${event.error}`;
+      }
+      
+      setError(errorMessage);
       setIsListening(false);
     };
 
