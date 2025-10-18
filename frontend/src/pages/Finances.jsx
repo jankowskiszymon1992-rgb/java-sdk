@@ -332,3 +332,220 @@ const Finances = () => {
       )}
 
       {/* Entries Table - continued in next message due to length */}
+
+      {/* All Entries Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Wszystkie wpisy</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {entries.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">Brak wpisów dla wybranego miesiąca</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategoria</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opis</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Kwota netto</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Kwota brutto</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {entries.map((entry) => (
+                    <tr key={entry.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {new Date(entry.date).toLocaleDateString('pl-PL')}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          CATEGORIES[entry.category]?.type === 'income' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {CATEGORIES[entry.category]?.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{entry.description}</td>
+                      <td className="px-4 py-3 text-sm text-right font-semibold">{entry.amount_net.toFixed(2)} zł</td>
+                      <td className="px-4 py-3 text-sm text-right font-semibold">{entry.amount_gross.toFixed(2)} zł</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(entry)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingEntry ? 'Edytuj wpis' : 'Dodaj nowy wpis'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="category">Kategoria *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={handleCategoryChange}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wybierz kategorię" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" sideOffset={5}>
+                    <div className="px-2 py-1 text-xs font-semibold text-green-600">PRZYCHODY</div>
+                    {Object.entries(CATEGORIES).filter(([_, cat]) => cat.type === 'income').map(([key, cat]) => (
+                      <SelectItem key={key} value={key}>{cat.label}</SelectItem>
+                    ))}
+                    <div className="px-2 py-1 text-xs font-semibold text-red-600 mt-2">WYDATKI</div>
+                    {Object.entries(CATEGORIES).filter(([_, cat]) => cat.type === 'expense').map(([key, cat]) => (
+                      <SelectItem key={key} value={key}>{cat.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="date">Data *</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            {useOCR && !editingEntry && (
+              <div>
+                <Label htmlFor="image">Zdjęcie faktury *</Label>
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={handleImageChange}
+                  required
+                />
+                {imagePreview && (
+                  <img src={imagePreview} alt="Preview" className="mt-2 max-h-40 rounded" />
+                )}
+                <p className="text-sm text-gray-500 mt-1">
+                  <Camera className="h-4 w-4 inline mr-1" />
+                  AI automatycznie wyciągnie dane z faktury
+                </p>
+              </div>
+            )}
+
+            {!useOCR && (
+              <>
+                <div>
+                  <Label htmlFor="description">Opis *</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Numer faktury, opis..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="amount_net">Kwota netto * (zł)</Label>
+                    <Input
+                      id="amount_net"
+                      type="number"
+                      step="0.01"
+                      value={formData.amount_net}
+                      onChange={(e) => setFormData({ ...formData, amount_net: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="amount_gross">Kwota brutto * (zł)</Label>
+                    <Input
+                      id="amount_gross"
+                      type="number"
+                      step="0.01"
+                      value={formData.amount_gross}
+                      onChange={(e) => setFormData({ ...formData, amount_gross: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="vat_rate">VAT (%)</Label>
+                    <Input
+                      id="vat_rate"
+                      type="number"
+                      step="0.01"
+                      value={formData.vat_rate}
+                      onChange={(e) => setFormData({ ...formData, vat_rate: e.target.value })}
+                      placeholder="23"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">Notatki</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Anuluj
+              </Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                {editingEntry ? 'Zapisz zmiany' : (useOCR ? 'Przetwórz i dodaj' : 'Dodaj wpis')}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">Czy na pewno chcesz usunąć ten wpis? Ta operacja jest nieodwracalna.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Anuluj
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Usuń
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Finances;
