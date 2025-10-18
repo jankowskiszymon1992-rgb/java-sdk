@@ -152,6 +152,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ POST /api/employees endpoint działa poprawnie. Tworzy pracownika z danymi: name='Bart', hourly_rate=30.0, notes='Pomocnik elektryk'. Generuje UUID, zapisuje do MongoDB, zwraca status 200 z pełną strukturą danych (id, name, hourly_rate, notes, created_at, updated_at)."
+      - working: true
+        agent: "testing"
+        comment: "✅ RETESTED 2025-10-18: Kompletny flow dla Jana Kowalskiego DZIAŁA POPRAWNIE. POST /api/employees tworzy pracownika z name='Jan Kowalski', hourly_rate=35.50, notes='Elektryk - pomocnik'. Generuje UUID, zapisuje do MongoDB, zwraca status 200. Wszystkie pola są poprawnie wypełnione."
   
   - task: "Employee Management - Get Employees List"
     implemented: true
