@@ -137,12 +137,18 @@ def test_get_employees():
                         print(f"❌ Employee {i} missing fields: {missing_fields}")
                         return False
                 
-                # Check if our test employee "Bart" is in the list
-                bart_found = any(emp.get("name") == "Bart" for emp in response_data)
-                if bart_found:
-                    print("✅ Test employee 'Bart' found in employee list")
+                # Check if our test employee "Jan Kowalski" is in the list
+                jan_found = any(emp.get("name") == "Jan Kowalski" for emp in response_data)
+                if jan_found:
+                    print("✅ Test employee 'Jan Kowalski' found in employee list")
+                    # Verify hourly rate
+                    jan_employee = next(emp for emp in response_data if emp.get("name") == "Jan Kowalski")
+                    if jan_employee.get("hourly_rate") == 35.50:
+                        print("✅ Jan Kowalski has correct hourly rate: 35.50 zł/h")
+                    else:
+                        print(f"❌ Jan Kowalski hourly rate mismatch. Expected: 35.50, Got: {jan_employee.get('hourly_rate')}")
                 else:
-                    print("⚠️  Test employee 'Bart' not found in list")
+                    print("⚠️  Test employee 'Jan Kowalski' not found in list")
                 
             else:
                 print("⚠️  No employees found")
