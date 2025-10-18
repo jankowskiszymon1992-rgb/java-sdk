@@ -30,6 +30,8 @@ function App() {
           startReminderService();
           // Schedule daily report reminder at 18:00
           scheduleDailyReportReminder();
+          // Check for custom reminders every 5 minutes
+          startRemindersCheckService();
         }
       });
     }, 5000);
