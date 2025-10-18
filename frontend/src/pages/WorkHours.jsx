@@ -163,7 +163,7 @@ const WorkHours = () => {
                     <SelectTrigger data-testid="workhour-project-select">
                       <SelectValue placeholder="Wybierz zlecenie" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" sideOffset={5}>
                       {projects && projects.length > 0 ? (
                         projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
