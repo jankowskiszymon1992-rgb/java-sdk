@@ -1798,6 +1798,216 @@ async def export_financial_entries_pdf(month: Optional[str] = None):
     )
 
 
+@api_router.get("/financial-entries/export/pdf")
+async def export_financial_entries_pdf(month: Optional[str] = None):
+    """
+    Export financial entries to PDF
+    """
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+    
+    # Get data
+    query = {}
+    if month:
+        start_date = f"{month}-01"
+        from calendar import monthrange
+        year, mon = map(int, month.split('-'))
+        last_day = monthrange(year, mon)[1]
+        end_date = f"{month}-{last_day:02d}"
+        query["date"] = {"$gte": start_date, "$lte": end_date}
+    
+    entries = await db.financial_entries.find(query, {"_id": 0}).sort("date", -1).to_list(10000)
+    
+    # Create PDF
+    pdf_buffer = BytesIO()
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=landscape(A4))
+    elements = []
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.HexColor('#1a1a1a'),
+        spaceAfter=20
+    )
+    
+    # Title
+    title = Paragraph(f"Raport finansowy - {month or 'Wszystkie miesiące'}", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 12))
+    
+    # Category names
+    cat_names = {
+        "invoice_sales": "Faktura sprzedażowa",
+        "cash_income": "Pieniądze bez faktury",
+        "invoice_purchase": "Faktura zakupowa",
+        "fuel": "Paliwo",
+        "salaries": "Wypłaty pracowników",
+        "taxes": "Podatki",
+        "zus": "ZUS",
+        "equipment": "Sprzęt",
+        "clothes": "Ciuchy"
+    }
+    
+    # Table data
+    table_data = [["Data", "Kategoria", "Opis", "Netto (zł)", "Brutto (zł)"]]
+    
+    for entry in entries:
+        table_data.append([
+            entry.get("date"),
+            cat_names.get(entry.get("category"), entry.get("category")),
+            entry.get("description")[:30] + "..." if len(entry.get("description", "")) > 30 else entry.get("description", ""),
+            f"{entry.get('amount_net', 0):.2f}",
+            f"{entry.get('amount_gross', 0):.2f}"
+        ])
+    
+    # Create table
+    table = Table(table_data, colWidths=[60, 100, 200, 80, 80])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (3, 1), (4, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+    ]))
+    
+    elements.append(table)
+    elements.append(Spacer(1, 20))
+    
+    # Summary
+    income_net = sum(e.get("amount_net", 0) for e in entries if e.get("category") in ["invoice_sales", "cash_income"])
+    income_gross = sum(e.get("amount_gross", 0) for e in entries if e.get("category") in ["invoice_sales", "cash_income"])
+    expense_net = sum(e.get("amount_net", 0) for e in entries if e.get("category") not in ["invoice_sales", "cash_income"])
+    expense_gross = sum(e.get("amount_gross", 0) for e in entries if e.get("category") not in ["invoice_sales", "cash_income"])
+    
+    summary_data = [
+        ["PODSUMOWANIE", "Netto (zł)", "Brutto (zł)"],
+        ["Przychody", f"{income_net:.2f}", f"{income_gross:.2f}"],
+        ["Wydatki", f"{expense_net:.2f}", f"{expense_gross:.2f}"],
+        ["Bilans", f"{income_net - expense_net:.2f}", f"{income_gross - expense_gross:.2f}"]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[150, 100, 100])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E7D32')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    
+    elements.append(summary_table)
+    
+    # Build PDF
+    doc.build(elements)
+    pdf_buffer.seek(0)
+    
+    filename = f"finanse_{month or 'wszystkie'}.pdf"
+    
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@api_router.get("/financial-entries/charts")
+async def get_financial_charts_data(months: int = 6):
+    """
+    Get data for financial charts - last N months
+    """
+    from datetime import datetime, timedelta
+    from collections import defaultdict
+    
+    # Calculate date range
+    today = datetime.now(timezone.utc)
+    start_date = (today - timedelta(days=months * 31)).replace(day=1).date().isoformat()
+    
+    # Get all entries from start_date
+    entries = await db.financial_entries.find(
+        {"date": {"$gte": start_date}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Aggregate by month
+    monthly_data = defaultdict(lambda: {"income": 0, "expense": 0})
+    category_data = defaultdict(lambda: {"income": 0, "expense": 0})
+    
+    income_categories = ["invoice_sales", "cash_income"]
+    
+    for entry in entries:
+        date_str = entry.get("date", "")
+        month = date_str[:7]  # YYYY-MM
+        category = entry.get("category")
+        amount = entry.get("amount_gross", 0)
+        
+        # Monthly aggregation
+        if category in income_categories:
+            monthly_data[month]["income"] += amount
+        else:
+            monthly_data[month]["expense"] += amount
+        
+        # Category aggregation
+        if category in income_categories:
+            category_data[category]["income"] += amount
+        else:
+            category_data[category]["expense"] += amount
+    
+    # Convert to lists
+    months_list = sorted(monthly_data.keys())
+    monthly_chart = [
+        {
+            "month": m,
+            "income": monthly_data[m]["income"],
+            "expense": monthly_data[m]["expense"],
+            "balance": monthly_data[m]["income"] - monthly_data[m]["expense"]
+        }
+        for m in months_list
+    ]
+    
+    # Category names
+    cat_names = {
+        "invoice_sales": "Faktury sprzedażowe",
+        "cash_income": "Bez faktury",
+        "invoice_purchase": "Faktury zakupowe",
+        "fuel": "Paliwo",
+        "salaries": "Wypłaty",
+        "taxes": "Podatki",
+        "zus": "ZUS",
+        "equipment": "Sprzęt",
+        "clothes": "Ciuchy"
+    }
+    
+    category_chart = [
+        {
+            "category": cat_names.get(cat, cat),
+            "amount": abs(data["income"] + data["expense"]),
+            "type": "income" if cat in income_categories else "expense"
+        }
+        for cat, data in category_data.items()
+        if data["income"] + data["expense"] != 0
+    ]
+    
+    return {
+        "monthly": monthly_chart,
+        "by_category": category_chart
+    }
+
+
 @api_router.post("/financial-entries/ocr")
 async def create_financial_entry_with_ocr(request: dict):
     """
