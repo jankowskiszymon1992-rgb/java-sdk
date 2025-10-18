@@ -1631,9 +1631,11 @@ Kwoty muszą być liczbami, nie tekstem.""",
             file_contents=[image_content]
         )
         
-        # Get response from Claude - emergentintegrations is NOT async
+        # Get response from Claude
+        # emergentintegrations send_message is synchronous, so run it in thread pool
         import asyncio
-        response = await asyncio.to_thread(chat.send_message, user_message)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(None, chat.send_message, user_message)
         
         # Parse JSON response
         # Clean response - remove markdown if present
