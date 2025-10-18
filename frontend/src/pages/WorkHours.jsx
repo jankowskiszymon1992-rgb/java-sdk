@@ -268,6 +268,81 @@ const WorkHours = () => {
         </Card>
       </div>
 
+      {/* Employee Summary Section */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <Users className="h-5 w-5 mr-2 text-green-600" />
+              Podsumowanie pracowników
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="month-select" className="text-sm text-gray-600">Miesiąc:</Label>
+              <Input
+                id="month-select"
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-40"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {employeeSummary.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">
+              Brak danych dla wybranego miesiąca
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Imię i nazwisko
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Suma godzin
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zarobek
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {employeeSummary.map((employee) => (
+                    <tr key={employee.employee_id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {employee.employee_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                        {employee.total_hours}h
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-green-600">
+                        {employee.total_earnings.toFixed(2)} zł
+                      </td>
+                    </tr>
+                  ))}
+                  {employeeSummary.length > 0 && (
+                    <tr className="bg-gray-100 font-bold">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        SUMA CAŁKOWITA
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                        {employeeSummary.reduce((sum, e) => sum + e.total_hours, 0)}h
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-green-700">
+                        {employeeSummary.reduce((sum, e) => sum + e.total_earnings, 0).toFixed(2)} zł
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Work Hours Table */}
       <Card>
         <CardHeader>
