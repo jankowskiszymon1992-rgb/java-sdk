@@ -34,6 +34,7 @@ const Finances = () => {
   const [summary, setSummary] = useState(null);
   const [chartsData, setChartsData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -54,8 +55,11 @@ const Finances = () => {
 
   useEffect(() => {
     loadData();
-    loadChartsData();
   }, [selectedMonth]);
+
+  useEffect(() => {
+    loadChartsData();
+  }, [selectedYear]);
 
   const loadData = async () => {
     try {
