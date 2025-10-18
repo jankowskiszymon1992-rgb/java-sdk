@@ -53,6 +53,7 @@ function App() {
             <Route path="mail" element={<Mail />} />
             <Route path="ai-assistant" element={<AIAssistant />} />
             <Route path="employees" element={<Employees />} />
+            <Route path="finances" element={<Finances />} />
           </Route>
         </Routes>
       </BrowserRouter>
