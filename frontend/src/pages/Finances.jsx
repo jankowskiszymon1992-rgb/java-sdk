@@ -195,7 +195,7 @@ const Finances = () => {
 
   const handleCategoryChange = (category) => {
     setFormData({ ...formData, category });
-    setUseOCR(CATEGORIES[category]?.ocr || false);
+    // Don't auto-enable OCR - let user choose
   };
 
   if (loading) {
