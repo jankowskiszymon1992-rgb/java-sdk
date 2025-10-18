@@ -511,9 +511,9 @@ const Employees = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogTitle>Potwierdź usunięcie pracownika</DialogTitle>
           </DialogHeader>
-          <p className="text-gray-600">Czy na pewno chcesz usunąć tego pracownika? Ta operacja jest nieodwracalna.</p>
+          <p className="text-gray-600">Czy na pewno chcesz usunąć tego pracownika? Wszystkie jego godziny pracy również zostaną usunięte. Ta operacja jest nieodwracalna.</p>
           <div className="flex justify-end gap-2 mt-4">
             <Button
               variant="outline"
@@ -524,6 +524,30 @@ const Employees = () => {
             <Button
               variant="destructive"
               onClick={confirmDelete}
+            >
+              Usuń
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Work Entry Confirmation Dialog */}
+      <Dialog open={deleteWorkDialogOpen} onOpenChange={setDeleteWorkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Potwierdź usunięcie wpisu</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">Czy na pewno chcesz usunąć ten wpis godzin pracy? Ta operacja jest nieodwracalna.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteWorkDialogOpen(false)}
+            >
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteWorkEntry}
             >
               Usuń
             </Button>
