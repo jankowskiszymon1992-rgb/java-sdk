@@ -636,12 +636,20 @@ async def get_dashboard_stats():
     active_projects = await db.projects.count_documents({"status": "in_progress"})
     completed_projects = await db.projects.count_documents({"status": "completed"})
     
-    # Calculate total hours this month
+    # Calculate total hours this month from BOTH workhours (projects) AND employee work entries
     from datetime import datetime as dt
     current_month_start = dt.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).date().isoformat()
     
+    # Get hours from regular workhours (linked to projects)
     workhours = await db.workhours.find({"date": {"$gte": current_month_start}}, {"_id": 0}).to_list(10000)
-    total_hours_month = sum(wh.get("hours", 0) for wh in workhours)
+    project_hours = sum(wh.get("hours", 0) for wh in workhours)
+    
+    # Get hours from employee work entries
+    employee_entries = await db.employee_work_entries.find({"date": {"$gte": current_month_start}}, {"_id": 0}).to_list(10000)
+    employee_hours = sum(entry.get("hours", 0) for entry in employee_entries)
+    
+    # Total = project hours + employee hours
+    total_hours_month = project_hours + employee_hours
     
     return {
         "total_clients": total_clients,
