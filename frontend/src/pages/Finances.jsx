@@ -247,6 +247,24 @@ const Finances = () => {
               className="w-40"
             />
           </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={handleExportExcel} 
+              variant="outline"
+              className="text-green-600 border-green-600 hover:bg-green-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Excel
+            </Button>
+            <Button 
+              onClick={handleExportPDF} 
+              variant="outline"
+              className="text-red-600 border-red-600 hover:bg-red-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              PDF
+            </Button>
+          </div>
           <Button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700">
             <Plus className="h-4 w-4 mr-2" />
             Dodaj wpis
