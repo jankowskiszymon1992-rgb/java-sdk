@@ -215,6 +215,30 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ RETESTED 2025-10-18: GET /api/employee-work-entries/summary?month=2025-10 DZIAŁA POPRAWNIE. Agreguje dane za październik 2025: Jan Kowalski (total_hours=6.5, total_earnings=230.75 zł), grand_total=710.75 zł dla 3 pracowników. KRYTYCZNE OBLICZENIA POPRAWNE. MongoDB aggregation pipeline działa prawidłowo. Status 200."
+  
+  - task: "Employee Work Entries - Edit Entry"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ NOWA FUNKCJONALNOŚĆ PRZETESTOWANA 2025-10-18: PUT /api/employee-work-entries/{entry_id} DZIAŁA POPRAWNIE. Testowano z Markiem Testowym (40.0 zł/h): 1) Utworzono wpis 5.0h = 200.0 zł, 2) Edytowano na 7.5h = 300.0 zł, 3) KRYTYCZNE: total_earnings automatycznie przeliczone poprawnie (7.5 × 40.0 = 300.0 zł), 4) Wszystkie pola zaktualizowane (hours, notes, total_earnings), 5) Weryfikacja przez GET potwierdza zmiany. Status 200."
+  
+  - task: "Employee Management - CASCADE DELETE"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ NOWA FUNKCJONALNOŚĆ PRZETESTOWANA 2025-10-18: DELETE /api/employees/{employee_id} CASCADE DELETE DZIAŁA POPRAWNIE. Testowano z Markiem Testowym: 1) Utworzono 2 wpisy godzin (7.5h + 8.0h), 2) Zweryfikowano że ma 2 wpisy, 3) Usunięto pracownika DELETE /api/employees/{id}, 4) KRYTYCZNE: CASCADE DELETE usunął pracownika I wszystkie jego wpisy godzin, 5) Weryfikacja: GET /api/employees - Marek usunięty, GET /api/employee-work-entries - wszystkie wpisy Marka usunięte. Status 200, komunikat: 'Pracownik i jego godziny pracy usunięte pomyślnie'."
 
 frontend:
   - task: "React removeChild Error Fix"
