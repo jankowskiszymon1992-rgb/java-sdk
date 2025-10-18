@@ -123,12 +123,18 @@ const Reminders = () => {
   };
 
   const testNotifications = async () => {
-    // Test if notifications work
-    showNotification('Test powiadomienia 🔔', {
-      body: 'Jeśli widzisz to powiadomienie, system działa poprawnie!',
-      tag: 'test-notification'
-    });
-    toast.success('Wysłano testowe powiadomienie');
+    console.log('Test notifications button clicked');
+    try {
+      // Test if notifications work
+      await showNotification('Test powiadomienia 🔔', {
+        body: 'Jeśli widzisz to powiadomienie, system działa poprawnie!',
+        tag: 'test-notification'
+      });
+      toast.success('Wysłano testowe powiadomienie - sprawdź czy widzisz powiadomienie!');
+    } catch (error) {
+      console.error('Error in testNotifications:', error);
+      toast.error('Błąd: ' + error.message);
+    }
   };
 
   const checkNow = async () => {
