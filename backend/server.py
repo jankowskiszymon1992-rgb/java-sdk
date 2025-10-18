@@ -1608,10 +1608,22 @@ Twoim zadaniem jest wyciągnięcie danych z {cat_name} w języku polskim.
 Zwróć TYLKO JSON bez dodatkowego tekstu."""
         ).with_model("anthropic", "claude-sonnet-4-20250514")
         
-        # Create message with image
-        # Note: emergentintegrations automatically detects image type from base64 data
-        image_content = ImageContent(image_base64=image)
+        # Detect image type from base64
+        import base64
+        try:
+            img_data = base64.b64decode(image[:100])
+            if img_data.startswith(b'\xff\xd8\xff'):
+                media_type = "image/jpeg"
+            elif img_data.startswith(b'\x89PNG'):
+                media_type = "image/png"
+            elif img_data.startswith(b'RIFF') and b'WEBP' in img_data[:20]:
+                media_type = "image/webp"
+            else:
+                media_type = "image/jpeg"
+        except Exception:
+            media_type = "image/jpeg"
         
+        # Create message with image - using dict format to specify media_type
         user_message = UserMessage(
             text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
 Zwróć odpowiedź TYLKO w formacie JSON bez żadnego dodatkowego tekstu:
@@ -1629,7 +1641,14 @@ Zwróć odpowiedź TYLKO w formacie JSON bez żadnego dodatkowego tekstu:
 
 Jeśli jakiejś wartości nie ma na dokumencie, użyj null lub "brak".
 Kwoty muszą być liczbami, nie tekstem.""",
-            file_contents=[image_content]
+            file_contents=[{
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": image
+                }
+            }]
         )
         
         # Get response from Claude (async method)
