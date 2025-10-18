@@ -272,10 +272,13 @@ const WorkHours = () => {
       <Card className="mt-6">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-green-600" />
-              Podsumowanie pracowników
-            </CardTitle>
+            <div>
+              <CardTitle className="flex items-center">
+                <Users className="h-5 w-5 mr-2 text-green-600" />
+                Godziny pracy pracowników
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">Podsumowanie godzin i zarobków za miesiąc</p>
+            </div>
             <div className="flex items-center gap-2">
               <Label htmlFor="month-select" className="text-sm text-gray-600">Miesiąc:</Label>
               <Input
@@ -323,19 +326,6 @@ const WorkHours = () => {
                       </td>
                     </tr>
                   ))}
-                  {employeeSummary.length > 0 && (
-                    <tr className="bg-gray-100 font-bold">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        SUMA CAŁKOWITA
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                        {employeeSummary.reduce((sum, e) => sum + e.total_hours, 0)}h
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-green-700">
-                        {employeeSummary.reduce((sum, e) => sum + e.total_earnings, 0).toFixed(2)} zł
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
