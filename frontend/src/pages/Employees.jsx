@@ -409,11 +409,13 @@ const Employees = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Work Hours Dialog */}
+      {/* Add/Edit Work Hours Dialog */}
       <Dialog open={workDialogOpen} onOpenChange={setWorkDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Dodaj godziny pracy</DialogTitle>
+            <DialogTitle>
+              {editingWorkEntry ? 'Edytuj godziny pracy' : 'Dodaj godziny pracy'}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleWorkSubmit} className="space-y-4">
             <div>
