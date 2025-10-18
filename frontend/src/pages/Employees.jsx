@@ -500,7 +500,7 @@ const Employees = () => {
                 Anuluj
               </Button>
               <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                Dodaj godziny
+                {editingWorkEntry ? 'Zapisz zmiany' : 'Dodaj godziny'}
               </Button>
             </div>
           </form>
