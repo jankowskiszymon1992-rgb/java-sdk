@@ -1629,8 +1629,9 @@ Kwoty muszą być liczbami, nie tekstem.""",
             file_contents=[image_content]
         )
         
-        # Get response from Claude
-        response = await chat.send_message(user_message)
+        # Get response from Claude - emergentintegrations is NOT async
+        import asyncio
+        response = await asyncio.to_thread(chat.send_message, user_message)
         
         # Parse JSON response
         import json
