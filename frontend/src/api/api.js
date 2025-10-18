@@ -40,3 +40,8 @@ export const photosApi = {
   update: (id, data) => axios.put(`${API}/photos/${id}`, data),
   delete: (id) => axios.delete(`${API}/photos/${id}`),
 };
+
+// Employee Work Entries API
+export const employeeWorkApi = {
+  getSummary: (params) => axios.get(`${API}/employee-work-entries/summary`, { params }),
+};
