@@ -2587,6 +2587,7 @@ MONITORED_PRODUCTS = [
     # PRZEWODY (różne przekroje i liczba żył)
     {"name": "Przewód YDYp 2x1.5 mm²", "category": "przewody", "usd_sensitive": True},
     {"name": "Przewód YDYp 3x1.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x1.5 mm² 100m", "category": "przewody", "usd_sensitive": True},
     {"name": "Przewód YDYp 4x1.5 mm²", "category": "przewody", "usd_sensitive": True},
     {"name": "Przewód YDYp 5x1.5 mm²", "category": "przewody", "usd_sensitive": True},
     {"name": "Przewód YDYp 2x2.5 mm²", "category": "przewody", "usd_sensitive": True},
