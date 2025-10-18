@@ -167,6 +167,14 @@ const Reminders = () => {
           <p className="text-gray-600 mt-1">Zarządzaj przypomnieniami i powiadomieniami</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={testNotifications} variant="outline" className="text-green-600">
+            <Send className="h-4 w-4 mr-2" />
+            Test powiadomień
+          </Button>
+          <Button onClick={checkNow} variant="outline" className="text-purple-600">
+            <Bell className="h-4 w-4 mr-2" />
+            Sprawdź teraz
+          </Button>
           <Button onClick={setupRecurringReminders} variant="outline" className="text-blue-600">
             <RefreshCw className="h-4 w-4 mr-2" />
             Setup ZUS/Podatki
