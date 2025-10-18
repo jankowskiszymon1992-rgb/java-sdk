@@ -2709,47 +2709,75 @@ async def fetch_usd_rate():
         return None
 
 
-# Helper: Scraping Kanlux (Przykład - wymaga dostosowania do rzeczywistej struktury)
+# Helper: Generuj przykładowe ceny (MOCK dla testów - do zastąpienia prawdziwym scrapingiem)
+def generate_mock_price(product_name: str, supplier: str):
+    """
+    Generuje przykładowe ceny dla testów
+    UWAGA: To są DANE TESTOWE. Zamień na prawdziwy scraping!
+    """
+    import hashlib
+    import random
+    
+    # Seed bazujący na nazwie produktu i dostawcy dla spójności
+    seed = int(hashlib.md5(f"{product_name}{supplier}".encode()).hexdigest()[:8], 16)
+    random.seed(seed)
+    
+    # Bazowa cena zależna od kategorii
+    base_prices = {
+        "przewody": (150, 400),
+        "gniazda": (8, 45),
+        "naswietlacze": (25, 180),
+        "rozdzielnice": (35, 250),
+        "bezpieczniki": (12, 65),
+        "zarowki": (5, 25),
+        "lampy_hermetyczne": (40, 150),
+        "swietlowki": (35, 90),
+        "peszle": (80, 300),
+        "rurki": (5, 15),
+        "odgromienie": (50, 200),
+        "bednarka": (60, 180),
+        "kostki": (20, 80),
+        "tasmy": (3, 12)
+    }
+    
+    # Znajdź kategorię
+    category = "przewody"  # default
+    for cat in base_prices.keys():
+        if cat in product_name.lower():
+            category = cat
+            break
+    
+    min_price, max_price = base_prices[category]
+    base_price = random.uniform(min_price, max_price)
+    
+    # Różnice między dostawcami
+    supplier_multipliers = {
+        "kanlux": 0.95,  # najtańszy
+        "tme": 1.05,
+        "conrad": 1.15,
+        "rs_components": 1.20  # najdroższy
+    }
+    
+    final_price = base_price * supplier_multipliers.get(supplier, 1.0)
+    
+    return {
+        "price": round(final_price, 2),
+        "url": f"https://{supplier}.com/product/{product_name.replace(' ', '-')}",
+        "availability": random.random() > 0.1  # 90% dostępności
+    }
+
+
+# Helper: Scraping Kanlux (MOCK - do zastąpienia prawdziwym)
 async def scrape_kanlux(product_name: str, search_term: str):
     """
     Scraper dla Kanlux.com
-    UWAGA: To jest przykładowa implementacja. Wymaga dostosowania do rzeczywistej struktury HTML.
+    OBECNIE: DANE TESTOWE
+    TODO: Zastąpić prawdziwym scrapingiem HTML
     """
     try:
-        import aiohttp
-        from bs4 import BeautifulSoup
-        
-        # Przykładowy URL - wymaga dostosowania
-        search_url = f"https://www.kanlux.com/pl/search?q={search_term.replace(' ', '+')}"
-        
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.get(search_url, headers=headers, timeout=15) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    soup = BeautifulSoup(html, 'lxml')
-                    
-                    # TODO: Dostosować selektory do rzeczywistej struktury Kanlux
-                    # To jest placeholder - wymaga analizy HTML strony
-                    price_element = soup.select_one('.product-price, .price')
-                    
-                    if price_element:
-                        price_text = price_element.get_text(strip=True)
-                        # Ekstrakcja ceny (usuń "PLN", "zł", spacje, przecinki)
-                        import re
-                        price_match = re.search(r'(\d+[,.]?\d*)', price_text.replace(',', '.'))
-                        if price_match:
-                            price = float(price_match.group(1))
-                            return {
-                                "price": price,
-                                "url": search_url,
-                                "availability": True
-                            }
-        
-        return None
+        # MOCK - zwróć wygenerowane dane
+        await asyncio.sleep(0.5)  # Symulacja opóźnienia
+        return generate_mock_price(product_name, "kanlux")
     except Exception as e:
         logger.error(f"Kanlux scraping error for {product_name}: {e}")
         return None
