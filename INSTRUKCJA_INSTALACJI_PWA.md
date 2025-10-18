@@ -13,7 +13,7 @@
 
 ### Metoda 1: Przez Chrome (POLECANA)
 1. Otwórz **Chrome** na telefonie
-2. Wejdź na: `https://elektron-assistant.preview.emergentagent.com`
+2. Wejdź na: `https://elektron-finance.preview.emergentagent.com`
 3. Poczekaj kilka sekund - pojawi się **żółty baner** na dole ekranu z napisem **"Zainstaluj Elektron"**
 4. Kliknij **"Zainstaluj"**
 5. Gotowe! Ikona aplikacji pojawi się na ekranie głównym 🎉
@@ -35,7 +35,7 @@
 
 ### Chrome / Edge
 1. Otwórz przeglądarkę **Chrome** lub **Edge**
-2. Wejdź na: `https://elektron-assistant.preview.emergentagent.com`
+2. Wejdź na: `https://elektron-finance.preview.emergentagent.com`
 3. W pasku adresu pojawi się **ikona instalacji** (mały monitor z strzałką) lub żółty baner
 4. Kliknij ikonę instalacji lub przycisk **"Zainstaluj"** w banerze
 5. Potwierdź instalację
