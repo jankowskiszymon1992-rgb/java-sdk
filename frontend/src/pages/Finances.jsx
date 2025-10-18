@@ -409,6 +409,9 @@ const Finances = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editingEntry ? 'Edytuj wpis' : 'Dodaj nowy wpis'}</DialogTitle>
+            <DialogDescription>
+              {editingEntry ? 'Edytuj dane wpisu finansowego' : 'Dodaj nowy wpis przychodu lub wydatku'}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
