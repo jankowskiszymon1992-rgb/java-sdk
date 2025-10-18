@@ -240,6 +240,66 @@ backend:
         agent: "testing"
         comment: "✅ NOWA FUNKCJONALNOŚĆ PRZETESTOWANA 2025-10-18: DELETE /api/employees/{employee_id} CASCADE DELETE DZIAŁA POPRAWNIE. Testowano z Markiem Testowym: 1) Utworzono 2 wpisy godzin (7.5h + 8.0h), 2) Zweryfikowano że ma 2 wpisy, 3) Usunięto pracownika DELETE /api/employees/{id}, 4) KRYTYCZNE: CASCADE DELETE usunął pracownika I wszystkie jego wpisy godzin, 5) Weryfikacja: GET /api/employees - Marek usunięty, GET /api/employee-work-entries - wszystkie wpisy Marka usunięte. Status 200, komunikat: 'Pracownik i jego godziny pracy usunięte pomyślnie'."
 
+  - task: "Financial Entries - Create Entry"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: POST /api/financial-entries DZIAŁA POPRAWNIE. Testowano 3 wpisy: 1) invoice_sales (Faktura VAT 123/2025, 1000.00 netto, 1230.00 brutto, VAT 23%), 2) salaries (Wypłaty październik 2025, 500.00 netto/brutto), 3) fuel (Tankowanie Shell, 200.00 netto, 246.00 brutto, VAT 23%). Wszystkie wpisy utworzone z poprawnymi ID, datami, kategoriami i kwotami. Status 200."
+
+  - task: "Financial Entries - Get Entries with Filter"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: GET /api/financial-entries?month=2025-10 DZIAŁA POPRAWNIE. Zwraca listę 3 wpisów finansowych dla października 2025. Wszystkie testowe wpisy (invoice_sales, salaries, fuel) znalezione w liście z poprawnymi danymi. Filtrowanie po miesiącu działa prawidłowo. Status 200."
+
+  - task: "Financial Entries - Summary Report"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: GET /api/financial-entries/summary?month=2025-10 DZIAŁA POPRAWNIE. KRYTYCZNE OBLICZENIA SPRAWDZONE: categories (invoice_sales: 1000.00 netto/1230.00 brutto, salaries: 500.00 netto/brutto, fuel: 200.00 netto/246.00 brutto), totals (income_net: 1000.00, income_gross: 1230.00, expense_net: 700.00, expense_gross: 746.00, balance_net: 300.00, balance_gross: 484.00). Wszystkie obliczenia bilansu poprawne. Status 200."
+
+  - task: "Financial Entries - Edit Entry"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: PUT /api/financial-entries/{id} DZIAŁA POPRAWNIE. Testowano edycję wpisu paliwa: zmiana amount_net z 200.00 na 250.00, amount_gross z 246.00 na 307.50. Wpis zaktualizowany poprawnie, inne pola pozostały niezmienione (category: fuel, description: Tankowanie Shell). Status 200."
+
+  - task: "Financial Entries - Delete Entry"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: DELETE /api/financial-entries/{id} DZIAŁA POPRAWNIE. Testowano usunięcie wpisu paliwa. Wpis usunięty pomyślnie z komunikatem 'Wpis usunięty pomyślnie'. Weryfikacja: GET /api/financial-entries/summary - kategoria fuel nie występuje w podsumowaniu, totals zaktualizowane (expense_net: 500.00, expense_gross: 500.00, balance_net: 500.00, balance_gross: 730.00). Status 200."
+
 frontend:
   - task: "React removeChild Error Fix"
     implemented: true
