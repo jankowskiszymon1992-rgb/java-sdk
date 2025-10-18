@@ -270,6 +270,21 @@ frontend:
       - working: true
         agent: "main"
         comment: "✅ TESTY ZAKOŃCZONE POMYŚLNIE: Chat działa w 100%. Wysłano testową wiadomość 'Witaj! Kim jesteś i jak możesz mi pomóc?' - Claude Sonnet 4 odpowiedział profesjonalnie po polsku. Wiadomości wyświetlają się poprawnie (użytkownik po prawej - niebieskie, AI po lewej - szare z ikoną bota). Timestamp działa. Historia konwersacji jest zapisywana. Interfejs użytkownika jest responsywny i intuicyjny."
+  
+  - task: "Work Hours - Empty Project Dropdown Fix"
+    implemented: true
+    working: true
+    file: "/frontend/src/pages/WorkHours.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Użytkownik zgłosił, że dropdown projektów w sekcji Godziny pracy jest pusty, mimo że projekty istnieją w bazie. Nie można dodać nowych wpisów godzin pracy."
+      - working: true
+        agent: "main"
+        comment: "✅ BUG NAPRAWIONY: Problem był z renderowaniem SelectContent w Radix UI - dropdown był pusty mimo że dane były załadowane. Rozwiązanie: dodano props `position='popper'` i `sideOffset={5}` do SelectContent. Po naprawie: dropdown poprawnie pokazuje listę projektów, można wybrać projekt, formularz dodawania godzin działa w 100%, wpisy są zapisywane, toast sukcesu pojawia się, suma godzin aktualizuje się automatycznie. Przetestowano kompletny flow dodawania wpisu - wszystko działa."
 
 metadata:
   created_by: "main_agent"
