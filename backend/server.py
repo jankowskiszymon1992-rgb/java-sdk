@@ -3037,7 +3037,7 @@ Pisz KONKRETNIE, z liczbami i nazwami. Po polsku."""
         
         # Parsuj odpowiedź
         import json
-        ai_response = response.choices[0].message.content
+        ai_response = response  # response jest już tekstem z LlmChat
         
         # Spróbuj wyciągnąć JSON z odpowiedzi
         try:
