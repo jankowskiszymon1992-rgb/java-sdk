@@ -1569,15 +1569,18 @@ async def delete_financial_entry(entry_id: str):
 
 
 @api_router.post("/financial-entries/ocr")
-async def create_financial_entry_with_ocr(
-    category: FinancialCategory,
-    image: str,  # base64 encoded image
-    date: Optional[str] = None
-):
+async def create_financial_entry_with_ocr(request: dict):
     """
     Extract data from invoice image using OCR (Claude Sonnet 4 Vision)
     """
     try:
+        category = request.get("category")
+        image = request.get("image")  # base64 encoded
+        date = request.get("date")
+        
+        if not category or not image:
+            raise HTTPException(status_code=400, detail="Brak wymaganych pól: category i image")
+        
         from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
         from dotenv import load_dotenv
         load_dotenv()
