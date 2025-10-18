@@ -2975,7 +2975,7 @@ async def generate_ai_analysis(price_data: dict, usd_data: dict):
     Używa Emergent LLM (Claude Sonnet 4)
     """
     try:
-        from emergentintegrations import EmergentLLM
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         # Przygotuj dane do analizy
         products_summary = []
