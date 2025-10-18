@@ -362,52 +362,73 @@ const Finances = () => {
 
       {/* Charts Section */}
       {chartsData && chartsData.monthly && chartsData.monthly.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Monthly Trend Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
-                Przychody vs Wydatki (ostatnie 6 miesięcy)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartsData.monthly}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `${value.toFixed(2)} zł`} />
-                  <Legend />
-                  <Line type="monotone" dataKey="income" stroke="#22c55e" strokeWidth={2} name="Przychody" />
-                  <Line type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} name="Wydatki" />
-                  <Line type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} name="Bilans" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-900 flex items-center">
+              <BarChart3 className="h-6 w-6 mr-2 text-blue-600" />
+              Wykresy finansowe - rok {chartsData.year}
+            </h3>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="year-select" className="text-sm text-gray-600">Rok:</Label>
+              <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper" sideOffset={5}>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2026">2026</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-          {/* Category Breakdown Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-purple-600" />
-                Wydatki per kategoria
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartsData.by_category.filter(c => c.type === 'expense')}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} fontSize={11} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `${value.toFixed(2)} zł`} />
-                  <Bar dataKey="amount" fill="#8b5cf6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Monthly Trend Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-base">
+                  Przychody vs Wydatki (styczeń - grudzień)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartsData.monthly}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `${value.toFixed(2)} zł`} />
+                    <Legend />
+                    <Line type="monotone" dataKey="income" stroke="#22c55e" strokeWidth={2} name="Przychody" />
+                    <Line type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} name="Wydatki" />
+                    <Line type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} name="Bilans" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Category Breakdown Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-base">
+                  Wydatki per kategoria (cały rok)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartsData.by_category.filter(c => c.type === 'expense')}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} fontSize={11} />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `${value.toFixed(2)} zł`} />
+                    <Bar dataKey="amount" fill="#8b5cf6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </>
       )}
 
       {/* Category Summary */}
