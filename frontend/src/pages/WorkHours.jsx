@@ -38,6 +38,8 @@ const WorkHours = () => {
         projectsApi.getAll(),
         workHoursApi.getSummary(),
       ]);
+      console.log('📊 Loaded projects:', projectsRes.data);
+      console.log('📊 Projects count:', projectsRes.data?.length);
       setWorkHours(workHoursRes.data);
       setProjects(projectsRes.data);
       setSummary(summaryRes.data);
