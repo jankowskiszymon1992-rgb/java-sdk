@@ -403,6 +403,7 @@ const Finances = () => {
                   value={formData.category}
                   onValueChange={handleCategoryChange}
                   required
+                  disabled={editingEntry}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Wybierz kategorię" />
@@ -432,27 +433,62 @@ const Finances = () => {
               </div>
             </div>
 
-            {useOCR && !editingEntry && (
+            {/* OCR Toggle for supported categories */}
+            {!editingEntry && formData.category && CATEGORIES[formData.category]?.ocr && (
+              <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-md">
+                <Camera className="h-5 w-5 text-blue-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Ta kategoria obsługuje OCR</p>
+                  <p className="text-xs text-gray-600">AI automatycznie wyciągnie dane z faktury</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={useOCR ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setUseOCR(true)}
+                  >
+                    <Camera className="h-4 w-4 mr-1" />
+                    Zeskanuj
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={!useOCR ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setUseOCR(false);
+                      setImagePreview(null);
+                      setFormData({ ...formData, image: null });
+                    }}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    Wpisz ręcznie
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {useOCR && !editingEntry ? (
               <div>
                 <Label htmlFor="image">Zdjęcie faktury *</Label>
                 <Input
                   id="image"
                   type="file"
-                  accept="image/*,application/pdf"
+                  accept="image/*"
+                  capture="environment"
                   onChange={handleImageChange}
                   required
                 />
                 {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 max-h-40 rounded" />
+                  <div className="mt-2">
+                    <img src={imagePreview} alt="Preview" className="max-h-60 rounded border" />
+                  </div>
                 )}
-                <p className="text-sm text-gray-500 mt-1">
-                  <Camera className="h-4 w-4 inline mr-1" />
-                  AI automatycznie wyciągnie dane z faktury
+                <p className="text-sm text-blue-600 mt-2">
+                  📸 Zrób zdjęcie faktury - AI automatycznie wyciągnie wszystkie dane
                 </p>
               </div>
-            )}
-
-            {!useOCR && (
+            ) : (
               <>
                 <div>
                   <Label htmlFor="description">Opis *</Label>
