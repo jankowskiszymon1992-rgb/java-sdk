@@ -1456,7 +1456,7 @@ class ChatHistoryQuery(BaseModel):
 
 @api_router.post("/ai/chat")
 async def ai_chat(message: ChatMessage):
-    """Send message to AI Assistant and get response"""
+    """Send message to AI Assistant and get response - PEŁNY DOSTĘP DO WSZYSTKICH DANYCH"""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
@@ -1465,20 +1465,112 @@ async def ai_chat(message: ChatMessage):
         # Generate session ID if not provided
         session_id = message.session_id or str(uuid.uuid4())
         
+        # ==== POBIERZ WSZYSTKIE DANE Z APLIKACJI ====
+        
+        # 1. FINANSE - ostatnie 100 wpisów
+        finances = await db.financial_entries.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
+        
+        # Oblicz podsumowanie finansów
+        income = sum(f.get("net_price", 0) for f in finances if f.get("category") in ["invoice_sales", "money_no_invoice"])
+        expense = sum(f.get("net_price", 0) for f in finances if f.get("category") not in ["invoice_sales", "money_no_invoice"])
+        balance = income - expense
+        
+        # 2. ZLECENIA - ostatnie 50
+        projects = await db.projects.find({}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
+        
+        # 3. RAPORTY - ostatnie 30
+        reports = await db.reports.find({}, {"_id": 0}).sort("date", -1).limit(30).to_list(30)
+        
+        # 4. GODZINY PRACY - ostatnie 100 wpisów (projekty)
+        work_hours_projects = await db.work_hours.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
+        
+        # 5. GODZINY PRACY PRACOWNIKÓW - ostatnie 100
+        work_hours_employees = await db.employee_work_entries.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
+        
+        # 6. PRACOWNICY - wszyscy
+        employees = await db.employees.find({}, {"_id": 0}).to_list(100)
+        
+        # 7. KLIENCI - ostatnich 50
+        clients = await db.clients.find({}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
+        
+        # ==== PRZYGOTUJ KONTEKST ====
+        
+        context = f"""=== PEŁNY DOSTĘP DO SYSTEMU ELEKTRON ===
+
+💰 FINANSE (ostatnie 100 wpisów):
+- Przychody: {income:.2f} PLN
+- Wydatki: {expense:.2f} PLN
+- Bilans: {balance:.2f} PLN
+- Wpisy: {len(finances)}
+SZCZEGÓŁY: {finances[:10]}  # Pokaz 10 najnowszych
+
+📋 ZLECENIA (ostatnie 50):
+- Liczba zleceń: {len(projects)}
+SZCZEGÓŁY: {projects[:10]}  # 10 najnowszych
+
+📝 RAPORTY (ostatnie 30):
+- Liczba raportów: {len(reports)}
+SZCZEGÓŁY: {reports[:5]}
+
+⏰ GODZINY PRACY - PROJEKTY (ostatnie 100):
+- Wpisów: {len(work_hours_projects)}
+SZCZEGÓŁY: {work_hours_projects[:10]}
+
+👷 GODZINY PRACY - PRACOWNICY (ostatnie 100):
+- Wpisów: {len(work_hours_employees)}
+SZCZEGÓŁY: {work_hours_employees[:10]}
+
+👥 PRACOWNICY (wszyscy):
+- Liczba pracowników: {len(employees)}
+SZCZEGÓŁY: {employees}
+
+👤 KLIENCI (ostatnich 50):
+- Liczba klientów: {len(clients)}
+SZCZEGÓŁY: {clients[:10]}
+
+🔍 MOŻLIWOŚCI WYSZUKIWANIA:
+- Po nazwie zlecenia (projects)
+- Po dacie (raporty, godziny pracy, finanse)
+- Po imieniu pracownika (employees, work hours)
+- Po nazwie klienta
+
+INSTRUKCJE:
+Użytkownik może zapytać:
+- "Jaki wynik finansowy w październiku?"
+- "Pokaż zlecenie Kowalski montaż"
+- "Ile godzin pracował Jan w tym tygodniu?"
+- "Co jest w raporcie z 15 października?"
+
+Odpowiadaj KONKRETNIE z danymi z bazy. Jeśli pytanie o konkretną datę/nazwę/osobę - WYSZUKAJ w danych i podaj szczegóły."""
+        
         # Initialize LLM Chat with Claude Sonnet 4
         chat = LlmChat(
             api_key=api_key,
             session_id=session_id,
-            system_message="""Jesteś inteligentnym asystentem biznesowym dla elektryka prowadzącego firmę.
-            
-Twoja rola:
-- Pomagasz w analizie finansowej i biznesowej
-- Odpowiadasz na pytania o projekty, klientów, wydatki
-- Doradzasz w sprawach związanych z prowadzeniem firmy elektrycznej
-- Pomagasz w planowaniu i organizacji pracy
+            system_message=f"""Jesteś GŁÓWNYM ASYSTENTEM BIZNESOWYM dla elektryka prowadzącego firmę "Elektron".
 
-Komunikujesz się po polsku, jesteś pomocny, konkretny i profesjonalny.
-Jeśli nie masz wystarczających danych, zapytaj o nie."""
+{context}
+
+Twoja rola:
+- Analizujesz finanse i dajesz porady biznesowe
+- Wyszukujesz zlecenia po nazwie lub dacie
+- Pokazujesz raporty z konkretnych dni
+- Sprawdzasz godziny pracy pracowników
+- Dajesz informacje o pracownikach po imieniu
+- Pomagasz w planowaniu i organizacji
+
+SPOSÓB ODPOWIEDZI:
+- KONKRETNIE z danymi z bazy
+- LICZBY i NAZWY
+- WYSZUKUJ dokładnie po zapytaniu
+- Po POLSKU
+- Krótko (3-5 zdań)
+
+PRZYKŁAD:
+User: "Pokaż zlecenie Kowalski"
+You: "Znalazłem zlecenie 'Montaż instalacji - Kowalski', klient: Jan Kowalski, lokalizacja: ul. Słoneczna 15, status: w trakcie. Szacowane godziny: 8h, data rozpoczęcia: 2025-10-10. Notatki: wymiana rozdzielni głównej."
+
+Jeśli nie ma danych - powiedz "Nie znalazłem w bazie"."""
         ).with_model("anthropic", "claude-3-7-sonnet-20250219")
         
         # Create user message
