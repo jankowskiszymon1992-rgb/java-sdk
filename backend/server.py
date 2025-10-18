@@ -1636,7 +1636,6 @@ Kwoty muszą być liczbami, nie tekstem.""",
         response = await asyncio.to_thread(chat.send_message, user_message)
         
         # Parse JSON response
-        import json
         # Clean response - remove markdown if present
         cleaned_response = response.strip()
         if cleaned_response.startswith("```"):
