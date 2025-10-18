@@ -348,3 +348,7 @@ agent_communication:
     message: "Pusta lista projektów w dropdownie na stronie Godziny pracy - nie można dodać nowych wpisów"
   - agent: "main"
     message: "✅ BUG NAPRAWIONY: Problem z renderowaniem SelectContent w Radix UI. Dropdown był renderowany w portalu i nie pokazywał elementów. Fix: dodano `position='popper'` i `sideOffset={5}` do SelectContent w WorkHours.jsx. Przetestowano pełny flow dodawania godzin - wszystko działa 100%."
+  - agent: "user"
+    message: "Przetestuj kompletny flow dla systemu pracowników z Janem Kowalskim (35.50 zł/h, 6.5h, 2025-10-18)"
+  - agent: "testing"
+    message: "✅ KOMPLETNY FLOW SYSTEMU PRACOWNIKÓW PRZETESTOWANY POMYŚLNIE 2025-10-18: Wszystkie 4 endpointy działają w 100%. 1) POST /api/employees - utworzono Jana Kowalskiego (35.50 zł/h), 2) GET /api/employees - znaleziono Jana z poprawną stawką, 3) POST /api/employee-work-entries - utworzono wpis (6.5h, 2025-10-18, Montaż rozdzielni) z automatycznym obliczeniem total_earnings=230.75 zł (6.5×35.50), 4) GET /api/employee-work-entries - zweryfikowano wpis z poprawnymi danymi, 5) GET /api/employee-work-entries/summary - agregacja za październik 2025 działa poprawnie. KRYTYCZNE: Obliczenia hours × hourly_rate są w 100% poprawne. Backend URL: https://elektron-assistant.preview.emergentagent.com"
