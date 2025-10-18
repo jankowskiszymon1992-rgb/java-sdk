@@ -19,8 +19,11 @@ const Employees = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [workDialogOpen, setWorkDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteWorkDialogOpen, setDeleteWorkDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [workEntryToDelete, setWorkEntryToDelete] = useState(null);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [editingWorkEntry, setEditingWorkEntry] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     hourly_rate: '',
