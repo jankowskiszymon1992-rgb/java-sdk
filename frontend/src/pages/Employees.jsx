@@ -86,8 +86,13 @@ const Employees = () => {
         hours: parseFloat(workFormData.hours)
       };
       
-      await axios.post(`${API}/employee-work-entries`, data);
-      toast.success('Godziny dodane pomyślnie');
+      if (editingWorkEntry) {
+        await axios.put(`${API}/employee-work-entries/${editingWorkEntry.id}`, data);
+        toast.success('Godziny zaktualizowane pomyślnie');
+      } else {
+        await axios.post(`${API}/employee-work-entries`, data);
+        toast.success('Godziny dodane pomyślnie');
+      }
       
       loadData();
       setWorkDialogOpen(false);
@@ -95,6 +100,38 @@ const Employees = () => {
     } catch (error) {
       console.error('Error saving work entry:', error);
       toast.error('Nie udało się zapisać godzin');
+    }
+  };
+
+  const handleEditWorkEntry = (entry) => {
+    setEditingWorkEntry(entry);
+    setWorkFormData({
+      employee_id: entry.employee_id,
+      date: entry.date,
+      hours: entry.hours.toString(),
+      notes: entry.notes || ''
+    });
+    setWorkDialogOpen(true);
+  };
+
+  const handleDeleteWorkEntry = (id) => {
+    setWorkEntryToDelete(id);
+    setDeleteWorkDialogOpen(true);
+  };
+
+  const confirmDeleteWorkEntry = async () => {
+    if (workEntryToDelete) {
+      try {
+        await axios.delete(`${API}/employee-work-entries/${workEntryToDelete}`);
+        toast.success('Wpis usunięty pomyślnie');
+        loadData();
+      } catch (error) {
+        console.error('Error deleting work entry:', error);
+        toast.error('Nie udało się usunąć wpisu');
+      } finally {
+        setDeleteWorkDialogOpen(false);
+        setWorkEntryToDelete(null);
+      }
     }
   };
 
