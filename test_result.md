@@ -503,3 +503,7 @@ agent_communication:
     message: "Przetestuj nowy system finansowy z OCR dla faktur - wszystkie endpointy finansowe"
   - agent: "testing"
     message: "✅ SYSTEM FINANSOWY PRZETESTOWANY POMYŚLNIE 2025-10-18: Wszystkie 5 endpointów działają w 100%. CZĘŚĆ 1 - RĘCZNE DODAWANIE: POST /api/financial-entries tworzy wpisy (invoice_sales: 1000.00/1230.00, salaries: 500.00/500.00, fuel: 200.00/246.00). CZĘŚĆ 2 - POBIERANIE: GET /api/financial-entries?month=2025-10 zwraca 3 wpisy, GET /api/financial-entries/summary oblicza poprawnie (income: 1000.00/1230.00, expense: 700.00/746.00, balance: 300.00/484.00). CZĘŚĆ 3 - EDYCJA/USUWANIE: PUT edytuje kwoty (250.00/307.50), DELETE usuwa wpis, podsumowanie aktualizuje się (balance: 500.00/730.00). KRYTYCZNE: Wszystkie obliczenia bilansu i kategorii poprawne. Backend URL: https://elektron-finance.preview.emergentagent.com"
+  - agent: "user"
+    message: "BRAK POWIADOMIEŃ NAWET PO WCIŚNIĘCIU TESTU BRAK - powiadomienia nie działają w ogóle na PWA"
+  - agent: "main"
+    message: "✅ ROOT CAUSE ZNALEZIONY I NAPRAWIONY: Service Worker był WYREJESTROWANY w /app/frontend/src/index.js (serviceWorkerRegistration.unregister()). Zmieniono na serviceWorkerRegistration.register(). Service Worker teraz się poprawnie rejestruje - widać w konsoli przeglądarki. To była główna przyczyna braku powiadomień. Teraz trzeba przetestować backend endpoint GET /api/reminders/check/pending i funkcjonalność powiadomień push."
