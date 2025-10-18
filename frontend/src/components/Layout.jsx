@@ -25,6 +25,7 @@ const Layout = () => {
     { to: '/workhours', icon: Clock, label: 'Godziny pracy' },
     { to: '/employees', icon: UserCog, label: 'Pracownicy' },
     { to: '/finances', icon: DollarSign, label: 'Finanse' },
+    { to: '/market-intelligence', icon: TrendingUp, label: 'Analiza Rynku' },
     { to: '/reminders', icon: Bell, label: 'Przypomnienia' },
     { to: '/reports', icon: FileText, label: 'Raporty' },
     { to: '/ai-assistant', icon: Bot, label: 'Asystent AI' },
