@@ -1457,6 +1457,117 @@ async def root():
     return {"message": "API Aplikacji dla Elektryka - Działa!"}
 
 
+
+
+# ============= FINANCIAL ENTRIES ENDPOINTS =============
+
+@api_router.post("/financial-entries", response_model=FinancialEntry)
+async def create_financial_entry(entry_input: FinancialEntryCreate):
+    entry_obj = FinancialEntry(**entry_input.model_dump())
+    doc = serialize_doc(entry_obj.model_dump())
+    await db.financial_entries.insert_one(doc)
+    return entry_obj
+
+
+@api_router.get("/financial-entries", response_model=List[FinancialEntry])
+async def get_financial_entries(
+    month: Optional[str] = None,  # Format: YYYY-MM
+    category: Optional[FinancialCategory] = None
+):
+    query = {}
+    
+    if month:
+        # Filter by month
+        start_date = f"{month}-01"
+        # Get last day of month
+        from calendar import monthrange
+        year, mon = map(int, month.split('-'))
+        last_day = monthrange(year, mon)[1]
+        end_date = f"{month}-{last_day:02d}"
+        query["date"] = {"$gte": start_date, "$lte": end_date}
+    
+    if category:
+        query["category"] = category
+    
+    entries = await db.financial_entries.find(query, {"_id": 0}).sort("date", -1).to_list(10000)
+    return [deserialize_doc(entry) for entry in entries]
+
+
+@api_router.get("/financial-entries/summary")
+async def get_financial_summary(month: Optional[str] = None):
+    query = {}
+    
+    if month:
+        start_date = f"{month}-01"
+        from calendar import monthrange
+        year, mon = map(int, month.split('-'))
+        last_day = monthrange(year, mon)[1]
+        end_date = f"{month}-{last_day:02d}"
+        query["date"] = {"$gte": start_date, "$lte": end_date}
+    
+    entries = await db.financial_entries.find(query, {"_id": 0}).to_list(10000)
+    
+    # Calculate summary per category
+    summary = {}
+    income_categories = ["invoice_sales", "cash_income"]
+    
+    for entry in entries:
+        cat = entry.get("category")
+        if cat not in summary:
+            summary[cat] = {
+                "category": cat,
+                "total_net": 0,
+                "total_gross": 0,
+                "count": 0,
+                "type": "income" if cat in income_categories else "expense"
+            }
+        
+        summary[cat]["total_net"] += entry.get("amount_net", 0)
+        summary[cat]["total_gross"] += entry.get("amount_gross", 0)
+        summary[cat]["count"] += 1
+    
+    # Calculate totals
+    total_income_net = sum(s["total_net"] for s in summary.values() if s["type"] == "income")
+    total_income_gross = sum(s["total_gross"] for s in summary.values() if s["type"] == "income")
+    total_expense_net = sum(s["total_net"] for s in summary.values() if s["type"] == "expense")
+    total_expense_gross = sum(s["total_gross"] for s in summary.values() if s["type"] == "expense")
+    
+    return {
+        "categories": list(summary.values()),
+        "totals": {
+            "income_net": total_income_net,
+            "income_gross": total_income_gross,
+            "expense_net": total_expense_net,
+            "expense_gross": total_expense_gross,
+            "balance_net": total_income_net - total_expense_net,
+            "balance_gross": total_income_gross - total_expense_gross
+        }
+    }
+
+
+@api_router.put("/financial-entries/{entry_id}", response_model=FinancialEntry)
+async def update_financial_entry(entry_id: str, entry_update: FinancialEntryUpdate):
+    existing = await db.financial_entries.find_one({"id": entry_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Wpis nie znaleziony")
+    
+    update_data = {k: v for k, v in entry_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.financial_entries.update_one({"id": entry_id}, {"$set": update_data})
+    
+    updated_entry = await db.financial_entries.find_one({"id": entry_id}, {"_id": 0})
+    return deserialize_doc(updated_entry)
+
+
+@api_router.delete("/financial-entries/{entry_id}")
+async def delete_financial_entry(entry_id: str):
+    result = await db.financial_entries.delete_one({"id": entry_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Wpis nie znaleziony")
+    return {"message": "Wpis usunięty pomyślnie"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
