@@ -197,6 +197,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/employee-work-entries endpoint działa poprawnie. Zwraca historię wpisów godzin posortowaną po dacie (najnowsze pierwsze). Testowano - znaleziono 1 wpis z prawidłowymi danymi. Status 200, dane pobierane z MongoDB."
+      - working: true
+        agent: "testing"
+        comment: "✅ RETESTED 2025-10-18: GET /api/employee-work-entries DZIAŁA POPRAWNIE. Zwraca historię 3 wpisów godzin posortowaną po dacie. KRYTYCZNA WERYFIKACJA: Wpis dla Jana Kowalskiego zawiera employee_name='Jan Kowalski', hours=6.5, hourly_rate=35.5, total_earnings=230.75 zł. Obliczenia są poprawne. Status 200."
   
   - task: "Employee Work Entries - Summary Report"
     implemented: true
