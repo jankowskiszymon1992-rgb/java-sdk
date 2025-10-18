@@ -1647,13 +1647,13 @@ Kwoty muszą być liczbami, nie tekstem.""",
         
         # Create financial entry
         entry_data = FinancialEntryCreate(
-            date=date or ocr_data.get("date", datetime.now(timezone.utc).date().isoformat()),
+            date=date or ocr_data.get("date") or datetime.now(timezone.utc).date().isoformat(),
             category=category,
-            description=ocr_data.get("document_number", "brak") + " - " + ocr_data.get("description", ""),
-            amount_net=float(ocr_data.get("amount_net", 0)),
-            amount_gross=float(ocr_data.get("amount_gross", 0)),
+            description=(ocr_data.get("document_number") or "brak") + " - " + (ocr_data.get("description") or ""),
+            amount_net=float(ocr_data.get("amount_net") or 0),
+            amount_gross=float(ocr_data.get("amount_gross") or 0),
             vat_rate=float(ocr_data.get("vat_rate")) if ocr_data.get("vat_rate") else None,
-            notes=f"Dostawca: {ocr_data.get('vendor', 'brak')}"
+            notes=f"Dostawca: {ocr_data.get('vendor') or 'brak'}"
         )
         
         entry_obj = FinancialEntry(**entry_data.model_dump())
