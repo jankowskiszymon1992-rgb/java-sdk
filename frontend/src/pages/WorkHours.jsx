@@ -7,13 +7,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Clock as ClockIcon } from 'lucide-react';
-import { workHoursApi, projectsApi } from '../api/api';
+import { Plus, Edit, Trash2, Clock as ClockIcon, Users } from 'lucide-react';
+import { workHoursApi, projectsApi, employeeWorkApi } from '../api/api';
 import { toast } from 'sonner';
 
 const WorkHours = () => {
   const [workHours, setWorkHours] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [employeeSummary, setEmployeeSummary] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
