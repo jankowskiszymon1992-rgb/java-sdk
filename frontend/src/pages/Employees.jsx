@@ -65,12 +65,33 @@ const Employees = () => {
         toast.success('Pracownik dodany pomyślnie');
       }
       
-      loadEmployees();
+      loadData();
       setDialogOpen(false);
       resetForm();
     } catch (error) {
       console.error('Error saving employee:', error);
       toast.error('Nie udało się zapisać pracownika');
+    }
+  };
+
+  const handleWorkSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const data = {
+        ...workFormData,
+        hours: parseFloat(workFormData.hours)
+      };
+      
+      await axios.post(`${API}/employee-work-entries`, data);
+      toast.success('Godziny dodane pomyślnie');
+      
+      loadData();
+      setWorkDialogOpen(false);
+      resetWorkForm();
+    } catch (error) {
+      console.error('Error saving work entry:', error);
+      toast.error('Nie udało się zapisać godzin');
     }
   };
 
