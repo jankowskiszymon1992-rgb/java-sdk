@@ -212,6 +212,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/employee-work-entries/summary?month=2025-10 endpoint działa poprawnie. Agreguje dane za miesiąc: employee_id, employee_name, total_hours=8.0, total_earnings=240.0, grand_total=240.0. MongoDB aggregation pipeline działa prawidłowo. Status 200."
+      - working: true
+        agent: "testing"
+        comment: "✅ RETESTED 2025-10-18: GET /api/employee-work-entries/summary?month=2025-10 DZIAŁA POPRAWNIE. Agreguje dane za październik 2025: Jan Kowalski (total_hours=6.5, total_earnings=230.75 zł), grand_total=710.75 zł dla 3 pracowników. KRYTYCZNE OBLICZENIA POPRAWNE. MongoDB aggregation pipeline działa prawidłowo. Status 200."
 
 frontend:
   - task: "React removeChild Error Fix"
