@@ -97,24 +97,112 @@ const AIAnalyst = () => {
           </h2>
           <p className="text-gray-600 mt-1">Inteligentna analiza rynku i rekomendacje</p>
         </div>
-        <Button 
-          onClick={handleGenerateReport} 
-          disabled={generating}
-          className="bg-purple-600 hover:bg-purple-700"
-        >
-          {generating ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Generuję...
-            </>
-          ) : (
-            <>
-              <Brain className="h-4 w-4 mr-2" />
-              Generuj Raport
-            </>
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleAnalyzeTrends} 
+            disabled={analyzingTrends}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {analyzingTrends ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Analizuję...
+              </>
+            ) : (
+              <>
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Analizuj Trendy (GPT-5)
+              </>
+            )}
+          </Button>
+          <Button 
+            onClick={handleGenerateReport} 
+            disabled={generating}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            {generating ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Generuję...
+              </>
+            ) : (
+              <>
+                <Brain className="h-4 w-4 mr-2" />
+                Raport (Claude)
+              </>
+            )}
+          </Button>
+        </div>
       </div>
+
+      {/* Analiza Trendów GPT-5 */}
+      {trendAnalysis && (
+        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <TrendingUp className="h-6 w-6 mr-2 text-green-600" />
+              Analiza Trendów - GPT-5
+            </CardTitle>
+            <p className="text-sm text-gray-600 mt-2">{trendAnalysis.summary}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {trendAnalysis.products?.map((product, idx) => (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-lg border-2 ${
+                    product.rekomendacja === 'KUP_TERAZ' 
+                      ? 'bg-green-50 border-green-300' 
+                      : 'bg-yellow-50 border-yellow-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-sm text-gray-900">{product.nazwa}</h4>
+                    <span className={`text-xs px-2 py-1 rounded font-bold ${
+                      product.rekomendacja === 'KUP_TERAZ'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-yellow-600 text-white'
+                    }`}>
+                      {product.rekomendacja === 'KUP_TERAZ' ? '✅ KUP' : '⏳ CZEKAJ'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs font-semibold ${
+                      product.trend === 'DROŻEJE' ? 'text-red-600' :
+                      product.trend === 'TANIEJE' ? 'text-green-600' :
+                      'text-gray-600'
+                    }`}>
+                      {product.trend === 'DROŻEJE' && '📈 DROŻEJE'}
+                      {product.trend === 'TANIEJE' && '📉 TANIEJE'}
+                      {product.trend === 'STABILNY' && '➡️ STABILNY'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({product.confidence}% pewności)
+                    </span>
+                  </div>
+                  
+                  <p className="text-xs text-gray-700">{product.uzasadnienie}</p>
+                </div>
+              ))}
+            </div>
+            
+            {trendAnalysis.key_insights && trendAnalysis.key_insights.length > 0 && (
+              <div className="mt-6 p-4 bg-white rounded-lg border border-green-200">
+                <h4 className="font-semibold text-gray-900 mb-3">Kluczowe Wnioski:</h4>
+                <ul className="space-y-2">
+                  {trendAnalysis.key_insights.map((insight, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-600 mr-2">•</span>
+                      <span className="text-sm text-gray-800">{insight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tabela Porównawcza z Obliczeniami */}
       <Card>
