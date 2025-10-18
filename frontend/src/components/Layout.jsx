@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Users, Briefcase, Clock, LayoutDashboard, Zap, Wifi, WifiOff, Calculator, Camera, FileText, Mail, Bot, UserCog } from 'lucide-react';
+import { Users, Briefcase, Clock, LayoutDashboard, Zap, Wifi, WifiOff, Calculator, Camera, FileText, Mail, Bot, UserCog, DollarSign } from 'lucide-react';
 
 const Layout = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -24,6 +24,7 @@ const Layout = () => {
     { to: '/projects', icon: Briefcase, label: 'Zlecenia' },
     { to: '/workhours', icon: Clock, label: 'Godziny pracy' },
     { to: '/employees', icon: UserCog, label: 'Pracownicy' },
+    { to: '/finances', icon: DollarSign, label: 'Finanse' },
     { to: '/reports', icon: FileText, label: 'Raporty' },
     { to: '/ai-assistant', icon: Bot, label: 'Asystent AI' },
     { to: '/mail', icon: Mail, label: 'Poczta' },
