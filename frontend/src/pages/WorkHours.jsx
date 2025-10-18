@@ -151,8 +151,6 @@ const WorkHours = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="project_id">Zlecenie *</Label>
-                  {console.log('🔍 Projects in render:', projects)}
-                  {console.log('🔍 Projects length:', projects?.length)}
                   <Select
                     value={formData.project_id}
                     onValueChange={(value) => setFormData({ ...formData, project_id: value })}
