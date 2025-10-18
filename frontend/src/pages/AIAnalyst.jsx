@@ -72,13 +72,47 @@ const AIAnalyst = () => {
     
     try {
       const response = await axios.post(`${API}/ai-analyst/trend-analysis`);
-      setTrendAnalysis(response);
+      setTrendAnalysis(response.data);
       toast.success('Analiza trendów gotowa!');
     } catch (error) {
       console.error('Błąd analizy trendów:', error);
       toast.error('Nie udało się przeanalizować trendów');
     } finally {
       setAnalyzingTrends(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim()) return;
+    
+    const userMessage = chatInput;
+    setChatInput('');
+    
+    // Dodaj wiadomość użytkownika
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatLoading(true);
+    
+    try {
+      const response = await axios.post(`${API}/ai-analyst/chat`, null, {
+        params: { 
+          message: userMessage,
+          session_id: sessionId
+        }
+      });
+      
+      // Zapisz session_id
+      if (!sessionId && response.data.session_id) {
+        setSessionId(response.data.session_id);
+      }
+      
+      // Dodaj odpowiedź AI
+      setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
+    } catch (error) {
+      console.error('Błąd czatu:', error);
+      toast.error('Nie udało się wysłać wiadomości');
+      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Przepraszam, wystąpił błąd. Spróbuj ponownie.' }]);
+    } finally {
+      setChatLoading(false);
     }
   };
 
