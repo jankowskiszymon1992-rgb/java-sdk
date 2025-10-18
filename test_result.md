@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Uporczywy błąd React Runtime - NotFoundError: Failed to execute 'removeChild' on 'Node' występujący na stronie /calculators"
+user_problem_statement: "Przetestuj nowy system finansowy z OCR dla faktur - wszystkie endpointy finansowe"
 
 backend:
   - task: "Backend API"
