@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for AI Assistant Endpoints
-Tests the new AI Assistant chat and history endpoints
+Backend API Testing for Employee Endpoints
+Tests the new Employee management endpoints
 """
 
 import requests
