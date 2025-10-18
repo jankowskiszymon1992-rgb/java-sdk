@@ -73,6 +73,15 @@ const Finances = () => {
     }
   };
 
+  const loadChartsData = async () => {
+    try {
+      const response = await axios.get(`${API}/financial-entries/charts`, { params: { months: 6 } });
+      setChartsData(response.data);
+    } catch (error) {
+      console.error('Błąd ładowania wykresów:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
