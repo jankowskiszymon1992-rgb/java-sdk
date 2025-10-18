@@ -9,7 +9,6 @@ root.render(
   <App />
 );
 
-// Register service worker for PWA functionality
-// TEMPORARILY DISABLED to fix cache issues
-serviceWorkerRegistration.unregister();
+// Register service worker for PWA functionality and push notifications
+serviceWorkerRegistration.register();
 
