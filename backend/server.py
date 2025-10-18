@@ -1608,24 +1608,44 @@ Twoim zadaniem jest wyciągnięcie danych z {cat_name} w języku polskim.
 Zwróć TYLKO JSON bez dodatkowego tekstu."""
         ).with_model("anthropic", "claude-sonnet-4-20250514")
         
-        # Detect image type from base64
+        # Convert image to PNG format (emergentintegrations always expects PNG)
         import base64
-        try:
-            img_data = base64.b64decode(image[:100])
-            if img_data.startswith(b'\xff\xd8\xff'):
-                media_type = "image/jpeg"
-            elif img_data.startswith(b'\x89PNG'):
-                media_type = "image/png"
-            elif img_data.startswith(b'RIFF') and b'WEBP' in img_data[:20]:
-                media_type = "image/webp"
-            else:
-                media_type = "image/jpeg"
-        except Exception:
-            media_type = "image/jpeg"
+        from PIL import Image
+        from io import BytesIO
         
-        # Create ImageContent and manually add media_type attribute
-        image_content = ImageContent(image_base64=image)
-        image_content.media_type = media_type  # Add media_type to the object
+        try:
+            # Decode base64 image
+            img_data = base64.b64decode(image)
+            
+            # Open image with PIL
+            img = Image.open(BytesIO(img_data))
+            
+            # Convert to RGB if necessary (for JPEG compatibility)
+            if img.mode in ('RGBA', 'LA', 'P'):
+                # Has transparency or palette
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # Save as PNG to BytesIO
+            png_buffer = BytesIO()
+            img.save(png_buffer, format='PNG')
+            png_buffer.seek(0)
+            
+            # Encode back to base64
+            png_base64 = base64.b64encode(png_buffer.getvalue()).decode('utf-8')
+            
+        except Exception as e:
+            # If conversion fails, use original image
+            print(f"Warning: Image conversion failed: {e}")
+            png_base64 = image
+        
+        # Create ImageContent with PNG
+        image_content = ImageContent(image_base64=png_base64)
         
         user_message = UserMessage(
             text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
