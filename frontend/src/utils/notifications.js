@@ -109,7 +109,7 @@ export const showNotification = async (title, options = {}) => {
           icon: '/icon-192.png',
           body: options.body || '',
         });
-        setTimeout(() => notification.close(), 10000);
+        setTimeout(() => notification.close(), 20000); // 20 seconds
         console.log('✅ Direct notification shown!');
         return true;
       } catch (fallbackError) {
@@ -117,7 +117,17 @@ export const showNotification = async (title, options = {}) => {
       }
     }
     
-    alert(`Błąd powiadomienia: ${error.message}\n\nSpróbuj odinstalować i zainstalować aplikację ponownie.`);
+    // Show detailed error message
+    const errorMsg = isStandalone
+      ? `Błąd powiadomienia w PWA: ${error.message}\n\n` +
+        '🔧 ROZWIĄZANIE:\n' +
+        '1. Sprawdź uprawnienia powiadomień w ustawieniach telefonu\n' +
+        '2. Odinstaluj i zainstaluj aplikację ponownie\n' +
+        '3. Po instalacji zaakceptuj uprawnienia do powiadomień'
+      : `Błąd powiadomienia: ${error.message}\n\n` +
+        'Sprawdź uprawnienia w ustawieniach przeglądarki.';
+    
+    alert(errorMsg);
     return false;
   }
 };
