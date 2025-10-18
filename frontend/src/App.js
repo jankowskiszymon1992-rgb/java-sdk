@@ -17,7 +17,7 @@ import Finances from './pages/Finances';
 import Reminders from './pages/Reminders';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
-import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder } from './utils/notifications';
+import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder, startRemindersCheckService } from './utils/notifications';
 
 function App() {
   useEffect(() => {
