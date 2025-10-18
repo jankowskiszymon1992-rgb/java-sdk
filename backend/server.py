@@ -2783,28 +2783,37 @@ async def scrape_kanlux(product_name: str, search_term: str):
         return None
 
 
-# Helper: Scraping TME (Placeholder)
+# Helper: Scraping TME (MOCK)
 async def scrape_tme(product_name: str, search_term: str):
-    """Scraper dla TME.eu - Placeholder"""
-    # TODO: Implementacja scrapingu TME
-    logger.info(f"TME scraping not implemented yet for: {product_name}")
-    return None
+    """Scraper dla TME.eu - OBECNIE: DANE TESTOWE"""
+    try:
+        await asyncio.sleep(0.5)
+        return generate_mock_price(product_name, "tme")
+    except Exception as e:
+        logger.error(f"TME scraping error for {product_name}: {e}")
+        return None
 
 
-# Helper: Scraping Conrad (Placeholder)
+# Helper: Scraping Conrad (MOCK)
 async def scrape_conrad(product_name: str, search_term: str):
-    """Scraper dla Conrad.pl - Placeholder"""
-    # TODO: Implementacja scrapingu Conrad
-    logger.info(f"Conrad scraping not implemented yet for: {product_name}")
-    return None
+    """Scraper dla Conrad.pl - OBECNIE: DANE TESTOWE"""
+    try:
+        await asyncio.sleep(0.5)
+        return generate_mock_price(product_name, "conrad")
+    except Exception as e:
+        logger.error(f"Conrad scraping error for {product_name}: {e}")
+        return None
 
 
-# Helper: Scraping RS Components (Placeholder)
+# Helper: Scraping RS Components (MOCK)
 async def scrape_rs_components(product_name: str, search_term: str):
-    """Scraper dla RS Components - Placeholder"""
-    # TODO: Implementacja scrapingu RS Components
-    logger.info(f"RS Components scraping not implemented yet for: {product_name}")
-    return None
+    """Scraper dla RS Components - OBECNIE: DANE TESTOWE"""
+    try:
+        await asyncio.sleep(0.5)
+        return generate_mock_price(product_name, "rs_components")
+    except Exception as e:
+        logger.error(f"RS Components scraping error for {product_name}: {e}")
+        return None
 
 
 # Mapa scraperów
