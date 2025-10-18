@@ -739,12 +739,21 @@ async def get_workhours_summary(start_date: Optional[str] = None, end_date: Opti
         if end_date:
             query["date"]["$lte"] = end_date
     
+    # Get workhours (project-related hours)
     workhours = await db.workhours.find(query, {"_id": 0}).to_list(10000)
+    project_total_hours = sum(wh.get("hours", 0) for wh in workhours)
+    project_total_entries = len(workhours)
     
-    total_hours = sum(wh.get("hours", 0) for wh in workhours)
-    total_entries = len(workhours)
+    # Get employee work entries
+    employee_entries = await db.employee_work_entries.find(query, {"_id": 0}).to_list(10000)
+    employee_total_hours = sum(entry.get("hours", 0) for entry in employee_entries)
+    employee_total_entries = len(employee_entries)
     
-    # Group by project
+    # Combined totals
+    total_hours = project_total_hours + employee_total_hours
+    total_entries = project_total_entries + employee_total_entries
+    
+    # Group by project (only for workhours)
     project_hours = {}
     for wh in workhours:
         pid = wh.get("project_id")
