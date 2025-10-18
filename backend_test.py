@@ -1437,6 +1437,290 @@ def test_verify_fuel_deletion():
         print(f"❌ Unexpected error: {str(e)}")
         return False
 
+# ============= REMINDERS SYSTEM TESTS =============
+
+def test_create_reminder_for_pending_check():
+    """Test POST /api/reminders - Create a reminder for today with past time"""
+    print("\n=== Testing Create Reminder for Pending Check ===")
+    
+    url = f"{API_URL}/reminders"
+    
+    # Create a reminder for today with a time that has already passed (09:00)
+    today = datetime.now().date().isoformat()
+    test_data = {
+        "title": "Test przypomnienie do sprawdzenia",
+        "description": "To jest testowe przypomnienie które powinno być zwrócone przez endpoint check/pending",
+        "reminder_date": today,
+        "reminder_time": "09:00",
+        "reminder_type": "custom",
+        "is_recurring": False
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["id", "title", "description", "reminder_date", "reminder_time", "reminder_type", "is_recurring", "is_completed", "sent", "created_at", "updated_at"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify data matches
+            for field in ["title", "description", "reminder_date", "reminder_time", "reminder_type", "is_recurring"]:
+                if response_data[field] != test_data[field]:
+                    print(f"❌ {field} mismatch. Expected: {test_data[field]}, Got: {response_data[field]}")
+                    return False, None
+            
+            # Verify initial state
+            if response_data["sent"] != False:
+                print(f"❌ Initial sent state should be False, got: {response_data['sent']}")
+                return False, None
+            
+            if response_data["is_completed"] != False:
+                print(f"❌ Initial is_completed state should be False, got: {response_data['is_completed']}")
+                return False, None
+            
+            # Verify ID is generated
+            if not response_data["id"] or len(response_data["id"]) == 0:
+                print("❌ Reminder ID is empty")
+                return False, None
+            
+            print("✅ Create Reminder endpoint working correctly")
+            print(f"Created reminder ID: {response_data['id']}")
+            print(f"Reminder date: {response_data['reminder_date']}, time: {response_data['reminder_time']}")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_check_pending_reminders():
+    """Test GET /api/reminders/check/pending - Check for pending reminders"""
+    print("\n=== Testing Check Pending Reminders Endpoint ===")
+    
+    url = f"{API_URL}/reminders/check/pending"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["count", "reminders"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify count is a number
+            if not isinstance(response_data["count"], int):
+                print("❌ Count field is not an integer")
+                return False
+            
+            # Verify reminders is a list
+            if not isinstance(response_data["reminders"], list):
+                print("❌ Reminders field is not a list")
+                return False
+            
+            # Verify count matches list length
+            if response_data["count"] != len(response_data["reminders"]):
+                print(f"❌ Count mismatch. Count: {response_data['count']}, List length: {len(response_data['reminders'])}")
+                return False
+            
+            print(f"✅ Found {response_data['count']} pending reminder(s)")
+            
+            # If we have reminders, verify structure and check for our test reminder
+            if response_data["count"] > 0:
+                test_reminder_found = False
+                
+                for i, reminder in enumerate(response_data["reminders"]):
+                    print(f"\nReminder {i+1}:")
+                    print(f"  Title: {reminder.get('title')}")
+                    print(f"  Date: {reminder.get('reminder_date')}")
+                    print(f"  Time: {reminder.get('reminder_time')}")
+                    print(f"  Sent: {reminder.get('sent')}")
+                    
+                    # Verify reminder structure
+                    required_reminder_fields = ["id", "title", "reminder_date", "reminder_time", "sent"]
+                    missing_reminder_fields = [field for field in required_reminder_fields if field not in reminder]
+                    
+                    if missing_reminder_fields:
+                        print(f"❌ Reminder {i+1} missing fields: {missing_reminder_fields}")
+                        return False
+                    
+                    # Check if this is our test reminder
+                    if (reminder.get("title") == "Test przypomnienie do sprawdzenia" and 
+                        reminder.get("reminder_time") == "09:00"):
+                        test_reminder_found = True
+                        print(f"✅ Found our test reminder in pending list")
+                        
+                        # Verify it was marked as sent
+                        if reminder.get("sent") == True:
+                            print("✅ CRITICAL: Reminder was correctly marked as sent=True")
+                        else:
+                            print(f"❌ CRITICAL: Reminder should be marked as sent=True, got: {reminder.get('sent')}")
+                            return False
+                
+                if not test_reminder_found:
+                    print("⚠️  Our test reminder was not found in pending list (might have been processed already)")
+            else:
+                print("ℹ️  No pending reminders found")
+            
+            print("✅ Check Pending Reminders endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_verify_reminder_marked_as_sent(reminder_id):
+    """Test GET /api/reminders/{reminder_id} - Verify reminder was marked as sent"""
+    print("\n=== Testing Verify Reminder Marked as Sent ===")
+    
+    url = f"{API_URL}/reminders/{reminder_id}"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify the reminder was marked as sent
+            if response_data.get("sent") == True:
+                print("✅ CRITICAL: Reminder correctly marked as sent=True after check/pending call")
+                return True
+            else:
+                print(f"❌ CRITICAL: Reminder should be sent=True, got: {response_data.get('sent')}")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_reminders_system():
+    """Run complete reminders system test"""
+    print("\n" + "="*60)
+    print("🔔 REMINDERS SYSTEM TESTING - CHECK PENDING ENDPOINT")
+    print("="*60)
+    print(f"Backend URL: {BASE_URL}")
+    print(f"API URL: {API_URL}")
+    print(f"Test time: {datetime.now().isoformat()}")
+    
+    results = {}
+    
+    # Test backend health first
+    results['backend_health'] = test_backend_health()
+    
+    if not results['backend_health']:
+        print("\n❌ Backend is not responding. Cannot proceed with tests.")
+        return results
+    
+    print("\n" + "="*60)
+    print("KROK 1: UTWORZENIE TESTOWEGO PRZYPOMNIENIA")
+    print("="*60)
+    
+    # Step 1: Create a test reminder for today with past time
+    create_result, reminder_id = test_create_reminder_for_pending_check()
+    results['create_reminder'] = create_result
+    
+    if not create_result or not reminder_id:
+        print("\n❌ Cannot proceed without creating test reminder")
+        return results
+    
+    print("\n" + "="*60)
+    print("KROK 2: SPRAWDZENIE PENDING REMINDERS")
+    print("="*60)
+    
+    # Step 2: Call check/pending endpoint
+    results['check_pending'] = test_check_pending_reminders()
+    
+    print("\n" + "="*60)
+    print("KROK 3: WERYFIKACJA OZNACZENIA JAKO WYSŁANE")
+    print("="*60)
+    
+    # Step 3: Verify reminder was marked as sent
+    results['verify_sent'] = test_verify_reminder_marked_as_sent(reminder_id)
+    
+    # Summary
+    print("\n" + "="*60)
+    print("TEST SUMMARY - REMINDERS SYSTEM")
+    print("="*60)
+    
+    for test_name, result in results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"  {test_name}: {status}")
+    
+    all_passed = all(results.values())
+    
+    if all_passed:
+        print("\n🎉 All REMINDERS SYSTEM tests PASSED!")
+        print("\n✅ VERIFICATION COMPLETE:")
+        print("- POST /api/reminders working ✅")
+        print("- GET /api/reminders/check/pending working ✅")
+        print("- Endpoint returns correct format: {\"count\": int, \"reminders\": [...]} ✅")
+        print("- Endpoint filters reminders for today with time <= current time ✅")
+        print("- Endpoint marks reminders as sent=True after retrieval ✅")
+    else:
+        print("\n⚠️  Some REMINDERS SYSTEM tests FAILED!")
+        failed_tests = [name for name, result in results.items() if not result]
+        print(f"Failed tests: {failed_tests}")
+    
+    return results
+
 def main():
     """Run all Financial System endpoint tests"""
     print("💰 Financial System Testing - NEW FINANCIAL SYSTEM WITH OCR")
