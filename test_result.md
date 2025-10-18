@@ -278,6 +278,7 @@ metadata:
   run_ui: false
   fix_date: "2025-01-12"
   ai_test_date: "2025-10-14"
+  employee_test_date: "2025-10-18"
 
 test_plan:
   current_focus:
