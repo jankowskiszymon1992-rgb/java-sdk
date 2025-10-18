@@ -2814,8 +2814,11 @@ async def trigger_scraping(supplier: Optional[str] = None):
             products_scraped = 0
             
             for product in MONITORED_PRODUCTS:
-                search_term = product["search_terms"].get(supp, product["name"])
-                scrape_result = await scraper_func(product["name"], search_term)
+                # Automatyczne generowanie search term z nazwy produktu
+                product_name = product["name"]
+                search_term = product.get("search_terms", {}).get(supp, product_name.lower())
+                
+                scrape_result = await scraper_func(product_name, search_term)
                 
                 if scrape_result and scrape_result.get("price"):
                     # Zapisz cenę do bazy
