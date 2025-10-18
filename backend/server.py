@@ -1573,6 +1573,8 @@ async def create_financial_entry_with_ocr(request: dict):
     """
     Extract data from invoice image using OCR (Claude Sonnet 4 Vision)
     """
+    import json
+    
     try:
         category = request.get("category")
         image = request.get("image")  # base64 encoded
