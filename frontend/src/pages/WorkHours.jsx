@@ -33,6 +33,10 @@ const WorkHours = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    loadEmployeeSummary();
+  }, [selectedMonth]);
+
   const loadData = async () => {
     try {
       const [workHoursRes, projectsRes, summaryRes] = await Promise.all([
@@ -48,6 +52,17 @@ const WorkHours = () => {
       toast.error('Nie udało się załadować danych');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadEmployeeSummary = async () => {
+    try {
+      const response = await employeeWorkApi.getSummary({ month: selectedMonth });
+      setEmployeeSummary(response.data.employees || []);
+    } catch (error) {
+      console.error('Błąd ładowania podsumowania pracowników:', error);
+      // Don't show error toast if no data - it's expected
+      setEmployeeSummary([]);
     }
   };
 
