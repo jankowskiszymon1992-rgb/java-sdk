@@ -178,9 +178,9 @@ def test_create_work_entry(employee_id):
     # Test data as specified in the request
     test_data = {
         "employee_id": employee_id,
-        "date": "2025-10-14",
-        "hours": 8.0,
-        "notes": "Montaż instalacji"
+        "date": "2025-10-18",
+        "hours": 6.5,
+        "notes": "Montaż rozdzielni"
     }
     
     headers = {
