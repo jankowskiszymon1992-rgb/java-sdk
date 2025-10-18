@@ -232,7 +232,62 @@ const Employees = () => {
         </CardContent>
       </Card>
 
-      {/* Add/Edit Dialog */}
+      {/* Work Hours Section */}
+      <Card className="mt-6">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-green-600" />
+              Godziny pracy
+            </CardTitle>
+            <p className="text-sm text-gray-600 mt-1">Rejestruj przepracowane godziny pracowników</p>
+          </div>
+          <Button onClick={handleAddWorkHours} className="bg-green-600 hover:bg-green-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Dodaj godziny
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="text-gray-500 text-center py-4">Ładowanie...</p>
+          ) : workEntries.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">Brak wpisów. Dodaj pierwszy wpis godzin pracy.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imię</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dzień</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Godziny</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stawka (zł/h)</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Wynik (zł)</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notatki</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {workEntries.map((entry) => (
+                    <tr key={entry.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{entry.employee_name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {new Date(entry.date).toLocaleDateString('pl-PL')}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-700">{entry.hours}h</td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-700">{entry.hourly_rate} zł</td>
+                      <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">
+                        {entry.total_earnings.toFixed(2)} zł
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{entry.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add/Edit Employee Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
