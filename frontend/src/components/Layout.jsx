@@ -26,6 +26,7 @@ const Layout = () => {
     { to: '/employees', icon: UserCog, label: 'Pracownicy' },
     { to: '/finances', icon: DollarSign, label: 'Finanse' },
     { to: '/market-intelligence', icon: TrendingUp, label: 'Analiza Rynku' },
+    { to: '/ai-analyst', icon: Brain, label: 'AI Analityk' },
     { to: '/reminders', icon: Bell, label: 'Przypomnienia' },
     { to: '/reports', icon: FileText, label: 'Raporty' },
     { to: '/ai-assistant', icon: Bot, label: 'Asystent AI' },
