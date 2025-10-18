@@ -34,11 +34,25 @@ export const showNotification = async (title, options = {}) => {
 
   if ('serviceWorker' in navigator) {
     console.log('Service Worker available, checking registration...');
+    
+    // Check current registration state
+    const registration = await navigator.serviceWorker.getRegistration();
+    console.log('Current SW registration:', registration);
+    console.log('SW state:', registration?.active?.state);
+    
     try {
-      const registration = await navigator.serviceWorker.ready;
-      console.log('Service Worker ready:', registration);
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Service Worker timeout - nie odpowiada')), 5000)
+      );
       
-      await registration.showNotification(title, {
+      const readyPromise = navigator.serviceWorker.ready;
+      const reg = await Promise.race([readyPromise, timeoutPromise]);
+      
+      console.log('Service Worker ready:', reg);
+      console.log('Active SW:', reg.active);
+      
+      await reg.showNotification(title, {
         icon: '/icon-192.png',
         badge: '/icon-192.png',
         vibrate: [200, 100, 200],
@@ -48,13 +62,16 @@ export const showNotification = async (title, options = {}) => {
       });
       
       console.log('✅ Notification shown successfully!');
+      return true;
     } catch (error) {
       console.error('❌ Error showing notification:', error);
-      alert(`Błąd powiadomienia: ${error.message}`);
+      alert(`Błąd powiadomienia: ${error.message}\n\nService Worker może nie być aktywny. Odśwież stronę (Ctrl+Shift+R) i spróbuj ponownie.`);
+      return false;
     }
   } else {
     console.error('Service Worker not supported');
     alert('Ta przeglądarka nie obsługuje powiadomień PWA');
+    return false;
   }
 };
 
