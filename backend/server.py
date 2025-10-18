@@ -122,6 +122,59 @@ class VoiceWorkEntryRequest(BaseModel):
     transcript: str  # Text from Whisper
 
 
+# ============= FINANCIAL ENTRIES MODELS =============
+
+class FinancialCategory(str, Enum):
+    # Przychody
+    invoice_sales = "invoice_sales"  # Faktura sprzedażowa
+    cash_income = "cash_income"  # Pieniądze bez faktury
+    
+    # Wydatki
+    invoice_purchase = "invoice_purchase"  # Faktura zakupowa
+    fuel = "fuel"  # Paliwo
+    salaries = "salaries"  # Wypłaty pracowników
+    taxes = "taxes"  # Podatki
+    zus = "zus"  # ZUS
+    equipment = "equipment"  # Sprzęt
+    clothes = "clothes"  # Ciuchy dla pracowników
+
+
+class FinancialEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    date: str  # Format: YYYY-MM-DD
+    category: FinancialCategory
+    description: str  # Numer faktury, opis, etc.
+    amount_net: float  # Kwota netto
+    amount_gross: float  # Kwota brutto
+    vat_rate: Optional[float] = None  # Stawka VAT %
+    image_url: Optional[str] = None  # Opcjonalnie zdjęcie faktury
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class FinancialEntryCreate(BaseModel):
+    date: str
+    category: FinancialCategory
+    description: str
+    amount_net: float
+    amount_gross: float
+    vat_rate: Optional[float] = None
+    notes: Optional[str] = None
+
+
+class FinancialEntryUpdate(BaseModel):
+    date: Optional[str] = None
+    category: Optional[FinancialCategory] = None
+    description: Optional[str] = None
+    amount_net: Optional[float] = None
+    amount_gross: Optional[float] = None
+    vat_rate: Optional[float] = None
+    notes: Optional[str] = None
+
+
 class Project(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
