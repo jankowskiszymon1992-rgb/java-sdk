@@ -22,15 +22,19 @@ const AIAnalyst = () => {
 
   const loadData = async () => {
     try {
-      const [reportsRes, tableRes] = await Promise.all([
+      const [reportsRes, tableRes, trendRes] = await Promise.all([
         axios.get(`${API}/ai-analyst/reports?limit=1`),
-        axios.get(`${API}/ai-analyst/comparison-table`)
+        axios.get(`${API}/ai-analyst/comparison-table`),
+        axios.get(`${API}/ai-analyst/latest-trend-analysis`)
       ]);
       
       if (reportsRes.data.reports && reportsRes.data.reports.length > 0) {
         setLatestReport(reportsRes.data.reports[0]);
       }
       setComparisonTable(tableRes.data);
+      if (trendRes.data && !trendRes.data.message) {
+        setTrendAnalysis(trendRes.data);
+      }
     } catch (error) {
       console.error('Błąd ładowania danych:', error);
       toast.error('Nie udało się załadować danych');
