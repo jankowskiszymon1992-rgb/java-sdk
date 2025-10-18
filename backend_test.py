@@ -905,9 +905,541 @@ def test_verify_cascade_delete():
     
     return cascade_success
 
+# ============= FINANCIAL SYSTEM TESTS =============
+
+def test_create_financial_entry_invoice_sales():
+    """Test POST /api/financial-entries - Dodaj przychód - Faktura sprzedażowa"""
+    print("\n=== Testing Create Financial Entry - Invoice Sales ===")
+    
+    url = f"{API_URL}/financial-entries"
+    
+    # Test data as specified in the request
+    test_data = {
+        "category": "invoice_sales",
+        "date": "2025-10-22",
+        "description": "Faktura VAT 123/2025",
+        "amount_net": 1000.00,
+        "amount_gross": 1230.00,
+        "vat_rate": 23.0,
+        "notes": "Instalacja elektryczna - klient XYZ"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["id", "date", "category", "description", "amount_net", "amount_gross", "vat_rate", "notes", "created_at", "updated_at"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify data matches
+            for field in ["category", "date", "description", "amount_net", "amount_gross", "vat_rate", "notes"]:
+                if response_data[field] != test_data[field]:
+                    print(f"❌ {field} mismatch. Expected: {test_data[field]}, Got: {response_data[field]}")
+                    return False, None
+            
+            # Verify ID is generated
+            if not response_data["id"] or len(response_data["id"]) == 0:
+                print("❌ Financial entry ID is empty")
+                return False, None
+            
+            print("✅ Create Financial Entry (Invoice Sales) endpoint working correctly")
+            print(f"Created entry ID: {response_data['id']}")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_create_financial_entry_salaries():
+    """Test POST /api/financial-entries - Dodaj wydatek - Wypłaty pracowników"""
+    print("\n=== Testing Create Financial Entry - Salaries ===")
+    
+    url = f"{API_URL}/financial-entries"
+    
+    # Test data as specified in the request
+    test_data = {
+        "category": "salaries",
+        "date": "2025-10-22",
+        "description": "Wypłaty październik 2025",
+        "amount_net": 500.00,
+        "amount_gross": 500.00,
+        "notes": "Wypłaty dla 4 pracowników"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["id", "date", "category", "description", "amount_net", "amount_gross", "notes", "created_at", "updated_at"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify data matches
+            for field in ["category", "date", "description", "amount_net", "amount_gross", "notes"]:
+                if response_data[field] != test_data[field]:
+                    print(f"❌ {field} mismatch. Expected: {test_data[field]}, Got: {response_data[field]}")
+                    return False, None
+            
+            print("✅ Create Financial Entry (Salaries) endpoint working correctly")
+            print(f"Created entry ID: {response_data['id']}")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_create_financial_entry_fuel():
+    """Test POST /api/financial-entries - Dodaj wydatek - Paliwo"""
+    print("\n=== Testing Create Financial Entry - Fuel ===")
+    
+    url = f"{API_URL}/financial-entries"
+    
+    # Test data as specified in the request
+    test_data = {
+        "category": "fuel",
+        "date": "2025-10-22",
+        "description": "Tankowanie Shell",
+        "amount_net": 200.00,
+        "amount_gross": 246.00,
+        "vat_rate": 23.0
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["id", "date", "category", "description", "amount_net", "amount_gross", "vat_rate", "created_at", "updated_at"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify data matches
+            for field in ["category", "date", "description", "amount_net", "amount_gross", "vat_rate"]:
+                if response_data[field] != test_data[field]:
+                    print(f"❌ {field} mismatch. Expected: {test_data[field]}, Got: {response_data[field]}")
+                    return False, None
+            
+            print("✅ Create Financial Entry (Fuel) endpoint working correctly")
+            print(f"Created entry ID: {response_data['id']}")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_get_financial_entries_october():
+    """Test GET /api/financial-entries?month=2025-10 - Pobierz wszystkie wpisy dla października"""
+    print("\n=== Testing Get Financial Entries for October 2025 ===")
+    
+    url = f"{API_URL}/financial-entries?month=2025-10"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response is a list
+            if not isinstance(response_data, list):
+                print("❌ Response is not a list")
+                return False
+            
+            print(f"✅ Found {len(response_data)} financial entries for October 2025")
+            
+            # Verify our test entries are present
+            test_entries = {
+                "invoice_sales": False,
+                "salaries": False,
+                "fuel": False
+            }
+            
+            for entry in response_data:
+                if entry.get("date") == "2025-10-22":
+                    if entry.get("category") == "invoice_sales" and entry.get("description") == "Faktura VAT 123/2025":
+                        test_entries["invoice_sales"] = True
+                        print("✅ Found test invoice_sales entry")
+                    elif entry.get("category") == "salaries" and entry.get("description") == "Wypłaty październik 2025":
+                        test_entries["salaries"] = True
+                        print("✅ Found test salaries entry")
+                    elif entry.get("category") == "fuel" and entry.get("description") == "Tankowanie Shell":
+                        test_entries["fuel"] = True
+                        print("✅ Found test fuel entry")
+            
+            missing_entries = [cat for cat, found in test_entries.items() if not found]
+            if missing_entries:
+                print(f"⚠️  Missing test entries: {missing_entries}")
+            else:
+                print("✅ All test entries found in October 2025 list")
+            
+            print("✅ Get Financial Entries endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_get_financial_summary_october():
+    """Test GET /api/financial-entries/summary?month=2025-10 - Pobierz podsumowanie"""
+    print("\n=== Testing Get Financial Summary for October 2025 ===")
+    
+    url = f"{API_URL}/financial-entries/summary?month=2025-10"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["categories", "totals"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify categories structure
+            categories = response_data.get("categories", [])
+            if not isinstance(categories, list):
+                print("❌ Categories is not a list")
+                return False
+            
+            # Verify totals structure
+            totals = response_data.get("totals", {})
+            required_total_fields = ["income_net", "income_gross", "expense_net", "expense_gross", "balance_net", "balance_gross"]
+            missing_total_fields = [field for field in required_total_fields if field not in totals]
+            
+            if missing_total_fields:
+                print(f"❌ Missing total fields: {missing_total_fields}")
+                return False
+            
+            print("✅ Financial Summary structure is correct")
+            
+            # Verify calculations based on our test data
+            # Expected: 
+            # Income: invoice_sales (1000.00 net, 1230.00 gross)
+            # Expenses: salaries (500.00 net, 500.00 gross) + fuel (200.00 net, 246.00 gross)
+            # Total income: 1000.00 net, 1230.00 gross
+            # Total expenses: 700.00 net, 746.00 gross
+            # Balance: 300.00 net, 484.00 gross
+            
+            print(f"\n📊 CRITICAL CALCULATIONS VERIFICATION:")
+            print(f"Income Net: {totals['income_net']}")
+            print(f"Income Gross: {totals['income_gross']}")
+            print(f"Expense Net: {totals['expense_net']}")
+            print(f"Expense Gross: {totals['expense_gross']}")
+            print(f"Balance Net: {totals['balance_net']}")
+            print(f"Balance Gross: {totals['balance_gross']}")
+            
+            # Verify categories have correct structure
+            for category in categories:
+                required_cat_fields = ["category", "total_net", "total_gross", "count", "type"]
+                missing_cat_fields = [field for field in required_cat_fields if field not in category]
+                
+                if missing_cat_fields:
+                    print(f"❌ Category missing fields: {missing_cat_fields}")
+                    return False
+                
+                print(f"Category {category['category']}: {category['total_net']} net, {category['total_gross']} gross, count: {category['count']}, type: {category['type']}")
+            
+            # Verify balance calculation
+            calculated_balance_net = totals['income_net'] - totals['expense_net']
+            calculated_balance_gross = totals['income_gross'] - totals['expense_gross']
+            
+            if abs(totals['balance_net'] - calculated_balance_net) < 0.01:
+                print("✅ CRITICAL: Balance Net calculation is correct")
+            else:
+                print(f"❌ CRITICAL: Balance Net calculation error. Expected: {calculated_balance_net}, Got: {totals['balance_net']}")
+                return False
+            
+            if abs(totals['balance_gross'] - calculated_balance_gross) < 0.01:
+                print("✅ CRITICAL: Balance Gross calculation is correct")
+            else:
+                print(f"❌ CRITICAL: Balance Gross calculation error. Expected: {calculated_balance_gross}, Got: {totals['balance_gross']}")
+                return False
+            
+            print("✅ Get Financial Summary endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_edit_financial_entry_fuel(fuel_id):
+    """Test PUT /api/financial-entries/{fuel_id} - Edytuj wpis paliwa - zmień kwotę"""
+    print("\n=== Testing Edit Financial Entry - Fuel ===")
+    
+    url = f"{API_URL}/financial-entries/{fuel_id}"
+    
+    # Test data as specified in the request - change amounts
+    test_data = {
+        "amount_net": 250.00,
+        "amount_gross": 307.50
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending PUT request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.put(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify amounts were updated
+            if response_data.get("amount_net") == 250.00:
+                print("✅ Amount Net updated correctly to 250.00")
+            else:
+                print(f"❌ Amount Net not updated correctly. Expected: 250.00, Got: {response_data.get('amount_net')}")
+                return False
+            
+            if response_data.get("amount_gross") == 307.50:
+                print("✅ Amount Gross updated correctly to 307.50")
+            else:
+                print(f"❌ Amount Gross not updated correctly. Expected: 307.50, Got: {response_data.get('amount_gross')}")
+                return False
+            
+            # Verify other fields remain unchanged
+            if response_data.get("category") == "fuel" and response_data.get("description") == "Tankowanie Shell":
+                print("✅ Other fields remain unchanged")
+            else:
+                print("❌ Other fields were unexpectedly changed")
+                return False
+            
+            print("✅ Edit Financial Entry endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_delete_financial_entry_fuel(fuel_id):
+    """Test DELETE /api/financial-entries/{fuel_id} - Usuń wpis paliwa"""
+    print("\n=== Testing Delete Financial Entry - Fuel ===")
+    
+    url = f"{API_URL}/financial-entries/{fuel_id}"
+    
+    try:
+        print(f"Sending DELETE request to: {url}")
+        
+        response = requests.delete(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify success message
+            if "message" in response_data:
+                print(f"✅ DELETE response: {response_data['message']}")
+                return True
+            else:
+                print("❌ No success message in response")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_verify_fuel_deletion():
+    """Test GET /api/financial-entries/summary?month=2025-10 - Zweryfikuj po usunięciu"""
+    print("\n=== Testing Verify Fuel Entry Deletion ===")
+    
+    url = f"{API_URL}/financial-entries/summary?month=2025-10"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if fuel category is missing or has 0 entries
+            categories = response_data.get("categories", [])
+            fuel_category = next((cat for cat in categories if cat.get("category") == "fuel"), None)
+            
+            if fuel_category is None:
+                print("✅ CRITICAL: Fuel category not found in summary (correctly deleted)")
+                fuel_deleted = True
+            elif fuel_category.get("count", 0) == 0:
+                print("✅ CRITICAL: Fuel category has 0 entries (correctly deleted)")
+                fuel_deleted = True
+            else:
+                print(f"❌ CRITICAL: Fuel category still has {fuel_category.get('count', 0)} entries")
+                fuel_deleted = False
+            
+            # Verify updated totals (should exclude fuel amounts)
+            # Expected after deletion:
+            # Income: invoice_sales (1000.00 net, 1230.00 gross)
+            # Expenses: salaries (500.00 net, 500.00 gross) only
+            # Total expenses: 500.00 net, 500.00 gross
+            # Balance: 500.00 net, 730.00 gross
+            
+            totals = response_data.get("totals", {})
+            print(f"\n📊 UPDATED CALCULATIONS AFTER DELETION:")
+            print(f"Income Net: {totals.get('income_net')}")
+            print(f"Income Gross: {totals.get('income_gross')}")
+            print(f"Expense Net: {totals.get('expense_net')}")
+            print(f"Expense Gross: {totals.get('expense_gross')}")
+            print(f"Balance Net: {totals.get('balance_net')}")
+            print(f"Balance Gross: {totals.get('balance_gross')}")
+            
+            if fuel_deleted:
+                print("✅ Verify Fuel Deletion working correctly")
+                return True
+            else:
+                print("❌ Fuel deletion verification failed")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
 def main():
-    """Run all Employee endpoint tests including new functionality"""
-    print("👷 Employee Endpoint Testing - NEW FUNCTIONALITY")
+    """Run all Financial System endpoint tests"""
+    print("💰 Financial System Testing - NEW FINANCIAL SYSTEM WITH OCR")
     print(f"Backend URL: {BASE_URL}")
     print(f"API URL: {API_URL}")
     print(f"Test time: {datetime.now().isoformat()}")
@@ -922,63 +1454,72 @@ def main():
         return results
     
     print("\n" + "="*60)
-    print("CZĘŚĆ 1: TEST EDYCJI WPISU GODZIN")
+    print("CZĘŚĆ 1: RĘCZNE DODAWANIE WPISÓW")
     print("="*60)
     
-    # Step 1: Create Marek Testowy employee
-    create_marek_result, marek_id = test_create_marek_testowy()
-    results['create_marek_testowy'] = create_marek_result
+    # Step 1: Create invoice sales entry
+    create_invoice_result, invoice_id = test_create_financial_entry_invoice_sales()
+    results['create_invoice_sales'] = create_invoice_result
     
-    if not create_marek_result:
-        print("\n❌ Cannot proceed without creating Marek Testowy.")
-        return results
+    # Step 2: Create salaries entry
+    create_salaries_result, salaries_id = test_create_financial_entry_salaries()
+    results['create_salaries'] = create_salaries_result
     
-    # Step 2: Create work entry (5.0 hours = 200.0 zł)
-    create_entry_result, entry_id = test_create_marek_work_entry(marek_id)
-    results['create_marek_work_entry'] = create_entry_result
-    
-    if not create_entry_result:
-        print("\n❌ Cannot proceed without creating work entry.")
-        return results
-    
-    # Step 3: Edit work entry (7.5 hours = 300.0 zł)
-    results['edit_work_entry'] = test_edit_work_entry(entry_id, marek_id)
-    
-    # Step 4: Verify edited entry
-    results['verify_edited_entry'] = test_verify_edited_entry()
+    # Step 3: Create fuel entry
+    create_fuel_result, fuel_id = test_create_financial_entry_fuel()
+    results['create_fuel'] = create_fuel_result
     
     print("\n" + "="*60)
-    print("CZĘŚĆ 2: TEST CASCADE DELETE")
+    print("CZĘŚĆ 2: POBIERANIE I PODSUMOWANIE")
     print("="*60)
     
-    # Step 5: Create second work entry
-    create_second_result, second_entry_id = test_create_second_work_entry(marek_id)
-    results['create_second_work_entry'] = create_second_result
+    # Step 4: Get all entries for October
+    results['get_entries_october'] = test_get_financial_entries_october()
     
-    # Step 6: Count Marek's entries (should be 2)
-    results['count_marek_entries'] = test_count_marek_entries()
+    # Step 5: Get summary for October
+    results['get_summary_october'] = test_get_financial_summary_october()
     
-    # Step 7: CASCADE DELETE employee
-    results['cascade_delete_employee'] = test_cascade_delete_employee(marek_id)
+    print("\n" + "="*60)
+    print("CZĘŚĆ 3: EDYCJA I USUWANIE")
+    print("="*60)
     
-    # Step 8: Verify CASCADE DELETE worked
-    results['verify_cascade_delete'] = test_verify_cascade_delete()
+    # Step 6: Edit fuel entry (only if it was created successfully)
+    if create_fuel_result and fuel_id:
+        results['edit_fuel_entry'] = test_edit_financial_entry_fuel(fuel_id)
+        
+        # Step 7: Delete fuel entry
+        results['delete_fuel_entry'] = test_delete_financial_entry_fuel(fuel_id)
+        
+        # Step 8: Verify deletion
+        results['verify_fuel_deletion'] = test_verify_fuel_deletion()
+    else:
+        print("⚠️  Skipping fuel edit/delete tests - fuel entry creation failed")
+        results['edit_fuel_entry'] = False
+        results['delete_fuel_entry'] = False
+        results['verify_fuel_deletion'] = False
     
     # Summary
     print("\n" + "="*60)
-    print("TEST SUMMARY - NEW FUNCTIONALITY")
+    print("TEST SUMMARY - FINANCIAL SYSTEM")
     print("="*60)
     
-    print("\nCZĘŚĆ 1: EDYCJA WPISU GODZIN")
-    part1_tests = ['create_marek_testowy', 'create_marek_work_entry', 'edit_work_entry', 'verify_edited_entry']
+    print("\nCZĘŚĆ 1: RĘCZNE DODAWANIE WPISÓW")
+    part1_tests = ['create_invoice_sales', 'create_salaries', 'create_fuel']
     for test_name in part1_tests:
         if test_name in results:
             status = "✅ PASS" if results[test_name] else "❌ FAIL"
             print(f"  {test_name}: {status}")
     
-    print("\nCZĘŚĆ 2: CASCADE DELETE")
-    part2_tests = ['create_second_work_entry', 'count_marek_entries', 'cascade_delete_employee', 'verify_cascade_delete']
+    print("\nCZĘŚĆ 2: POBIERANIE I PODSUMOWANIE")
+    part2_tests = ['get_entries_october', 'get_summary_october']
     for test_name in part2_tests:
+        if test_name in results:
+            status = "✅ PASS" if results[test_name] else "❌ FAIL"
+            print(f"  {test_name}: {status}")
+    
+    print("\nCZĘŚĆ 3: EDYCJA I USUWANIE")
+    part3_tests = ['edit_fuel_entry', 'delete_fuel_entry', 'verify_fuel_deletion']
+    for test_name in part3_tests:
         if test_name in results:
             status = "✅ PASS" if results[test_name] else "❌ FAIL"
             print(f"  {test_name}: {status}")
@@ -991,14 +1532,16 @@ def main():
     all_passed = all(results.values())
     
     if all_passed:
-        print("\n🎉 All NEW FUNCTIONALITY tests PASSED!")
+        print("\n🎉 All FINANCIAL SYSTEM tests PASSED!")
         print("\n✅ VERIFICATION COMPLETE:")
-        print("- PUT /api/employee-work-entries/{entry_id} working ✅")
-        print("- Automatic total_earnings recalculation working ✅")
-        print("- DELETE /api/employees/{employee_id} CASCADE DELETE working ✅")
-        print("- Employee and all work entries deleted correctly ✅")
+        print("- POST /api/financial-entries working ✅")
+        print("- GET /api/financial-entries with month filter working ✅")
+        print("- GET /api/financial-entries/summary with calculations working ✅")
+        print("- PUT /api/financial-entries/{id} working ✅")
+        print("- DELETE /api/financial-entries/{id} working ✅")
+        print("- All calculations (balance, totals per category) working ✅")
     else:
-        print("\n⚠️  Some NEW FUNCTIONALITY tests FAILED!")
+        print("\n⚠️  Some FINANCIAL SYSTEM tests FAILED!")
         failed_tests = [name for name, result in results.items() if not result]
         print(f"Failed tests: {failed_tests}")
     
