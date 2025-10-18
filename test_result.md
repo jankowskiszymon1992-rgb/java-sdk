@@ -428,11 +428,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Financial Entries - Create Entry - TESTED ✅ 2025-10-18"
-    - "Financial Entries - Get Entries with Filter - TESTED ✅ 2025-10-18"
-    - "Financial Entries - Summary Report - TESTED ✅ 2025-10-18"
-    - "Financial Entries - Edit Entry - TESTED ✅ 2025-10-18"
-    - "Financial Entries - Delete Entry - TESTED ✅ 2025-10-18"
+    - "Reminders - Backend API Check Pending - NEEDS TESTING"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
