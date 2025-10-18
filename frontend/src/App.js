@@ -16,6 +16,7 @@ import Employees from './pages/Employees';
 import Finances from './pages/Finances';
 import Reminders from './pages/Reminders';
 import MarketIntelligence from './pages/MarketIntelligence';
+import AIAnalyst from './pages/AIAnalyst';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
 import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder, startRemindersCheckService } from './utils/notifications';
