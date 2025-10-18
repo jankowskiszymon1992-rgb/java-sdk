@@ -216,6 +216,71 @@ class FinancialEntryUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+# ============= MARKET INTELLIGENCE MODELS =============
+
+class SupplierName(str, Enum):
+    kanlux = "kanlux"
+    tme = "tme"
+    conrad = "conrad"
+    rs_components = "rs_components"
+
+
+class ProductPrice(BaseModel):
+    """Ceny produktów z różnych hurtowni"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_name: str  # Nazwa produktu (np. "Przewód YDYp 3x1.5 mm²")
+    product_category: str  # Kategoria (np. "przewody", "gniazda")
+    supplier: SupplierName  # Hurtownia
+    price: float  # Cena w PLN
+    currency: str = "PLN"
+    availability: bool = True  # Czy dostępny
+    url: Optional[str] = None  # Link do produktu
+    scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class USDRate(BaseModel):
+    """Kurs dolara USD/PLN"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    rate: float  # Kurs USD/PLN
+    date: str  # Data w formacie YYYY-MM-DD
+    source: str = "NBP"  # Źródło kursu
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ScrapingLog(BaseModel):
+    """Logi scrapingu"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    supplier: SupplierName
+    status: str  # "success", "failed", "partial"
+    products_scraped: int = 0
+    error_message: Optional[str] = None
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None
+    duration_seconds: Optional[float] = None
+
+
+class PriceAlert(BaseModel):
+    """Alerty cenowe"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_name: str
+    supplier: SupplierName
+    old_price: float
+    new_price: float
+    change_percent: float  # % zmiany (np. -15.5 = spadek o 15.5%)
+    alert_type: str  # "price_drop", "price_increase"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    is_read: bool = False
+
+
 class Project(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
