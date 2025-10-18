@@ -140,6 +140,66 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ POST /api/ai/history endpoint działa poprawnie. Pobiera historię konwersacji dla podanego session_id, zwraca prawidłową strukturę danych z polami: session_id, conversations, count. Historia jest prawidłowo zapisywana i pobierana z MongoDB. Testowano z session_id 'test_session_123' i limit 10."
+  
+  - task: "Employee Management - Create Employee"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ POST /api/employees endpoint działa poprawnie. Tworzy pracownika z danymi: name='Bart', hourly_rate=30.0, notes='Pomocnik elektryk'. Generuje UUID, zapisuje do MongoDB, zwraca status 200 z pełną strukturą danych (id, name, hourly_rate, notes, created_at, updated_at)."
+  
+  - task: "Employee Management - Get Employees List"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/employees endpoint działa poprawnie. Zwraca listę wszystkich pracowników z pełną strukturą danych. Testowano - znaleziono 2 pracowników, w tym testowego 'Bart'. Status 200, dane pobierane z MongoDB."
+  
+  - task: "Employee Work Entries - Create Entry"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ POST /api/employee-work-entries endpoint działa poprawnie. Tworzy wpis godzin z automatycznym obliczaniem zarobków: employee_id, date='2025-10-14', hours=8.0, notes='Montaż instalacji'. Oblicza total_earnings = hours × hourly_rate (8.0 × 30.0 = 240.0). Denormalizuje employee_name. Status 200."
+  
+  - task: "Employee Work Entries - Get History"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/employee-work-entries endpoint działa poprawnie. Zwraca historię wpisów godzin posortowaną po dacie (najnowsze pierwsze). Testowano - znaleziono 1 wpis z prawidłowymi danymi. Status 200, dane pobierane z MongoDB."
+  
+  - task: "Employee Work Entries - Summary Report"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/employee-work-entries/summary?month=2025-10 endpoint działa poprawnie. Agreguje dane za miesiąc: employee_id, employee_name, total_hours=8.0, total_earnings=240.0, grand_total=240.0. MongoDB aggregation pipeline działa prawidłowo. Status 200."
 
 frontend:
   - task: "React removeChild Error Fix"
