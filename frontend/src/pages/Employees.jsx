@@ -263,6 +263,7 @@ const Employees = () => {
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stawka (zł/h)</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Wynik (zł)</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notatki</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Akcje</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -278,6 +279,22 @@ const Employees = () => {
                         {entry.total_earnings.toFixed(2)} zł
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{entry.notes || '-'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditWorkEntry(entry)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteWorkEntry(entry.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
