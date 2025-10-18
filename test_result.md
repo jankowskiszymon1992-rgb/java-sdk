@@ -329,3 +329,7 @@ agent_communication:
     message: "RCA: React 19 niekompatybilny z messagesEndRef.scrollIntoView() w AIAssistant.jsx. React 19 zmienił handling refs powodując konflikty DOM lifecycle."
   - agent: "main"
     message: "ROZWIĄZANIE: Downgrade React z 19.0.0 do 18.3.1 (stabilna wersja). Wszystkie błędy DOM (removeChild, insertBefore) usunięte. Cache zmieniony na elektron-v6-react18-stable. Aplikacja działa stabilnie."
+  - agent: "user"
+    message: "Pusta lista projektów w dropdownie na stronie Godziny pracy - nie można dodać nowych wpisów"
+  - agent: "main"
+    message: "✅ BUG NAPRAWIONY: Problem z renderowaniem SelectContent w Radix UI. Dropdown był renderowany w portalu i nie pokazywał elementów. Fix: dodano `position='popper'` i `sideOffset={5}` do SelectContent w WorkHours.jsx. Przetestowano pełny flow dodawania godzin - wszystko działa 100%."
