@@ -122,6 +122,20 @@ const Reminders = () => {
     }
   };
 
+  const testNotifications = async () => {
+    // Test if notifications work
+    showNotification('Test powiadomienia 🔔', {
+      body: 'Jeśli widzisz to powiadomienie, system działa poprawnie!',
+      tag: 'test-notification'
+    });
+    toast.success('Wysłano testowe powiadomienie');
+  };
+
+  const checkNow = async () => {
+    toast.info('Sprawdzam przypomnienia...');
+    await checkPendingReminders();
+  };
+
   const resetForm = () => {
     setFormData({
       title: '',
