@@ -3484,19 +3484,48 @@ Jeśli nie ma danych o produkcie - powiedz "Brak danych w bazie, uruchomić scra
         if not session_id:
             session_id = f"chat-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
         
+        # ==== WYKRYJ POLECENIA KONTROLI ====
+        command_detected = None
+        if "uruchom scraping" in message.lower() or "pobierz ceny" in message.lower():
+            # Wykryj dostawcę
+            suppliers_map = {
+                "kanlux": "kanlux",
+                "tme": "tme", 
+                "conrad": "conrad",
+                "rs": "rs_components",
+                "wszystkie": None
+            }
+            for keyword, supplier in suppliers_map.items():
+                if keyword in message.lower():
+                    command_detected = {"action": "scrape", "supplier": supplier}
+                    break
+        
         chat = LlmChat(
             api_key=llm_key,
             session_id=session_id,
-            system_message=f"""Jesteś ekspertem ds. analizy rynku artykułów elektrycznych dla sklepu internetowego. 
-Pomagasz właścicielowi sklepu podejmować decyzje zakupowe.
+            system_message=f"""Jesteś GŁÓWNYM AGENTEM KONTROLNYM systemu Market Intelligence dla sklepu elektrycznego.
 
 {context}
 
-Odpowiadaj:
-- KRÓTKO i KONKRETNIE (2-4 zdania max)
-- Z LICZBAMI i NAZWAMI produktów/dostawców
+TWOJE MOŻLIWOŚCI:
+1. Analizujesz WSZYSTKIE dane z bazy (ceny, trendy, historię)
+2. Kontrolujesz działanie botów scrapujących
+3. Rekomenujesz akcje (np. "uruchom scraping dla Kanlux")
+4. Dajesz KONKRETNE ceny i porównania
+5. Analizujesz efektywność operacji
+
+SPOSÓB ODPOWIEDZI:
+- KRÓTKO (2-5 zdań)
+- Z KONKRETNYMI DANYMI (ceny, %, dostawcy)
+- AKCJE jeśli potrzeba (np. "Brak danych - pobieram ceny z Kanlux...")
 - Po POLSKU
-- Jak doradca biznesowy"""
+- Jak szef analityki rynkowej
+
+PRZYKŁAD:
+User: "Jaka cena YDYP 3x1.5 100m?"
+You: "W bazie mam 3 oferty: Kanlux 245 PLN netto, TME 268 PLN, Conrad 289 PLN. Najtaniej Kanlux. Ostatni scraping: 2 dni temu. Polecam kupić teraz - trend stabilny."
+
+Jeśli brak danych - zaproponuj uruchomienie scrapingu."""
         ).with_model("openai", "gpt-5")
         
         user_message = UserMessage(text=message)
