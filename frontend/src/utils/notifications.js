@@ -20,8 +20,8 @@ export const requestNotificationPermission = async () => {
 
 export const showNotification = (title, options = {}) => {
   if (Notification.permission === 'granted') {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      // Use service worker to show notification (works even when app is closed)
+    if ('serviceWorker' in navigator) {
+      // Always use service worker for PWA
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification(title, {
           icon: '/icon-192.png',
@@ -29,14 +29,14 @@ export const showNotification = (title, options = {}) => {
           vibrate: [200, 100, 200],
           ...options,
         });
+      }).catch((error) => {
+        console.error('Error showing notification:', error);
       });
     } else {
-      // Fallback to direct notification
-      new Notification(title, {
-        icon: '/icon-192.png',
-        ...options,
-      });
+      console.warn('Service Worker not available - notifications may not work');
     }
+  } else {
+    console.warn('Notification permission not granted');
   }
 };
 
