@@ -115,7 +115,7 @@ const Employees = () => {
       try {
         await axios.delete(`${API}/employees/${employeeToDelete}`);
         toast.success('Pracownik usunięty pomyślnie');
-        loadEmployees();
+        loadData();
       } catch (error) {
         console.error('Error deleting employee:', error);
         toast.error('Nie udało się usunąć pracownika');
@@ -135,9 +135,34 @@ const Employees = () => {
     setEditingEmployee(null);
   };
 
+  const resetWorkForm = () => {
+    setWorkFormData({
+      employee_id: '',
+      date: new Date().toISOString().split('T')[0],
+      hours: '',
+      notes: ''
+    });
+  };
+
   const handleAddNew = () => {
     resetForm();
     setDialogOpen(true);
+  };
+
+  const handleAddWorkHours = () => {
+    resetWorkForm();
+    setWorkDialogOpen(true);
+  };
+
+  // Calculate preview earnings when hours/employee changes
+  const calculatePreviewEarnings = () => {
+    if (workFormData.employee_id && workFormData.hours) {
+      const employee = employees.find(e => e.id === workFormData.employee_id);
+      if (employee) {
+        return (parseFloat(workFormData.hours) * employee.hourly_rate).toFixed(2);
+      }
+    }
+    return '0.00';
   };
 
   return (
