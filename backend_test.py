@@ -403,16 +403,24 @@ def test_work_entries_summary():
                         print(f"❌ Employee summary {i} missing fields: {missing_emp_fields}")
                         return False
                 
-                # Check if our test employee "Bart" is in the summary
-                bart_summary = next(
-                    (emp for emp in response_data["employees"] if emp.get("employee_name") == "Bart"),
+                # Check if our test employee "Jan Kowalski" is in the summary
+                jan_summary = next(
+                    (emp for emp in response_data["employees"] if emp.get("employee_name") == "Jan Kowalski"),
                     None
                 )
                 
-                if bart_summary:
-                    print(f"✅ Test employee 'Bart' found in summary with {bart_summary['total_hours']} hours and {bart_summary['total_earnings']} earnings")
+                if jan_summary:
+                    print(f"✅ Test employee 'Jan Kowalski' found in summary:")
+                    print(f"   Total Hours: {jan_summary['total_hours']}")
+                    print(f"   Total Earnings: {jan_summary['total_earnings']} zł")
+                    
+                    # Verify calculation in summary
+                    if jan_summary['total_hours'] == 6.5 and jan_summary['total_earnings'] == 230.75:
+                        print("✅ CRITICAL: Summary calculations are correct!")
+                    else:
+                        print(f"❌ CRITICAL: Summary calculation mismatch!")
                 else:
-                    print("⚠️  Test employee 'Bart' not found in summary")
+                    print("⚠️  Test employee 'Jan Kowalski' not found in summary")
                 
             else:
                 print("⚠️  No employees found in summary")
