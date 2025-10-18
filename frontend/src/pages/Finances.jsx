@@ -585,8 +585,11 @@ const Finances = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogDescription>
+              Ta operacja jest nieodwracalna.
+            </DialogDescription>
           </DialogHeader>
-          <p className="text-gray-600">Czy na pewno chcesz usunąć ten wpis? Ta operacja jest nieodwracalna.</p>
+          <p className="text-gray-600">Czy na pewno chcesz usunąć ten wpis?</p>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Anuluj
