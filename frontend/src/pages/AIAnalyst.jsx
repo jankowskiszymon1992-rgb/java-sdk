@@ -242,6 +242,79 @@ const AIAnalyst = () => {
         </Card>
       )}
 
+      {/* Chat z GPT-5 */}
+      <Card className="border-2 border-blue-200">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+          <CardTitle className="flex items-center">
+            <Brain className="h-5 w-5 mr-2 text-blue-600" />
+            Zapytaj GPT-5 o Produkty i Ceny
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Zadawaj pytania np: "Czy powinienem kupić przewody teraz?" lub "Co jest teraz najtańsze?"
+          </p>
+        </CardHeader>
+        <CardContent>
+          {/* Historia czatu */}
+          <div className="space-y-3 mb-4 max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg">
+            {chatMessages.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Brain className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p>Zacznij rozmowę z GPT-5!</p>
+                <p className="text-sm mt-2">Przykłady pytań:</p>
+                <ul className="text-sm mt-2 space-y-1">
+                  <li>"Które przewody są teraz najtańsze?"</li>
+                  <li>"Czy ceny naświetlaczy rosną?"</li>
+                  <li>"Od kogo kupić gniazdka Simon 54?"</li>
+                </ul>
+              </div>
+            ) : (
+              chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-lg ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white border border-gray-200 text-gray-900'
+                  }`}>
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                </div>
+              ))
+            )}
+            {chatLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-gray-200 p-3 rounded-lg">
+                  <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input czatu */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Wpisz pytanie..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={chatLoading}
+            />
+            <Button 
+              onClick={handleSendMessage}
+              disabled={chatLoading || !chatInput.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {chatLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                'Wyślij'
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Tabela Porównawcza z Obliczeniami */}
       <Card>
         <CardHeader>
