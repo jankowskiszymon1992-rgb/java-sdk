@@ -34,16 +34,20 @@ const Employees = () => {
   });
 
   useEffect(() => {
-    loadEmployees();
+    loadData();
   }, []);
 
-  const loadEmployees = async () => {
+  const loadData = async () => {
     try {
-      const response = await axios.get(`${API}/employees`);
-      setEmployees(response.data);
+      const [employeesRes, workEntriesRes] = await Promise.all([
+        axios.get(`${API}/employees`),
+        axios.get(`${API}/employee-work-entries`)
+      ]);
+      setEmployees(employeesRes.data);
+      setWorkEntries(workEntriesRes.data);
     } catch (error) {
-      console.error('Error loading employees:', error);
-      toast.error('Nie udało się załadować pracowników');
+      console.error('Error loading data:', error);
+      toast.error('Nie udało się załadować danych');
     } finally {
       setLoading(false);
     }
