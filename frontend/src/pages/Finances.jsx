@@ -32,6 +32,7 @@ const CATEGORIES = {
 const Finances = () => {
   const [entries, setEntries] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [chartsData, setChartsData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,6 +54,7 @@ const Finances = () => {
 
   useEffect(() => {
     loadData();
+    loadChartsData();
   }, [selectedMonth]);
 
   const loadData = async () => {
