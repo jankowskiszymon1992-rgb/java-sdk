@@ -24,16 +24,17 @@ def get_backend_url():
 BASE_URL = get_backend_url()
 API_URL = f"{BASE_URL}/api"
 
-def test_ai_chat_endpoint():
-    """Test POST /api/ai/chat endpoint"""
-    print("\n=== Testing AI Chat Endpoint ===")
+def test_create_employee():
+    """Test POST /api/employees endpoint"""
+    print("\n=== Testing Create Employee Endpoint ===")
     
-    url = f"{API_URL}/ai/chat"
+    url = f"{API_URL}/employees"
     
     # Test data as specified in the request
     test_data = {
-        "text": "Witaj! Kim jesteś?",
-        "session_id": "test_session_123"
+        "name": "Bart",
+        "hourly_rate": 30.0,
+        "notes": "Pomocnik elektryk"
     }
     
     headers = {
@@ -44,36 +45,43 @@ def test_ai_chat_endpoint():
         print(f"Sending POST request to: {url}")
         print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
         
-        response = requests.post(url, json=test_data, headers=headers, timeout=30)
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
         
         print(f"Response status: {response.status_code}")
-        print(f"Response headers: {dict(response.headers)}")
         
         if response.status_code == 200:
             response_data = response.json()
             print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
             
             # Verify response structure
-            required_fields = ["response", "session_id", "timestamp"]
+            required_fields = ["id", "name", "hourly_rate", "notes", "created_at", "updated_at"]
             missing_fields = [field for field in required_fields if field not in response_data]
             
             if missing_fields:
                 print(f"❌ Missing required fields: {missing_fields}")
-                return False
+                return False, None
             
-            # Verify session_id matches
-            if response_data["session_id"] != test_data["session_id"]:
-                print(f"❌ Session ID mismatch. Expected: {test_data['session_id']}, Got: {response_data['session_id']}")
-                return False
+            # Verify data matches
+            if response_data["name"] != test_data["name"]:
+                print(f"❌ Name mismatch. Expected: {test_data['name']}, Got: {response_data['name']}")
+                return False, None
             
-            # Verify AI response is not empty
-            if not response_data["response"] or len(response_data["response"].strip()) == 0:
-                print("❌ AI response is empty")
-                return False
+            if response_data["hourly_rate"] != test_data["hourly_rate"]:
+                print(f"❌ Hourly rate mismatch. Expected: {test_data['hourly_rate']}, Got: {response_data['hourly_rate']}")
+                return False, None
             
-            print("✅ AI Chat endpoint working correctly")
-            print(f"AI Response: {response_data['response']}")
-            return True
+            if response_data["notes"] != test_data["notes"]:
+                print(f"❌ Notes mismatch. Expected: {test_data['notes']}, Got: {response_data['notes']}")
+                return False, None
+            
+            # Verify ID is generated
+            if not response_data["id"] or len(response_data["id"]) == 0:
+                print("❌ Employee ID is empty")
+                return False, None
+            
+            print("✅ Create Employee endpoint working correctly")
+            print(f"Created employee ID: {response_data['id']}")
+            return True, response_data["id"]
             
         else:
             print(f"❌ Request failed with status {response.status_code}")
@@ -82,17 +90,17 @@ def test_ai_chat_endpoint():
                 print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
             except:
                 print(f"Error text: {response.text}")
-            return False
+            return False, None
             
     except requests.exceptions.Timeout:
-        print("❌ Request timed out (30s)")
-        return False
+        print("❌ Request timed out (15s)")
+        return False, None
     except requests.exceptions.ConnectionError:
         print("❌ Connection error - backend may not be running")
-        return False
+        return False, None
     except Exception as e:
         print(f"❌ Unexpected error: {str(e)}")
-        return False
+        return False, None
 
 def test_ai_history_endpoint():
     """Test POST /api/ai/history endpoint"""
