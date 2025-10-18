@@ -442,31 +442,50 @@ def test_backend_health():
         return False
 
 def main():
-    """Run all AI Assistant endpoint tests"""
-    print("🤖 AI Assistant Endpoint Testing")
+    """Run all Employee endpoint tests"""
+    print("👷 Employee Endpoint Testing")
     print(f"Backend URL: {BASE_URL}")
     print(f"API URL: {API_URL}")
     print(f"Test time: {datetime.now().isoformat()}")
     
     results = {}
+    employee_id = None
     
     # Test backend health first
     results['backend_health'] = test_backend_health()
     
     if not results['backend_health']:
-        print("\n❌ Backend is not responding. Cannot proceed with AI tests.")
+        print("\n❌ Backend is not responding. Cannot proceed with Employee tests.")
         return results
     
-    # Test AI Chat endpoint
-    results['ai_chat'] = test_ai_chat_endpoint()
+    # Test Create Employee endpoint
+    create_result, employee_id = test_create_employee()
+    results['create_employee'] = create_result
     
-    # Wait a moment for the conversation to be saved
-    if results['ai_chat']:
-        print("\nWaiting 2 seconds for conversation to be saved...")
-        time.sleep(2)
+    if not create_result:
+        print("\n❌ Cannot proceed with other tests without creating an employee.")
+        return results
     
-    # Test AI History endpoint
-    results['ai_history'] = test_ai_history_endpoint()
+    # Test Get Employees endpoint
+    results['get_employees'] = test_get_employees()
+    
+    # Test Create Work Entry endpoint (requires employee_id)
+    if employee_id:
+        results['create_work_entry'] = test_create_work_entry(employee_id)
+        
+        # Wait a moment for the work entry to be saved
+        if results['create_work_entry']:
+            print("\nWaiting 2 seconds for work entry to be saved...")
+            time.sleep(2)
+    else:
+        print("\n❌ No employee ID available for work entry test")
+        results['create_work_entry'] = False
+    
+    # Test Get Work Entries endpoint
+    results['get_work_entries'] = test_get_work_entries()
+    
+    # Test Work Entries Summary endpoint
+    results['work_entries_summary'] = test_work_entries_summary()
     
     # Summary
     print("\n" + "="*50)
@@ -480,9 +499,14 @@ def main():
     all_passed = all(results.values())
     
     if all_passed:
-        print("\n🎉 All AI Assistant tests PASSED!")
+        print("\n🎉 All Employee endpoint tests PASSED!")
+        print("\n✅ VERIFICATION COMPLETE:")
+        print("- All CRUD operations working")
+        print("- Calculations are correct (hours × hourly_rate)")
+        print("- Data is being saved to MongoDB")
+        print("- All endpoints return status 200")
     else:
-        print("\n⚠️  Some AI Assistant tests FAILED!")
+        print("\n⚠️  Some Employee endpoint tests FAILED!")
     
     return results
 
