@@ -281,6 +281,42 @@ class PriceAlert(BaseModel):
     is_read: bool = False
 
 
+class AIReportType(str, Enum):
+    daily = "daily"  # Raport dzienny
+    weekly = "weekly"  # Raport tygodniowy
+    on_demand = "on_demand"  # Na żądanie
+
+
+class AIReport(BaseModel):
+    """Raporty AI Analityka"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    report_type: AIReportType
+    title: str
+    summary: str  # Krótkie podsumowanie
+    analysis: str  # Pełna analiza od AI
+    recommendations: List[str]  # Lista rekomendacji
+    predictions: List[str]  # Lista predykcji
+    key_insights: List[str]  # Kluczowe wnioski
+    data_snapshot: dict  # Snapshot danych na moment generowania
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AIInsight(BaseModel):
+    """Pojedyncze wnioski AI"""
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_name: Optional[str] = None
+    insight_type: str  # "buy_now", "wait", "price_optimal", "trend_up", "trend_down"
+    message: str
+    confidence: float = 0.0  # 0-100%
+    action_items: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: Optional[datetime] = None
+
+
 class Project(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
