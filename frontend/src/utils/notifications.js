@@ -127,3 +127,35 @@ export const scheduleDailyReportReminder = () => {
   checkTime(); // Check immediately
   setInterval(checkTime, 60 * 1000); // Check every minute
 };
+
+// Check for pending reminders from backend
+export const checkPendingReminders = async () => {
+  try {
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const response = await fetch(`${BACKEND_URL}/api/reminders/check/pending`);
+    const data = await response.json();
+
+    if (data.reminders && data.reminders.length > 0) {
+      data.reminders.forEach((reminder) => {
+        showNotification(reminder.title, {
+          body: reminder.description || 'Przypomnienie',
+          tag: `reminder-${reminder.id}`,
+          requireInteraction: true,
+          data: {
+            url: '/reminders',
+            reminderId: reminder.id,
+          },
+        });
+      });
+      console.log(`Sent ${data.count} reminder notifications`);
+    }
+  } catch (error) {
+    console.error('Error checking pending reminders:', error);
+  }
+};
+
+// Start reminder checking service - checks every 5 minutes
+export const startRemindersCheckService = () => {
+  checkPendingReminders(); // Check immediately
+  setInterval(checkPendingReminders, 5 * 60 * 1000); // Check every 5 minutes
+};
