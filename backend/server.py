@@ -3531,20 +3531,42 @@ Jeśli brak danych - zaproponuj uruchomienie scrapingu."""
         user_message = UserMessage(text=message)
         response = await chat.send_message(user_message)
         
+        # ==== WYKONAJ POLECENIE JEŚLI WYKRYTE ====
+        action_result = None
+        if command_detected:
+            if command_detected["action"] == "scrape":
+                try:
+                    # Uruchom scraping w tle
+                    import asyncio
+                    supplier = command_detected.get("supplier")
+                    # Nie czekamy na wynik - scraping działa w tle
+                    asyncio.create_task(trigger_scraping(supplier))
+                    action_result = f"✅ Uruchomiono scraping dla {supplier or 'wszystkich dostawców'}"
+                except Exception as e:
+                    action_result = f"❌ Błąd uruchamiania scrapingu: {str(e)}"
+        
         # Zapisz do historii
         chat_entry = {
             "id": str(uuid.uuid4()),
             "session_id": session_id,
             "user_message": message,
             "ai_response": response,
+            "action_detected": command_detected,
+            "action_result": action_result,
             "created_at": datetime.now(timezone.utc)
         }
         chat_entry = serialize_doc(chat_entry)
         await db.ai_chat_history.insert_one(chat_entry)
         
+        # Dodaj info o akcji do odpowiedzi
+        final_response = response
+        if action_result:
+            final_response = f"{response}\n\n{action_result}"
+        
         return {
-            "response": response,
-            "session_id": session_id
+            "response": final_response,
+            "session_id": session_id,
+            "action_executed": action_result
         }
         
     except Exception as e:
