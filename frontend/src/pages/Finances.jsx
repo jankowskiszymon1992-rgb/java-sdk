@@ -490,7 +490,6 @@ const Finances = () => {
                   id="image"
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={handleImageChange}
                   required
                 />
@@ -500,7 +499,7 @@ const Finances = () => {
                   </div>
                 )}
                 <p className="text-sm text-blue-600 mt-2">
-                  📸 Zrób zdjęcie faktury - AI automatycznie wyciągnie wszystkie dane
+                  📸 Zrób zdjęcie lub wybierz plik z dysku - AI automatycznie wyciągnie wszystkie dane
                 </p>
               </div>
             ) : (
