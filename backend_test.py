@@ -295,18 +295,35 @@ def test_get_work_entries():
                         print(f"❌ Work entry {i} missing fields: {missing_fields}")
                         return False
                 
-                # Check if our test entry is in the list
-                test_entry_found = any(
-                    entry.get("date") == "2025-10-14" and 
-                    entry.get("hours") == 8.0 and 
-                    entry.get("notes") == "Montaż instalacji"
-                    for entry in response_data
-                )
+                # Check if our test entry is in the list and verify calculations
+                test_entry_found = False
+                for entry in response_data:
+                    if (entry.get("date") == "2025-10-18" and 
+                        entry.get("hours") == 6.5 and 
+                        entry.get("notes") == "Montaż rozdzielni" and
+                        entry.get("employee_name") == "Jan Kowalski"):
+                        
+                        test_entry_found = True
+                        print("✅ Test work entry found in list")
+                        
+                        # Verify critical calculation: total_earnings = hours × hourly_rate
+                        expected_earnings = 6.5 * 35.50  # 230.75
+                        actual_earnings = entry.get("total_earnings")
+                        
+                        if abs(actual_earnings - expected_earnings) < 0.01:
+                            print(f"✅ CRITICAL: Earnings calculation correct: {actual_earnings} zł (6.5h × 35.50 zł/h = 230.75 zł)")
+                        else:
+                            print(f"❌ CRITICAL: Earnings calculation ERROR! Expected: 230.75 zł, Got: {actual_earnings} zł")
+                        
+                        # Verify all fields
+                        print(f"   Employee: {entry.get('employee_name')}")
+                        print(f"   Hours: {entry.get('hours')}")
+                        print(f"   Hourly Rate: {entry.get('hourly_rate')} zł/h")
+                        print(f"   Total Earnings: {entry.get('total_earnings')} zł")
+                        break
                 
-                if test_entry_found:
-                    print("✅ Test work entry found in list")
-                else:
-                    print("⚠️  Test work entry not found in list")
+                if not test_entry_found:
+                    print("⚠️  Test work entry for Jan Kowalski not found in list")
                 
             else:
                 print("⚠️  No work entries found")
