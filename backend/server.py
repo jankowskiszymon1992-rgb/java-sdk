@@ -1608,7 +1608,7 @@ Twoim zadaniem jest wyciągnięcie danych z {cat_name} w języku polskim.
 Zwróć TYLKO JSON bez dodatkowego tekstu."""
         ).with_model("anthropic", "claude-sonnet-4-20250514")
         
-        # Convert image to PNG format (emergentintegrations always expects PNG)
+        # Convert image to PNG format and compress if needed (Claude limit: 5MB)
         import base64
         from PIL import Image
         from io import BytesIO
@@ -1616,13 +1616,27 @@ Zwróć TYLKO JSON bez dodatkowego tekstu."""
         try:
             # Decode base64 image
             img_data = base64.b64decode(image)
+            original_size = len(img_data)
             
             # Open image with PIL
             img = Image.open(BytesIO(img_data))
             
+            # Calculate max dimensions to stay under 5MB
+            # Start with original size, then resize if needed
+            max_size_bytes = 4.5 * 1024 * 1024  # 4.5 MB to be safe
+            quality = 85
+            max_dimension = 2048  # Start with reasonable max dimension
+            
+            # If image is too large, resize it
+            if original_size > max_size_bytes or max(img.size) > max_dimension:
+                # Calculate new dimensions maintaining aspect ratio
+                ratio = min(max_dimension / img.size[0], max_dimension / img.size[1])
+                if ratio < 1:  # Only resize if image is larger than max_dimension
+                    new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
+                    img = img.resize(new_size, Image.Resampling.LANCZOS)
+            
             # Convert to RGB if necessary (for JPEG compatibility)
             if img.mode in ('RGBA', 'LA', 'P'):
-                # Has transparency or palette
                 background = Image.new('RGB', img.size, (255, 255, 255))
                 if img.mode == 'P':
                     img = img.convert('RGBA')
@@ -1631,21 +1645,41 @@ Zwróć TYLKO JSON bez dodatkowego tekstu."""
             elif img.mode != 'RGB':
                 img = img.convert('RGB')
             
-            # Save as PNG to BytesIO
+            # Try PNG first, if too large fall back to JPEG
             png_buffer = BytesIO()
-            img.save(png_buffer, format='PNG')
-            png_buffer.seek(0)
+            img.save(png_buffer, format='PNG', optimize=True)
+            png_size = png_buffer.tell()
             
-            # Encode back to base64
-            png_base64 = base64.b64encode(png_buffer.getvalue()).decode('utf-8')
+            if png_size > max_size_bytes:
+                # PNG too large, use JPEG with compression
+                jpeg_buffer = BytesIO()
+                img.save(jpeg_buffer, format='JPEG', quality=quality, optimize=True)
+                jpeg_buffer.seek(0)
+                
+                # Check if still too large
+                while jpeg_buffer.tell() > max_size_bytes and quality > 20:
+                    quality -= 10
+                    jpeg_buffer = BytesIO()
+                    img.save(jpeg_buffer, format='JPEG', quality=quality, optimize=True)
+                    jpeg_buffer.seek(0)
+                
+                final_base64 = base64.b64encode(jpeg_buffer.getvalue()).decode('utf-8')
+                final_size = len(jpeg_buffer.getvalue())
+            else:
+                # PNG is fine
+                png_buffer.seek(0)
+                final_base64 = base64.b64encode(png_buffer.getvalue()).decode('utf-8')
+                final_size = png_size
+            
+            print(f"Image processed: {original_size} bytes -> {final_size} bytes ({final_size/1024/1024:.2f} MB)")
             
         except Exception as e:
-            # If conversion fails, use original image
             print(f"Warning: Image conversion failed: {e}")
-            png_base64 = image
+            # Use original but this might fail if too large
+            final_base64 = image
         
-        # Create ImageContent with PNG
-        image_content = ImageContent(image_base64=png_base64)
+        # Create ImageContent with processed image
+        image_content = ImageContent(image_base64=final_base64)
         
         user_message = UserMessage(
             text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
