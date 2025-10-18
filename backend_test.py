@@ -1831,5 +1831,14 @@ def main():
     
     return results
 
+def main_reminders():
+    """Run Reminders System tests specifically"""
+    return test_reminders_system()
+
 if __name__ == "__main__":
-    main()
+    # Check if we should run reminders tests specifically
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "reminders":
+        main_reminders()
+    else:
+        main()
