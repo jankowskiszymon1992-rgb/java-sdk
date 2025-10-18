@@ -74,6 +74,43 @@ const Finances = () => {
     e.preventDefault();
     
     try {
+      if (useOCR && formData.image && !editingEntry) {
+        // OCR upload
+        toast.info('Przetwarzam fakturę... To może potrwać do 10 sekund');
+        
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          try {
+            const base64 = reader.result.split(',')[1];
+            console.log('Wysyłam obraz do OCR...');
+            
+            const response = await axios.post(`${API}/financial-entries/ocr`, {
+              category: formData.category,
+              image: base64,
+              date: formData.date
+            });
+            
+            console.log('OCR response:', response.data);
+            toast.success('Faktura przetworzona i dodana pomyślnie! ✅');
+            setDialogOpen(false);
+            resetForm();
+            loadData();
+          } catch (error) {
+            console.error('Błąd OCR:', error);
+            const errorMsg = error.response?.data?.detail || error.message;
+            toast.error(`Nie udało się przetworzyć faktury: ${errorMsg}`);
+          }
+        };
+        
+        reader.onerror = () => {
+          toast.error('Nie udało się odczytać pliku obrazu');
+        };
+        
+        reader.readAsDataURL(formData.image);
+        return; // Don't continue with normal submit
+      }
+      
+      // Normal manual entry
       const data = {
         category: formData.category,
         date: formData.date,
@@ -87,28 +124,6 @@ const Finances = () => {
       if (editingEntry) {
         await axios.put(`${API}/financial-entries/${editingEntry.id}`, data);
         toast.success('Wpis zaktualizowany pomyślnie');
-      } else if (useOCR && formData.image) {
-        // OCR upload
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64 = reader.result.split(',')[1];
-          try {
-            await axios.post(`${API}/financial-entries/ocr`, {
-              category: formData.category,
-              image: base64,
-              date: formData.date
-            });
-            toast.success('Faktura przetworzona i dodana pomyślnie');
-            setDialogOpen(false);
-            resetForm();
-            loadData();
-          } catch (error) {
-            console.error('Błąd OCR:', error);
-            toast.error('Nie udało się przetworzyć faktury: ' + (error.response?.data?.detail || error.message));
-          }
-        };
-        reader.readAsDataURL(formData.image);
-        return;
       } else {
         await axios.post(`${API}/financial-entries`, data);
         toast.success('Wpis dodany pomyślnie');
@@ -119,7 +134,7 @@ const Finances = () => {
       loadData();
     } catch (error) {
       console.error('Błąd zapisywania wpisu:', error);
-      toast.error('Nie udało się zapisać wpisu');
+      toast.error('Nie udało się zapisać wpisu: ' + (error.response?.data?.detail || error.message));
     }
   };
 
