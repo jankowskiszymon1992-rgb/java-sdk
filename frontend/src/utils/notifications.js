@@ -148,14 +148,19 @@ export const scheduleDailyReportReminder = () => {
 
 // Check for pending reminders from backend
 export const checkPendingReminders = async () => {
+  console.log('🔍 Checking pending reminders...');
   try {
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
     const response = await fetch(`${BACKEND_URL}/api/reminders/check/pending`);
     const data = await response.json();
 
+    console.log('Pending reminders response:', data);
+
     if (data.reminders && data.reminders.length > 0) {
-      data.reminders.forEach((reminder) => {
-        showNotification(reminder.title, {
+      console.log(`📬 Found ${data.count} pending reminders`);
+      
+      for (const reminder of data.reminders) {
+        await showNotification(reminder.title, {
           body: reminder.description || 'Przypomnienie',
           tag: `reminder-${reminder.id}`,
           requireInteraction: true,
@@ -164,11 +169,14 @@ export const checkPendingReminders = async () => {
             reminderId: reminder.id,
           },
         });
-      });
-      console.log(`Sent ${data.count} reminder notifications`);
+      }
+      
+      console.log(`✅ Sent ${data.count} reminder notifications`);
+    } else {
+      console.log('No pending reminders at this time');
     }
   } catch (error) {
-    console.error('Error checking pending reminders:', error);
+    console.error('❌ Error checking pending reminders:', error);
   }
 };
 
