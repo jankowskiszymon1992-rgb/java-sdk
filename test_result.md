@@ -300,6 +300,18 @@ frontend:
       - working: true
         agent: "main"
         comment: "✅ BUG NAPRAWIONY: Problem był z renderowaniem SelectContent w Radix UI - dropdown był pusty mimo że dane były załadowane. Rozwiązanie: dodano props `position='popper'` i `sideOffset={5}` do SelectContent. Po naprawie: dropdown poprawnie pokazuje listę projektów, można wybrać projekt, formularz dodawania godzin działa w 100%, wpisy są zapisywane, toast sukcesu pojawia się, suma godzin aktualizuje się automatycznie. Przetestowano kompletny flow dodawania wpisu - wszystko działa."
+  
+  - task: "Employee Summary in Work Hours Page"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/WorkHours.jsx, /frontend/src/api/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Dodano nową sekcję 'Podsumowanie pracowników' na stronie Godziny pracy. Tabela pokazuje: Imię i nazwisko, Suma godzin w miesiącu, Zarobek w miesiącu. Dodano wybór miesiąca (month picker). Backend endpoint /api/employee-work-entries/summary działa - zwraca agregację dla 4 pracowników w październiku 2025 (grand_total: 1250.75 zł). Frontend wymaga testów."
 
 metadata:
   created_by: "main_agent"
