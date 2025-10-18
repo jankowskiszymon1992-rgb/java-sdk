@@ -322,10 +322,18 @@ async def update_employee(employee_id: str, employee_input: EmployeeUpdate):
 
 @api_router.delete("/employees/{employee_id}")
 async def delete_employee(employee_id: str):
-    result = await db.employees.delete_one({"id": employee_id})
-    if result.deleted_count == 0:
+    # First, check if employee exists
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
         raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
-    return {"message": "Pracownik usunięty pomyślnie"}
+    
+    # Delete all work entries for this employee (cascade delete)
+    await db.employee_work_entries.delete_many({"employee_id": employee_id})
+    
+    # Delete the employee
+    await db.employees.delete_one({"id": employee_id})
+    
+    return {"message": "Pracownik i jego godziny pracy usunięte pomyślnie"}
 
 
 # ============= EMPLOYEE WORK ENTRIES =============
