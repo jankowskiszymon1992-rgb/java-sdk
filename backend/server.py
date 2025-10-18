@@ -1623,7 +1623,10 @@ Zwróć TYLKO JSON bez dodatkowego tekstu."""
         except Exception:
             media_type = "image/jpeg"
         
-        # Create message with image - using dict format to specify media_type
+        # Create ImageContent and manually add media_type attribute
+        image_content = ImageContent(image_base64=image)
+        image_content.media_type = media_type  # Add media_type to the object
+        
         user_message = UserMessage(
             text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
 Zwróć odpowiedź TYLKO w formacie JSON bez żadnego dodatkowego tekstu:
@@ -1641,14 +1644,7 @@ Zwróć odpowiedź TYLKO w formacie JSON bez żadnego dodatkowego tekstu:
 
 Jeśli jakiejś wartości nie ma na dokumencie, użyj null lub "brak".
 Kwoty muszą być liczbami, nie tekstem.""",
-            file_contents=[{
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": media_type,
-                    "data": image
-                }
-            }]
+            file_contents=[image_content]
         )
         
         # Get response from Claude (async method)
