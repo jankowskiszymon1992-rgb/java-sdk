@@ -2544,6 +2544,385 @@ Kwoty muszą być liczbami, nie tekstem.""",
         raise HTTPException(status_code=500, detail=f"Błąd OCR: {str(e)}")
 
 
+# ============= MARKET INTELLIGENCE ENDPOINTS =============
+
+# Lista produktów do monitorowania (TOP 5 na start)
+MONITORED_PRODUCTS = [
+    {
+        "name": "Przewód YDYp 3x1.5 mm²",
+        "category": "przewody",
+        "search_terms": {
+            "kanlux": "przewód ydyp 3x1.5",
+            "tme": "przewód 3x1.5",
+            "conrad": "kabel 3x1.5",
+            "rs_components": "cable 3x1.5"
+        }
+    },
+    {
+        "name": "Przewód YDYp 3x2.5 mm²",
+        "category": "przewody",
+        "search_terms": {
+            "kanlux": "przewód ydyp 3x2.5",
+            "tme": "przewód 3x2.5",
+            "conrad": "kabel 3x2.5",
+            "rs_components": "cable 3x2.5"
+        }
+    },
+    {
+        "name": "Gniazdko Simon 54 pojedyncze",
+        "category": "gniazda",
+        "search_terms": {
+            "kanlux": "gniazdko simon 54",
+            "tme": "gniazdo simon 54",
+            "conrad": "steckdose simon 54",
+            "rs_components": "socket simon 54"
+        }
+    },
+    {
+        "name": "Bezpiecznik B16 1-fazowy",
+        "category": "bezpieczniki",
+        "search_terms": {
+            "kanlux": "wyłącznik b16",
+            "tme": "bezpiecznik b16",
+            "conrad": "sicherung b16",
+            "rs_components": "circuit breaker b16"
+        }
+    },
+    {
+        "name": "Naświetlacz LED 20W",
+        "category": "naswietlacze",
+        "search_terms": {
+            "kanlux": "naświetlacz led 20w",
+            "tme": "projektor led 20w",
+            "conrad": "led strahler 20w",
+            "rs_components": "led floodlight 20w"
+        }
+    }
+]
+
+
+# Helper: Pobierz kurs USD z NBP API
+async def fetch_usd_rate():
+    """Pobiera aktualny kurs USD/PLN z API NBP"""
+    try:
+        import aiohttp
+        url = "https://api.nbp.pl/api/exchangerates/rates/a/usd/?format=json"
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=10) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    rate = data['rates'][0]['mid']
+                    date = data['rates'][0]['effectiveDate']
+                    return {"rate": rate, "date": date}
+                else:
+                    return None
+    except Exception as e:
+        logger.error(f"Error fetching USD rate: {e}")
+        return None
+
+
+# Helper: Scraping Kanlux (Przykład - wymaga dostosowania do rzeczywistej struktury)
+async def scrape_kanlux(product_name: str, search_term: str):
+    """
+    Scraper dla Kanlux.com
+    UWAGA: To jest przykładowa implementacja. Wymaga dostosowania do rzeczywistej struktury HTML.
+    """
+    try:
+        import aiohttp
+        from bs4 import BeautifulSoup
+        
+        # Przykładowy URL - wymaga dostosowania
+        search_url = f"https://www.kanlux.com/pl/search?q={search_term.replace(' ', '+')}"
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(search_url, headers=headers, timeout=15) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'lxml')
+                    
+                    # TODO: Dostosować selektory do rzeczywistej struktury Kanlux
+                    # To jest placeholder - wymaga analizy HTML strony
+                    price_element = soup.select_one('.product-price, .price')
+                    
+                    if price_element:
+                        price_text = price_element.get_text(strip=True)
+                        # Ekstrakcja ceny (usuń "PLN", "zł", spacje, przecinki)
+                        import re
+                        price_match = re.search(r'(\d+[,.]?\d*)', price_text.replace(',', '.'))
+                        if price_match:
+                            price = float(price_match.group(1))
+                            return {
+                                "price": price,
+                                "url": search_url,
+                                "availability": True
+                            }
+        
+        return None
+    except Exception as e:
+        logger.error(f"Kanlux scraping error for {product_name}: {e}")
+        return None
+
+
+# Helper: Scraping TME (Placeholder)
+async def scrape_tme(product_name: str, search_term: str):
+    """Scraper dla TME.eu - Placeholder"""
+    # TODO: Implementacja scrapingu TME
+    logger.info(f"TME scraping not implemented yet for: {product_name}")
+    return None
+
+
+# Helper: Scraping Conrad (Placeholder)
+async def scrape_conrad(product_name: str, search_term: str):
+    """Scraper dla Conrad.pl - Placeholder"""
+    # TODO: Implementacja scrapingu Conrad
+    logger.info(f"Conrad scraping not implemented yet for: {product_name}")
+    return None
+
+
+# Helper: Scraping RS Components (Placeholder)
+async def scrape_rs_components(product_name: str, search_term: str):
+    """Scraper dla RS Components - Placeholder"""
+    # TODO: Implementacja scrapingu RS Components
+    logger.info(f"RS Components scraping not implemented yet for: {product_name}")
+    return None
+
+
+# Mapa scraperów
+SCRAPERS = {
+    "kanlux": scrape_kanlux,
+    "tme": scrape_tme,
+    "conrad": scrape_conrad,
+    "rs_components": scrape_rs_components
+}
+
+
+@api_router.post("/market-intelligence/scrape")
+async def trigger_scraping(supplier: Optional[str] = None):
+    """
+    Ręczne uruchomienie scrapingu cen
+    supplier: opcjonalnie - nazwa hurtowni (kanlux, tme, conrad, rs_components)
+    """
+    results = []
+    suppliers_to_scrape = [supplier] if supplier else list(SCRAPERS.keys())
+    
+    for supp in suppliers_to_scrape:
+        if supp not in SCRAPERS:
+            continue
+            
+        log_entry = {
+            "id": str(uuid.uuid4()),
+            "supplier": supp,
+            "status": "started",
+            "products_scraped": 0,
+            "started_at": datetime.now(timezone.utc)
+        }
+        
+        try:
+            scraper_func = SCRAPERS[supp]
+            products_scraped = 0
+            
+            for product in MONITORED_PRODUCTS:
+                search_term = product["search_terms"].get(supp, product["name"])
+                scrape_result = await scraper_func(product["name"], search_term)
+                
+                if scrape_result and scrape_result.get("price"):
+                    # Zapisz cenę do bazy
+                    price_doc = {
+                        "id": str(uuid.uuid4()),
+                        "product_name": product["name"],
+                        "product_category": product["category"],
+                        "supplier": supp,
+                        "price": scrape_result["price"],
+                        "currency": "PLN",
+                        "availability": scrape_result.get("availability", True),
+                        "url": scrape_result.get("url"),
+                        "scraped_at": datetime.now(timezone.utc),
+                        "created_at": datetime.now(timezone.utc)
+                    }
+                    await db.product_prices.insert_one(price_doc)
+                    products_scraped += 1
+            
+            log_entry["status"] = "success"
+            log_entry["products_scraped"] = products_scraped
+            log_entry["completed_at"] = datetime.now(timezone.utc)
+            log_entry["duration_seconds"] = (log_entry["completed_at"] - log_entry["started_at"]).total_seconds()
+            
+        except Exception as e:
+            log_entry["status"] = "failed"
+            log_entry["error_message"] = str(e)
+            log_entry["completed_at"] = datetime.now(timezone.utc)
+            log_entry["duration_seconds"] = (log_entry["completed_at"] - log_entry["started_at"]).total_seconds()
+        
+        # Zapisz log
+        await db.scraping_logs.insert_one(log_entry)
+        results.append(log_entry)
+    
+    return {"results": results, "total_suppliers": len(results)}
+
+
+@api_router.get("/market-intelligence/usd-rate")
+async def get_usd_rate_current():
+    """Pobierz aktualny kurs USD/PLN"""
+    usd_data = await fetch_usd_rate()
+    
+    if usd_data:
+        # Zapisz do bazy
+        rate_doc = {
+            "id": str(uuid.uuid4()),
+            "rate": usd_data["rate"],
+            "date": usd_data["date"],
+            "source": "NBP",
+            "created_at": datetime.now(timezone.utc)
+        }
+        await db.usd_rates.insert_one(rate_doc)
+        
+        return rate_doc
+    else:
+        raise HTTPException(status_code=500, detail="Nie udało się pobrać kursu USD")
+
+
+@api_router.get("/market-intelligence/usd-rate/history")
+async def get_usd_rate_history(days: int = 30):
+    """Historia kursu USD za ostatnie N dni"""
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+    
+    rates = await db.usd_rates.find(
+        {"created_at": {"$gte": cutoff_date}},
+        {"_id": 0}
+    ).sort("date", -1).to_list(1000)
+    
+    return {"rates": rates, "count": len(rates)}
+
+
+@api_router.get("/market-intelligence/prices/compare")
+async def compare_prices(product_name: Optional[str] = None):
+    """Porównanie cen produktu między hurtowniami"""
+    query = {}
+    if product_name:
+        query["product_name"] = product_name
+    
+    # Pobierz najnowsze ceny dla każdego produktu i hurtowni
+    pipeline = [
+        {"$match": query},
+        {"$sort": {"scraped_at": -1}},
+        {
+            "$group": {
+                "_id": {"product_name": "$product_name", "supplier": "$supplier"},
+                "latest_price": {"$first": "$price"},
+                "latest_scraped": {"$first": "$scraped_at"},
+                "url": {"$first": "$url"},
+                "availability": {"$first": "$availability"}
+            }
+        },
+        {
+            "$group": {
+                "_id": "$_id.product_name",
+                "prices": {
+                    "$push": {
+                        "supplier": "$_id.supplier",
+                        "price": "$latest_price",
+                        "scraped_at": "$latest_scraped",
+                        "url": "$url",
+                        "availability": "$availability"
+                    }
+                }
+            }
+        }
+    ]
+    
+    results = await db.product_prices.aggregate(pipeline).to_list(1000)
+    
+    # Dodaj analizę
+    for result in results:
+        prices_list = [p["price"] for p in result["prices"] if p.get("availability", True)]
+        if prices_list:
+            result["min_price"] = min(prices_list)
+            result["max_price"] = max(prices_list)
+            result["avg_price"] = sum(prices_list) / len(prices_list)
+            result["price_spread"] = result["max_price"] - result["min_price"]
+            result["spread_percent"] = (result["price_spread"] / result["min_price"] * 100) if result["min_price"] > 0 else 0
+    
+    return {"products": results, "count": len(results)}
+
+
+@api_router.get("/market-intelligence/prices/history")
+async def get_price_history(product_name: str, days: int = 30):
+    """Historia cen produktu za ostatnie N dni"""
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+    
+    prices = await db.product_prices.find(
+        {
+            "product_name": product_name,
+            "scraped_at": {"$gte": cutoff_date}
+        },
+        {"_id": 0}
+    ).sort("scraped_at", 1).to_list(10000)
+    
+    return {"product_name": product_name, "prices": prices, "count": len(prices)}
+
+
+@api_router.get("/market-intelligence/alerts")
+async def get_price_alerts(limit: int = 50):
+    """Pobierz ostatnie alerty cenowe"""
+    alerts = await db.price_alerts.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {"alerts": alerts, "count": len(alerts)}
+
+
+@api_router.get("/market-intelligence/logs")
+async def get_scraping_logs(limit: int = 20):
+    """Historia logów scrapingu"""
+    logs = await db.scraping_logs.find(
+        {},
+        {"_id": 0}
+    ).sort("started_at", -1).limit(limit).to_list(limit)
+    
+    return {"logs": logs, "count": len(logs)}
+
+
+@api_router.get("/market-intelligence/dashboard")
+async def get_market_dashboard():
+    """Dashboard - podsumowanie danych rynkowych"""
+    # Najnowszy kurs USD
+    latest_usd = await db.usd_rates.find_one(
+        {},
+        {"_id": 0},
+        sort=[("date", -1)]
+    )
+    
+    # Liczba monitorowanych produktów
+    products_count = len(MONITORED_PRODUCTS)
+    
+    # Ostatni scraping
+    last_scraping = await db.scraping_logs.find_one(
+        {},
+        {"_id": 0},
+        sort=[("started_at", -1)]
+    )
+    
+    # Liczba alertów nieprzeczytanych
+    unread_alerts = await db.price_alerts.count_documents({"is_read": False})
+    
+    # Porównanie cen (wszystkie produkty)
+    price_comparison = await compare_prices()
+    
+    return {
+        "usd_rate": latest_usd,
+        "monitored_products": products_count,
+        "last_scraping": last_scraping,
+        "unread_alerts": unread_alerts,
+        "price_comparison": price_comparison
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
