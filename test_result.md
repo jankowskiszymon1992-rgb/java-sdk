@@ -182,6 +182,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ POST /api/employee-work-entries endpoint działa poprawnie. Tworzy wpis godzin z automatycznym obliczaniem zarobków: employee_id, date='2025-10-14', hours=8.0, notes='Montaż instalacji'. Oblicza total_earnings = hours × hourly_rate (8.0 × 30.0 = 240.0). Denormalizuje employee_name. Status 200."
+      - working: true
+        agent: "testing"
+        comment: "✅ RETESTED 2025-10-18: POST /api/employee-work-entries DZIAŁA POPRAWNIE. KRYTYCZNE OBLICZENIA SPRAWDZONE: Dla Jana Kowalskiego (employee_id, date='2025-10-18', hours=6.5, notes='Montaż rozdzielni') automatycznie oblicza total_earnings = 6.5 × 35.50 = 230.75 zł. Denormalizuje employee_name='Jan Kowalski'. Status 200."
   
   - task: "Employee Work Entries - Get History"
     implemented: true
