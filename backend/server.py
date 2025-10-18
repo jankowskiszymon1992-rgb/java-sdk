@@ -2967,6 +2967,283 @@ async def get_market_dashboard():
     }
 
 
+# ============= AI ANALYST ENDPOINTS =============
+
+async def generate_ai_analysis(price_data: dict, usd_data: dict):
+    """
+    Generuje analizę AI na podstawie danych cenowych i kursu USD
+    Używa Emergent LLM (Claude Sonnet 4)
+    """
+    try:
+        from emergentintegrations import EmergentLLM
+        
+        # Przygotuj dane do analizy
+        products_summary = []
+        for product in price_data.get("products", []):
+            prod_info = {
+                "nazwa": product.get("_id"),
+                "cena_min": product.get("min_price"),
+                "cena_max": product.get("max_price"),
+                "średnia": product.get("avg_price"),
+                "rozpiętość": f"{product.get('spread_percent', 0):.1f}%",
+                "ceny": product.get("prices", [])
+            }
+            products_summary.append(prod_info)
+        
+        # Prompt dla AI
+        prompt = f"""Jesteś ekspertem ds. analizy rynku artykułów elektrycznych. 
+Przeanalizuj poniższe dane i wygeneruj szczegółowy raport.
+
+DANE RYNKOWE:
+- Kurs USD/PLN: {usd_data.get('rate', 0):.4f} ({usd_data.get('date', 'N/A')})
+- Liczba monitorowanych produktów: {len(products_summary)}
+
+CENY PRODUKTÓW:
+{products_summary}
+
+ZADANIE:
+1. Przeanalizuj ceny i znajdź najlepsze okazje
+2. Porównaj ceny między hurtowniami
+3. Oceń wpływ kursu USD na ceny przewodów
+4. Wygeneruj 3-5 konkretnych rekomendacji
+5. Podaj 2-3 predykcje cenowe
+6. Wskaż kluczowe wnioski (3-5 punktów)
+
+FORMAT ODPOWIEDZI (JSON):
+{{
+  "podsumowanie": "Krótkie podsumowanie sytuacji rynkowej (2-3 zdania)",
+  "analiza": "Szczegółowa analiza każdego produktu i dostawcy (akapity)",
+  "rekomendacje": ["Rekomendacja 1", "Rekomendacja 2", ...],
+  "predykcje": ["Predykcja 1", "Predykcja 2", ...],
+  "kluczowe_wnioski": ["Wniosek 1", "Wniosek 2", ...]
+}}
+
+Pisz KONKRETNIE, z liczbami i nazwami. Po polsku."""
+
+        # Wywołaj AI
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            return {"error": "Brak klucza EMERGENT_LLM_KEY"}
+        
+        llm = EmergentLLM(api_key=llm_key)
+        
+        response = llm.chat_completion(
+            model="claude-sonnet-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=2000
+        )
+        
+        # Parsuj odpowiedź
+        import json
+        ai_response = response.choices[0].message.content
+        
+        # Spróbuj wyciągnąć JSON z odpowiedzi
+        try:
+            # Znajdź JSON w odpowiedzi (może być w markdown code block)
+            if "```json" in ai_response:
+                json_str = ai_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in ai_response:
+                json_str = ai_response.split("```")[1].split("```")[0].strip()
+            else:
+                json_str = ai_response.strip()
+            
+            analysis_data = json.loads(json_str)
+        except:
+            # Fallback - jeśli nie ma JSON, użyj całej odpowiedzi
+            analysis_data = {
+                "podsumowanie": "Analiza dostępna poniżej",
+                "analiza": ai_response,
+                "rekomendacje": ["Zobacz pełną analizę"],
+                "predykcje": ["Brak predykcji"],
+                "kluczowe_wnioski": ["Zobacz pełną analizę"]
+            }
+        
+        return analysis_data
+        
+    except Exception as e:
+        logger.error(f"AI analysis error: {e}")
+        return {
+            "error": str(e),
+            "podsumowanie": "Błąd generowania analizy",
+            "analiza": f"Wystąpił błąd: {str(e)}",
+            "rekomendacje": [],
+            "predykcje": [],
+            "kluczowe_wnioski": []
+        }
+
+
+@api_router.post("/ai-analyst/generate-report")
+async def generate_ai_report(report_type: str = "on_demand"):
+    """Generuj nowy raport AI"""
+    
+    # Pobierz aktualne dane
+    price_data = await compare_prices()
+    
+    usd_rate = await db.usd_rates.find_one(
+        {},
+        {"_id": 0},
+        sort=[("date", -1)]
+    )
+    
+    if not usd_rate:
+        raise HTTPException(status_code=404, detail="Brak danych o kursie USD")
+    
+    # Generuj analizę AI
+    ai_analysis = await generate_ai_analysis(price_data, usd_rate)
+    
+    if "error" in ai_analysis:
+        raise HTTPException(status_code=500, detail=f"Błąd AI: {ai_analysis['error']}")
+    
+    # Utwórz raport
+    report = AIReport(
+        report_type=report_type,
+        title=f"Raport AI - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}",
+        summary=ai_analysis.get("podsumowanie", ""),
+        analysis=ai_analysis.get("analiza", ""),
+        recommendations=ai_analysis.get("rekomendacje", []),
+        predictions=ai_analysis.get("predykcje", []),
+        key_insights=ai_analysis.get("kluczowe_wnioski", []),
+        data_snapshot={
+            "usd_rate": usd_rate,
+            "price_comparison": price_data
+        }
+    )
+    
+    # Zapisz do bazy
+    report_doc = serialize_doc(report.model_dump())
+    await db.ai_reports.insert_one(report_doc)
+    
+    return report.model_dump()
+
+
+@api_router.get("/ai-analyst/reports")
+async def get_ai_reports(limit: int = 10):
+    """Pobierz ostatnie raporty AI"""
+    reports = await db.ai_reports.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {"reports": reports, "count": len(reports)}
+
+
+@api_router.get("/ai-analyst/reports/{report_id}")
+async def get_ai_report(report_id: str):
+    """Pobierz konkretny raport"""
+    report = await db.ai_reports.find_one(
+        {"id": report_id},
+        {"_id": 0}
+    )
+    
+    if not report:
+        raise HTTPException(status_code=404, detail="Raport nie znaleziony")
+    
+    return report
+
+
+@api_router.get("/ai-analyst/insights")
+async def get_current_insights():
+    """Pobierz aktualne wnioski AI (krótkie, szybkie)"""
+    
+    # Pobierz ostatni raport
+    latest_report = await db.ai_reports.find_one(
+        {},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    if not latest_report:
+        return {"insights": [], "message": "Brak raportów. Wygeneruj pierwszy raport."}
+    
+    # Zwróć kluczowe wnioski z ostatniego raportu
+    insights = []
+    for idx, insight in enumerate(latest_report.get("key_insights", [])):
+        insights.append({
+            "id": f"insight-{idx}",
+            "message": insight,
+            "created_at": latest_report.get("created_at")
+        })
+    
+    return {
+        "insights": insights,
+        "report_id": latest_report.get("id"),
+        "report_date": latest_report.get("created_at")
+    }
+
+
+@api_router.get("/ai-analyst/comparison-table")
+async def get_comparison_table():
+    """
+    Tabela porównawcza z obliczeniami dla AI Analityka
+    Zawiera więcej metryk niż podstawowe porównanie
+    """
+    
+    price_data = await compare_prices()
+    
+    usd_rate = await db.usd_rates.find_one(
+        {},
+        {"_id": 0},
+        sort=[("date", -1)]
+    )
+    
+    # Pobierz historię USD (ostatnie 7 dni)
+    usd_history = await db.usd_rates.find(
+        {},
+        {"_id": 0}
+    ).sort("date", -1).limit(7).to_list(7)
+    
+    usd_trend = "stable"
+    if len(usd_history) >= 2:
+        current = usd_history[0]["rate"]
+        week_ago = usd_history[-1]["rate"]
+        change = ((current - week_ago) / week_ago) * 100
+        
+        if change > 2:
+            usd_trend = "rising"
+        elif change < -2:
+            usd_trend = "falling"
+    
+    # Wzbogać dane o dodatkowe obliczenia
+    enriched_products = []
+    for product in price_data.get("products", []):
+        if not product.get("prices"):
+            continue
+        
+        # Oblicz oszczędność przy zakupie od najtańszego
+        min_price = product.get("min_price", 0)
+        max_price = product.get("max_price", 0)
+        savings_percent = ((max_price - min_price) / max_price * 100) if max_price > 0 else 0
+        savings_amount = max_price - min_price
+        
+        # Znajdź najtańszego dostawcę
+        cheapest_supplier = None
+        for price in product["prices"]:
+            if price["price"] == min_price:
+                cheapest_supplier = price["supplier"]
+                break
+        
+        # Oceń konkurencyjność
+        competitiveness = "high" if savings_percent > 10 else "medium" if savings_percent > 5 else "low"
+        
+        enriched_products.append({
+            **product,
+            "cheapest_supplier": cheapest_supplier,
+            "savings_percent": round(savings_percent, 2),
+            "savings_amount": round(savings_amount, 2),
+            "competitiveness": competitiveness,
+            "usd_sensitive": "przewód" in product["_id"].lower()  # Przewody są wrażliwe na USD
+        })
+    
+    return {
+        "products": enriched_products,
+        "usd_rate": usd_rate,
+        "usd_trend": usd_trend,
+        "usd_change_7d": round(((usd_history[0]["rate"] - usd_history[-1]["rate"]) / usd_history[-1]["rate"] * 100), 2) if len(usd_history) >= 2 else 0,
+        "total_products": len(enriched_products)
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
