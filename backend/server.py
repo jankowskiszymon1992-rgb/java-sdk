@@ -2059,6 +2059,253 @@ async def get_financial_charts_data(year: Optional[int] = None):
     }
 
 
+@api_router.get("/financial-entries/charts")
+async def get_financial_charts_data(year: Optional[int] = None):
+    """
+    Get data for financial charts - full year (January to December)
+    """
+    from datetime import datetime
+    from collections import defaultdict
+    
+    # Use current year if not specified
+    if not year:
+        year = datetime.now(timezone.utc).year
+    
+    # Calculate date range - full year
+    start_date = f"{year}-01-01"
+    end_date = f"{year}-12-31"
+    
+    # Get all entries for the year
+    entries = await db.financial_entries.find(
+        {"date": {"$gte": start_date, "$lte": end_date}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Aggregate by month
+    monthly_data = defaultdict(lambda: {"income": 0, "expense": 0})
+    category_data = defaultdict(lambda: {"income": 0, "expense": 0})
+    
+    income_categories = ["invoice_sales", "cash_income"]
+    
+    # Initialize all 12 months with 0
+    for month in range(1, 13):
+        month_key = f"{year}-{month:02d}"
+        monthly_data[month_key] = {"income": 0, "expense": 0}
+    
+    for entry in entries:
+        date_str = entry.get("date", "")
+        month = date_str[:7]  # YYYY-MM
+        category = entry.get("category")
+        amount = entry.get("amount_gross", 0)
+        
+        # Monthly aggregation
+        if category in income_categories:
+            monthly_data[month]["income"] += amount
+        else:
+            monthly_data[month]["expense"] += amount
+        
+        # Category aggregation
+        if category in income_categories:
+            category_data[category]["income"] += amount
+        else:
+            category_data[category]["expense"] += amount
+    
+    # Convert to lists - all 12 months
+    months_list = sorted(monthly_data.keys())
+    monthly_chart = [
+        {
+            "month": m,
+            "income": monthly_data[m]["income"],
+            "expense": monthly_data[m]["expense"],
+            "balance": monthly_data[m]["income"] - monthly_data[m]["expense"]
+        }
+        for m in months_list
+    ]
+    
+    # Category names
+    cat_names = {
+        "invoice_sales": "Faktury sprzedażowe",
+        "cash_income": "Bez faktury",
+        "invoice_purchase": "Faktury zakupowe",
+        "fuel": "Paliwo",
+        "salaries": "Wypłaty",
+        "taxes": "Podatki",
+        "zus": "ZUS",
+        "equipment": "Sprzęt",
+        "clothes": "Ciuchy"
+    }
+    
+    category_chart = [
+        {
+            "category": cat_names.get(cat, cat),
+            "amount": abs(data["income"] + data["expense"]),
+            "type": "income" if cat in income_categories else "expense"
+        }
+        for cat, data in category_data.items()
+        if data["income"] + data["expense"] != 0
+    ]
+    
+    return {
+        "year": year,
+        "monthly": monthly_chart,
+        "by_category": category_chart
+    }
+
+
+# ============= REMINDERS ENDPOINTS =============
+
+@api_router.post("/reminders", response_model=Reminder)
+async def create_reminder(reminder_input: ReminderCreate):
+    reminder_obj = Reminder(**reminder_input.model_dump())
+    doc = serialize_doc(reminder_obj.model_dump())
+    await db.reminders.insert_one(doc)
+    return reminder_obj
+
+
+@api_router.get("/reminders", response_model=List[Reminder])
+async def get_reminders(
+    upcoming_only: bool = False,
+    completed: Optional[bool] = None
+):
+    query = {}
+    
+    if completed is not None:
+        query["is_completed"] = completed
+    
+    if upcoming_only:
+        # Get reminders from today onwards
+        today = datetime.now(timezone.utc).date().isoformat()
+        query["reminder_date"] = {"$gte": today}
+    
+    reminders = await db.reminders.find(query, {"_id": 0}).sort("reminder_date", 1).to_list(1000)
+    return [deserialize_doc(reminder) for reminder in reminders]
+
+
+@api_router.get("/reminders/{reminder_id}", response_model=Reminder)
+async def get_reminder(reminder_id: str):
+    reminder = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    if not reminder:
+        raise HTTPException(status_code=404, detail="Przypomnienie nie znalezione")
+    return deserialize_doc(reminder)
+
+
+@api_router.put("/reminders/{reminder_id}", response_model=Reminder)
+async def update_reminder(reminder_id: str, reminder_update: ReminderUpdate):
+    existing = await db.reminders.find_one({"id": reminder_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Przypomnienie nie znalezione")
+    
+    update_data = {k: v for k, v in reminder_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.reminders.update_one({"id": reminder_id}, {"$set": update_data})
+    
+    updated_reminder = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    return deserialize_doc(updated_reminder)
+
+
+@api_router.delete("/reminders/{reminder_id}")
+async def delete_reminder(reminder_id: str):
+    result = await db.reminders.delete_one({"id": reminder_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Przypomnienie nie znalezione")
+    return {"message": "Przypomnienie usunięte pomyślnie"}
+
+
+@api_router.get("/reminders/check/pending")
+async def check_pending_reminders():
+    """
+    Check for reminders that should be sent now
+    Returns list of reminders ready to be sent
+    """
+    from datetime import datetime
+    
+    now = datetime.now(timezone.utc)
+    today = now.date().isoformat()
+    current_time = now.strftime("%H:%M")
+    
+    # Find reminders for today that haven't been sent yet
+    query = {
+        "reminder_date": today,
+        "sent": False,
+        "is_completed": False,
+        "reminder_time": {"$lte": current_time}
+    }
+    
+    pending = await db.reminders.find(query, {"_id": 0}).to_list(100)
+    
+    # Mark as sent
+    for reminder in pending:
+        await db.reminders.update_one(
+            {"id": reminder["id"]},
+            {"$set": {"sent": True}}
+        )
+    
+    return {
+        "count": len(pending),
+        "reminders": [deserialize_doc(r) for r in pending]
+    }
+
+
+@api_router.post("/reminders/setup-recurring")
+async def setup_recurring_reminders():
+    """
+    Setup recurring reminders for ZUS and Taxes (18th of each month)
+    """
+    from datetime import datetime
+    from calendar import monthrange
+    
+    current_year = datetime.now(timezone.utc).year
+    
+    # Create reminders for rest of the year
+    created_count = 0
+    
+    for month in range(1, 13):
+        month_str = f"{current_year}-{month:02d}"
+        reminder_date = f"{current_year}-{month:02d}-18"
+        
+        # Check if ZUS reminder exists
+        existing_zus = await db.reminders.find_one({
+            "reminder_type": "zus",
+            "reminder_date": reminder_date
+        })
+        
+        if not existing_zus:
+            zus_reminder = Reminder(
+                title="Płatność ZUS",
+                description="Przypomnienie o opłaceniu składek ZUS za poprzedni miesiąc",
+                reminder_date=reminder_date,
+                reminder_time="09:00",
+                reminder_type=ReminderType.zus,
+                is_recurring=True
+            )
+            await db.reminders.insert_one(serialize_doc(zus_reminder.model_dump()))
+            created_count += 1
+        
+        # Check if Taxes reminder exists
+        existing_taxes = await db.reminders.find_one({
+            "reminder_type": "taxes",
+            "reminder_date": reminder_date
+        })
+        
+        if not existing_taxes:
+            taxes_reminder = Reminder(
+                title="Płatność Podatków",
+                description="Przypomnienie o rozliczeniu podatków za poprzedni miesiąc",
+                reminder_date=reminder_date,
+                reminder_time="09:00",
+                reminder_type=ReminderType.taxes,
+                is_recurring=True
+            )
+            await db.reminders.insert_one(serialize_doc(taxes_reminder.model_dump()))
+            created_count += 1
+    
+    return {
+        "message": f"Utworzono {created_count} przypomnień cyklicznych",
+        "year": current_year
+    }
+
+
 @api_router.post("/financial-entries/ocr")
 async def create_financial_entry_with_ocr(request: dict):
     """
