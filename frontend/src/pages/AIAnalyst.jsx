@@ -11,8 +11,10 @@ const API = `${BACKEND_URL}/api`;
 const AIAnalyst = () => {
   const [latestReport, setLatestReport] = useState(null);
   const [comparisonTable, setComparisonTable] = useState(null);
+  const [trendAnalysis, setTrendAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [analyzingTrends, setAnalyzingTrends] = useState(false);
 
   useEffect(() => {
     loadData();
