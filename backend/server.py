@@ -3363,6 +3363,99 @@ async def get_latest_trend_analysis():
     return analysis
 
 
+@api_router.post("/ai-analyst/chat")
+async def chat_with_gpt5(message: str, session_id: Optional[str] = None):
+    """
+    Chat z GPT-5 - zadawaj pytania o produkty, ceny, trendy
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Pobierz aktualne dane rynkowe jako kontekst
+        price_data = await compare_prices()
+        usd_rate = await db.usd_rates.find_one({}, {"_id": 0}, sort=[("date", -1)])
+        
+        # Pobierz ostatnią analizę trendów jeśli istnieje
+        trend_analysis = await db.trend_analyses.find_one({}, {"_id": 0}, sort=[("created_at", -1)])
+        
+        # Przygotuj kontekst
+        products_info = []
+        for product in price_data.get("products", [])[:30]:  # Pierwsze 30 produktów
+            if product.get("prices"):
+                products_info.append({
+                    "nazwa": product.get("_id"),
+                    "cena_min": product.get("min_price"),
+                    "cena_max": product.get("max_price"),
+                    "najtańszy": next((p["supplier"] for p in product["prices"] if p["price"] == product.get("min_price")), "N/A")
+                })
+        
+        context = f"""DANE RYNKOWE:
+- Kurs USD/PLN: {usd_rate['rate'] if usd_rate else 'N/A'} ({usd_rate['date'] if usd_rate else 'N/A'})
+- Monitorowane produkty: {len(MONITORED_PRODUCTS)}
+
+AKTUALNE CENY (top 30):
+{products_info}
+
+Odpowiadaj KONKRETNIE, z danymi i liczbami. Jeśli użytkownik pyta o produkt którego nie ma w danych, powiedz że nie masz informacji o nim."""
+
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            return {"error": "Brak EMERGENT_LLM_KEY"}
+        
+        # Utwórz lub użyj istniejącej sesji
+        if not session_id:
+            session_id = f"chat-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+        
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=session_id,
+            system_message=f"""Jesteś ekspertem ds. analizy rynku artykułów elektrycznych dla sklepu internetowego. 
+Pomagasz właścicielowi sklepu podejmować decyzje zakupowe.
+
+{context}
+
+Odpowiadaj:
+- KRÓTKO i KONKRETNIE (2-4 zdania max)
+- Z LICZBAMI i NAZWAMI produktów/dostawców
+- Po POLSKU
+- Jak doradca biznesowy"""
+        ).with_model("openai", "gpt-5")
+        
+        user_message = UserMessage(text=message)
+        response = await chat.send_message(user_message)
+        
+        # Zapisz do historii
+        chat_entry = {
+            "id": str(uuid.uuid4()),
+            "session_id": session_id,
+            "user_message": message,
+            "ai_response": response,
+            "created_at": datetime.now(timezone.utc)
+        }
+        chat_entry = serialize_doc(chat_entry)
+        await db.ai_chat_history.insert_one(chat_entry)
+        
+        return {
+            "response": response,
+            "session_id": session_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd czatu: {str(e)}")
+
+
+@api_router.get("/ai-analyst/chat/history")
+async def get_chat_history(session_id: str, limit: int = 50):
+    """Pobierz historię czatu"""
+    history = await db.ai_chat_history.find(
+        {"session_id": session_id},
+        {"_id": 0}
+    ).sort("created_at", 1).limit(limit).to_list(limit)
+    
+    return {"history": history, "count": len(history)}
+
+
 @api_router.get("/ai-analyst/comparison-table")
 async def get_comparison_table():
     """
