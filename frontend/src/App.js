@@ -60,6 +60,7 @@ function App() {
             <Route path="employees" element={<Employees />} />
             <Route path="finances" element={<Finances />} />
             <Route path="market-intelligence" element={<MarketIntelligence />} />
+            <Route path="ai-analyst" element={<AIAnalyst />} />
             <Route path="reminders" element={<Reminders />} />
           </Route>
         </Routes>
