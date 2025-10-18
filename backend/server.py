@@ -2582,58 +2582,108 @@ Kwoty muszą być liczbami, nie tekstem.""",
 
 # ============= MARKET INTELLIGENCE ENDPOINTS =============
 
-# Lista produktów do monitorowania (TOP 5 na start)
+# Lista produktów do monitorowania (PEŁNA LISTA)
 MONITORED_PRODUCTS = [
-    {
-        "name": "Przewód YDYp 3x1.5 mm²",
-        "category": "przewody",
-        "search_terms": {
-            "kanlux": "przewód ydyp 3x1.5",
-            "tme": "przewód 3x1.5",
-            "conrad": "kabel 3x1.5",
-            "rs_components": "cable 3x1.5"
-        }
-    },
-    {
-        "name": "Przewód YDYp 3x2.5 mm²",
-        "category": "przewody",
-        "search_terms": {
-            "kanlux": "przewód ydyp 3x2.5",
-            "tme": "przewód 3x2.5",
-            "conrad": "kabel 3x2.5",
-            "rs_components": "cable 3x2.5"
-        }
-    },
-    {
-        "name": "Gniazdko Simon 54 pojedyncze",
-        "category": "gniazda",
-        "search_terms": {
-            "kanlux": "gniazdko simon 54",
-            "tme": "gniazdo simon 54",
-            "conrad": "steckdose simon 54",
-            "rs_components": "socket simon 54"
-        }
-    },
-    {
-        "name": "Bezpiecznik B16 1-fazowy",
-        "category": "bezpieczniki",
-        "search_terms": {
-            "kanlux": "wyłącznik b16",
-            "tme": "bezpiecznik b16",
-            "conrad": "sicherung b16",
-            "rs_components": "circuit breaker b16"
-        }
-    },
-    {
-        "name": "Naświetlacz LED 20W",
-        "category": "naswietlacze",
-        "search_terms": {
-            "kanlux": "naświetlacz led 20w",
-            "tme": "projektor led 20w",
-            "conrad": "led strahler 20w",
-            "rs_components": "led floodlight 20w"
-        }
-    }
+    # PRZEWODY (różne przekroje i liczba żył)
+    {"name": "Przewód YDYp 2x1.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x1.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 4x1.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 5x1.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 2x2.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x2.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 4x2.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 5x2.5 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x4 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 5x4 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x6 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 5x6 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 3x10 mm²", "category": "przewody", "usd_sensitive": True},
+    {"name": "Przewód YDYp 5x10 mm²", "category": "przewody", "usd_sensitive": True},
+    
+    # GNIAZDA - Simon 10
+    {"name": "Gniazdko Simon 10 pojedyncze", "category": "gniazda", "usd_sensitive": False},
+    {"name": "Gniazdko Simon 10 podwójne", "category": "gniazda", "usd_sensitive": False},
+    
+    # GNIAZDA - Simon 54
+    {"name": "Gniazdko Simon 54 pojedyncze", "category": "gniazda", "usd_sensitive": False},
+    {"name": "Gniazdko Simon 54 podwójne", "category": "gniazda", "usd_sensitive": False},
+    
+    # GNIAZDA - Hager
+    {"name": "Gniazdko Hager pojedyncze", "category": "gniazda", "usd_sensitive": False},
+    {"name": "Gniazdko Hager podwójne", "category": "gniazda", "usd_sensitive": False},
+    
+    # NAŚWIETLACZE LED
+    {"name": "Naświetlacz LED 10W", "category": "naswietlacze", "usd_sensitive": False},
+    {"name": "Naświetlacz LED 20W", "category": "naswietlacze", "usd_sensitive": False},
+    {"name": "Naświetlacz LED 30W", "category": "naswietlacze", "usd_sensitive": False},
+    {"name": "Naświetlacz LED 50W", "category": "naswietlacze", "usd_sensitive": False},
+    
+    # ROZDZIELNICE
+    {"name": "Rozdzielnica podtynkowa 12M", "category": "rozdzielnice", "usd_sensitive": False},
+    {"name": "Rozdzielnica podtynkowa 24M", "category": "rozdzielnice", "usd_sensitive": False},
+    {"name": "Rozdzielnica natynkowa 12M", "category": "rozdzielnice", "usd_sensitive": False},
+    {"name": "Rozdzielnica natynkowa 24M", "category": "rozdzielnice", "usd_sensitive": False},
+    
+    # BEZPIECZNIKI 1-fazowe
+    {"name": "Bezpiecznik B10 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik B16 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik B20 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik B25 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik C16 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik C25 1P", "category": "bezpieczniki", "usd_sensitive": False},
+    
+    # BEZPIECZNIKI 3-fazowe
+    {"name": "Bezpiecznik B16 3P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik B25 3P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik C16 3P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik C25 3P", "category": "bezpieczniki", "usd_sensitive": False},
+    {"name": "Bezpiecznik C32 3P", "category": "bezpieczniki", "usd_sensitive": False},
+    
+    # ŻARÓWKI LED
+    {"name": "Żarówka LED E27 9W", "category": "zarowki", "usd_sensitive": False},
+    {"name": "Żarówka LED E27 12W", "category": "zarowki", "usd_sensitive": False},
+    {"name": "Żarówka LED E14 6W", "category": "zarowki", "usd_sensitive": False},
+    {"name": "Żarówka LED GU10 5W", "category": "zarowki", "usd_sensitive": False},
+    
+    # LAMPY HERMETYCZNE
+    {"name": "Lampa hermetyczna LED 18W 60cm okrągła", "category": "lampy_hermetyczne", "usd_sensitive": False},
+    {"name": "Lampa hermetyczna LED 36W 120cm okrągła", "category": "lampy_hermetyczne", "usd_sensitive": False},
+    {"name": "Lampa hermetyczna LED 18W 60cm kwadratowa", "category": "lampy_hermetyczne", "usd_sensitive": False},
+    {"name": "Lampa hermetyczna LED 36W 120cm kwadratowa", "category": "lampy_hermetyczne", "usd_sensitive": False},
+    
+    # ŚWIETLÓWKI LED
+    {"name": "Świetlówka LED 120cm 18W", "category": "swietlowki", "usd_sensitive": False},
+    {"name": "Świetlówka LED 150cm 22W", "category": "swietlowki", "usd_sensitive": False},
+    
+    # PESZLE I RURKI
+    {"name": "Peszel 16mm (50m)", "category": "peszle", "usd_sensitive": False},
+    {"name": "Peszel 20mm (50m)", "category": "peszle", "usd_sensitive": False},
+    {"name": "Peszel 25mm (50m)", "category": "peszle", "usd_sensitive": False},
+    {"name": "Peszel 32mm (25m)", "category": "peszle", "usd_sensitive": False},
+    {"name": "Rurka PCV 16mm (3m)", "category": "rurki", "usd_sensitive": False},
+    {"name": "Rurka PCV 20mm (3m)", "category": "rurki", "usd_sensitive": False},
+    {"name": "Uchwyt do rurki PCV 16mm", "category": "uchwyty", "usd_sensitive": False},
+    {"name": "Kolano PCV 16mm", "category": "kolanka", "usd_sensitive": False},
+    {"name": "Kolano PCV 20mm", "category": "kolanka", "usd_sensitive": False},
+    
+    # DRUT ODGROMOWY
+    {"name": "Drut odgromowy aluminium 8mm (25m)", "category": "odgromienie", "usd_sensitive": True},
+    {"name": "Uchwyt odgromowy dachowy", "category": "odgromienie", "usd_sensitive": False},
+    {"name": "Uchwyt odgromowy ścienny", "category": "odgromienie", "usd_sensitive": False},
+    
+    # BEDNARKA
+    {"name": "Bednarka 25mm (25m)", "category": "bednarka", "usd_sensitive": False},
+    {"name": "Bednarka 32mm (25m)", "category": "bednarka", "usd_sensitive": False},
+    
+    # KOSTKI ELEKTRYCZNE
+    {"name": "Kostka Wago 2-przewodowa (100szt)", "category": "kostki", "usd_sensitive": False},
+    {"name": "Kostka Wago 3-przewodowa (100szt)", "category": "kostki", "usd_sensitive": False},
+    {"name": "Kostka Wago 5-przewodowa (50szt)", "category": "kostki", "usd_sensitive": False},
+    {"name": "Kostka Tor 3-przewodowa (100szt)", "category": "kostki", "usd_sensitive": False},
+    
+    # TAŚMY IZOLACYJNE
+    {"name": "Taśma izolacyjna PCV czarna", "category": "tasmy", "usd_sensitive": False},
+    {"name": "Taśma izolacyjna PCV kolorowa (mix)", "category": "tasmy", "usd_sensitive": False},
 ]
 
 
