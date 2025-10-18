@@ -2771,17 +2771,25 @@ async def get_usd_rate_current():
     usd_data = await fetch_usd_rate()
     
     if usd_data:
+        # Sprawdź czy już mamy dzisiaj kurs
+        existing = await db.usd_rates.find_one(
+            {"date": usd_data["date"]},
+            {"_id": 0}
+        )
+        
+        if existing:
+            return existing
+        
         # Zapisz do bazy
-        rate_doc = {
-            "id": str(uuid.uuid4()),
-            "rate": usd_data["rate"],
-            "date": usd_data["date"],
-            "source": "NBP",
-            "created_at": datetime.now(timezone.utc)
-        }
+        rate_obj = USDRate(
+            rate=usd_data["rate"],
+            date=usd_data["date"],
+            source="NBP"
+        )
+        rate_doc = serialize_doc(rate_obj.model_dump())
         await db.usd_rates.insert_one(rate_doc)
         
-        return rate_doc
+        return rate_obj.model_dump()
     else:
         raise HTTPException(status_code=500, detail="Nie udało się pobrać kursu USD")
 
