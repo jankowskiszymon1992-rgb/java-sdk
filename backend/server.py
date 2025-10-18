@@ -413,6 +413,39 @@ async def get_work_summary(month: Optional[str] = None):
     }
 
 
+@api_router.put("/employee-work-entries/{entry_id}", response_model=EmployeeWorkEntry)
+async def update_work_entry(entry_id: str, entry_input: EmployeeWorkEntryCreate):
+    # Check if entry exists
+    existing = await db.employee_work_entries.find_one({"id": entry_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Wpis nie znaleziony")
+    
+    # Get employee to fetch current rate and name
+    employee = await db.employees.find_one({"id": entry_input.employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
+    
+    # Calculate earnings
+    total_earnings = entry_input.hours * employee["hourly_rate"]
+    
+    # Prepare update data
+    update_data = {
+        "employee_id": entry_input.employee_id,
+        "employee_name": employee["name"],
+        "date": entry_input.date,
+        "hours": entry_input.hours,
+        "hourly_rate": employee["hourly_rate"],
+        "total_earnings": total_earnings,
+        "notes": entry_input.notes or "",
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.employee_work_entries.update_one({"id": entry_id}, {"$set": update_data})
+    
+    updated_entry = await db.employee_work_entries.find_one({"id": entry_id}, {"_id": 0})
+    return deserialize_doc(updated_entry)
+
+
 @api_router.delete("/employee-work-entries/{entry_id}")
 async def delete_work_entry(entry_id: str):
     result = await db.employee_work_entries.delete_one({"id": entry_id})
