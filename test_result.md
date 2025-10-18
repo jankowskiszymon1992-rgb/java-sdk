@@ -353,6 +353,8 @@ test_plan:
     - "Employee Work Entries - Create Entry - RETESTED ✅ 2025-10-18"
     - "Employee Work Entries - Get History - RETESTED ✅ 2025-10-18"
     - "Employee Work Entries - Summary Report - RETESTED ✅ 2025-10-18"
+    - "Employee Work Entries - Edit Entry - NEW FUNCTIONALITY TESTED ✅ 2025-10-18"
+    - "Employee Management - CASCADE DELETE - NEW FUNCTIONALITY TESTED ✅ 2025-10-18"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
