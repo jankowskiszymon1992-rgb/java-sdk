@@ -62,6 +62,22 @@ const AIAnalyst = () => {
     }
   };
 
+  const handleAnalyzeTrends = async () => {
+    setAnalyzingTrends(true);
+    toast.info('GPT-5 analizuje trendy... To może potrwać 15-30 sekund');
+    
+    try {
+      const response = await axios.post(`${API}/ai-analyst/trend-analysis`);
+      setTrendAnalysis(response);
+      toast.success('Analiza trendów gotowa!');
+    } catch (error) {
+      console.error('Błąd analizy trendów:', error);
+      toast.error('Nie udało się przeanalizować trendów');
+    } finally {
+      setAnalyzingTrends(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12">Ładowanie...</div>;
   }
