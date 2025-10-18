@@ -32,55 +32,70 @@ export const showNotification = async (title, options = {}) => {
     }
   }
 
+  // Check if running as standalone PWA
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                       window.navigator.standalone === true;
+  console.log('Is standalone PWA:', isStandalone);
+
+  if (!('serviceWorker' in navigator)) {
+    console.error('Service Worker not supported');
+    alert('Ta przeglądarka nie obsługuje powiadomień');
+    return false;
+  }
+
   try {
-    // Try Service Worker first (for PWA)
-    if ('serviceWorker' in navigator) {
-      console.log('Trying Service Worker notification...');
-      
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration && registration.active) {
-        console.log('SW is active, using SW notification');
-        
-        await registration.showNotification(title, {
-          icon: '/icon-192.png',
-          badge: '/icon-192.png',
-          vibrate: [200, 100, 200],
-          tag: options.tag || 'elektron-notification',
-          requireInteraction: false,
-          body: options.body || '',
-          ...options,
-        });
-        
-        console.log('✅ SW Notification shown successfully!');
-        return true;
-      }
+    console.log('Getting SW registration...');
+    let registration = await navigator.serviceWorker.getRegistration();
+    
+    // If no registration, wait for it
+    if (!registration) {
+      console.log('No registration found, waiting for ready...');
+      registration = await navigator.serviceWorker.ready;
     }
     
-    // Fallback: Direct browser notification (simpler, always works)
-    console.log('Using direct browser notification (fallback)');
-    const notification = new Notification(title, {
+    console.log('SW Registration:', registration);
+    console.log('SW Active:', registration?.active);
+    console.log('SW Installing:', registration?.installing);
+    console.log('SW Waiting:', registration?.waiting);
+    
+    if (!registration) {
+      throw new Error('Service Worker nie jest zarejestrowany');
+    }
+    
+    // Use Service Worker notification
+    await registration.showNotification(title, {
       icon: '/icon-192.png',
-      body: options.body || '',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
       tag: options.tag || 'elektron-notification',
       requireInteraction: false,
-      vibrate: [200, 100, 200],
+      body: options.body || '',
+      data: options.data || {},
     });
     
-    // Auto-close after 10 seconds
-    setTimeout(() => notification.close(), 10000);
-    
-    // Handle click
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-    };
-    
-    console.log('✅ Direct notification shown successfully!');
+    console.log('✅ Notification shown via SW!');
     return true;
     
   } catch (error) {
     console.error('❌ Error showing notification:', error);
-    alert(`Błąd powiadomienia: ${error.message}`);
+    
+    // Only use fallback on desktop browser (not PWA)
+    if (!isStandalone && typeof Notification !== 'undefined') {
+      try {
+        console.log('Trying direct notification fallback...');
+        const notification = new Notification(title, {
+          icon: '/icon-192.png',
+          body: options.body || '',
+        });
+        setTimeout(() => notification.close(), 10000);
+        console.log('✅ Direct notification shown!');
+        return true;
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+      }
+    }
+    
+    alert(`Błąd powiadomienia: ${error.message}\n\nSpróbuj odinstalować i zainstalować aplikację ponownie.`);
     return false;
   }
 };
