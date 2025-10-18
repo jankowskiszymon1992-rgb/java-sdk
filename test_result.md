@@ -435,15 +435,18 @@ test_plan:
 
   - task: "Reminders - Backend API Check Pending"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoint GET /api/reminders/check/pending zwraca listę przypomnień które powinny wyświetlić powiadomienia. Wymaga testów backend."
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/reminders/check/pending DZIAŁA POPRAWNIE. Testowano kompletny flow: 1) Utworzono testowe przypomnienie na dzisiaj z czasem 09:00 (już minął), 2) Wywołano GET /api/reminders/check/pending - zwrócił 1 przypomnienie w formacie {\"count\": 1, \"reminders\": [...]}, 3) Zweryfikowano że przypomnienie zostało oznaczone jako sent=true w bazie danych, 4) Ponowne wywołanie zwróciło {\"count\": 0, \"reminders\": []} - poprawnie filtruje już wysłane. Endpoint poprawnie: filtruje przypomnienia na dzisiaj z reminder_time <= aktualny czas, zwraca poprawny format JSON, oznacza przypomnienia jako sent=true po pobraniu. Backend URL: https://elektron-finance.preview.emergentagent.com"
 
   - task: "Reminders - Service Worker Registration"
     implemented: true
