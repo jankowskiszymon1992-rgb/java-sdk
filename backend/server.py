@@ -3223,6 +3223,146 @@ async def get_current_insights():
     }
 
 
+@api_router.post("/ai-analyst/trend-analysis")
+async def analyze_price_trends():
+    """
+    Drugi AI Agent (GPT-5) - Analiza trendów cenowych
+    Pokazuje co drożeje, co tanieje, rekomendacje KUP/CZEKAJ
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Pobierz dane cenowe
+        price_data = await compare_prices()
+        
+        # Pobierz historię USD (ostatnie 7 dni)
+        usd_history = await db.usd_rates.find({}, {"_id": 0}).sort("date", -1).limit(7).to_list(7)
+        
+        usd_trend = "stabilny"
+        usd_change = 0
+        if len(usd_history) >= 2:
+            current = usd_history[0]["rate"]
+            week_ago = usd_history[-1]["rate"]
+            usd_change = ((current - week_ago) / week_ago) * 100
+            
+            if usd_change > 2:
+                usd_trend = "rośnie"
+            elif usd_change < -2:
+                usd_trend = "spada"
+        
+        # Przygotuj dane dla AI
+        products_summary = []
+        for product in price_data.get("products", []):
+            if product.get("prices"):
+                products_summary.append({
+                    "nazwa": product.get("_id"),
+                    "cena_min": product.get("min_price"),
+                    "cena_max": product.get("max_price"),
+                    "rozpiętość": f"{product.get('spread_percent', 0):.1f}%",
+                    "najtańszy": next((p["supplier"] for p in product["prices"] if p["price"] == product.get("min_price")), "N/A")
+                })
+        
+        prompt = f"""Jesteś ekspertem analizy trendów cenowych artykułów elektrycznych.
+
+DANE:
+- Kurs USD/PLN: {usd_history[0]['rate'] if usd_history else 'N/A':.4f} (trend: {usd_trend}, zmiana 7 dni: {usd_change:+.2f}%)
+- Liczba produktów: {len(products_summary)}
+
+PRODUKTY:
+{products_summary[:20]}  
+
+ZADANIE:
+Dla KAŻDEGO produktu oceń:
+1. Czy KUPIĆ TERAZ czy CZEKAĆ?
+2. Trend: DROŻEJE / TANIEJE / STABILNY
+3. Krótkie uzasadnienie (1 zdanie)
+
+FORMAT (JSON):
+{{
+  "podsumowanie": "Ogólna sytuacja rynkowa (2-3 zdania)",
+  "produkty": [
+    {{
+      "nazwa": "Przewód YDYp 3x1.5 mm²",
+      "rekomendacja": "KUP_TERAZ" lub "CZEKAJ",
+      "trend": "DROŻEJE" lub "TANIEJE" lub "STABILNY",
+      "uzasadnienie": "Krótkie uzasadnienie",
+      "confidence": 85
+    }}
+  ],
+  "kluczowe_wnioski": ["Wniosek 1", "Wniosek 2", "Wniosek 3"]
+}}
+
+Pisz KONKRETNIE. Po polsku."""
+
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            return {"error": "Brak EMERGENT_LLM_KEY"}
+        
+        # Użyj GPT-5 do analizy trendów
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"trend-analysis-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+            system_message="Jesteś ekspertem analizy trendów cenowych. Dajesz konkretne rekomendacje KUP/CZEKAJ."
+        ).with_model("openai", "gpt-5")
+        
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parsuj JSON
+        import json
+        try:
+            if "```json" in response:
+                json_str = response.split("```json")[1].split("```")[0].strip()
+            elif "```" in response:
+                json_str = response.split("```")[1].split("```")[0].strip()
+            else:
+                json_str = response.strip()
+            
+            analysis = json.loads(json_str)
+        except:
+            analysis = {
+                "podsumowanie": response[:200],
+                "produkty": [],
+                "kluczowe_wnioski": ["Błąd parsowania odpowiedzi AI"]
+            }
+        
+        # Zapisz analizę
+        analysis_doc = {
+            "id": str(uuid.uuid4()),
+            "analysis_type": "trend_analysis",
+            "summary": analysis.get("podsumowanie", ""),
+            "products": analysis.get("produkty", []),
+            "key_insights": analysis.get("kluczowe_wnioski", []),
+            "usd_rate": usd_history[0] if usd_history else None,
+            "usd_trend": usd_trend,
+            "usd_change_7d": usd_change,
+            "created_at": datetime.now(timezone.utc)
+        }
+        analysis_doc = serialize_doc(analysis_doc)
+        await db.trend_analyses.insert_one(analysis_doc)
+        
+        return analysis
+        
+    except Exception as e:
+        logger.error(f"Trend analysis error: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd analizy trendów: {str(e)}")
+
+
+@api_router.get("/ai-analyst/latest-trend-analysis")
+async def get_latest_trend_analysis():
+    """Pobierz ostatnią analizę trendów"""
+    analysis = await db.trend_analyses.find_one(
+        {},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    if not analysis:
+        return {"message": "Brak analiz. Wygeneruj pierwszą analizę."}
+    
+    return analysis
+
+
 @api_router.get("/ai-analyst/comparison-table")
 async def get_comparison_table():
     """
