@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v6-react18-stable';
+const CACHE_NAME = 'elektron-v7-market-intelligence-2025';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
