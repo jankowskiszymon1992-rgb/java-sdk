@@ -2887,9 +2887,10 @@ async def trigger_scraping(supplier: Optional[str] = None):
             log_entry["duration_seconds"] = (log_entry["completed_at"] - log_entry["started_at"]).total_seconds()
         
         # Zapisz log
-        log_doc = serialize_doc(log_entry)
+        log_doc = serialize_doc(log_entry.copy())
         await db.scraping_logs.insert_one(log_doc)
-        results.append(log_entry)
+        # Serialize także dla response API
+        results.append(serialize_doc(log_entry.copy()))
     
     return {"results": results, "total_suppliers": len(results)}
 
