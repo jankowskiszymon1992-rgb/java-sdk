@@ -1609,7 +1609,24 @@ Zwróć TYLKO JSON bez dodatkowego tekstu."""
         ).with_model("anthropic", "claude-sonnet-4-20250514")
         
         # Create message with image
-        image_content = ImageContent(image_base64=image)
+        # Detect image type from base64
+        import base64
+        try:
+            img_data = base64.b64decode(image[:100])  # Check first 100 bytes
+            # Check magic numbers for image types
+            if img_data.startswith(b'\xff\xd8\xff'):
+                media_type = "image/jpeg"
+            elif img_data.startswith(b'\x89PNG'):
+                media_type = "image/png"
+            elif img_data.startswith(b'RIFF') and b'WEBP' in img_data[:20]:
+                media_type = "image/webp"
+            else:
+                # Default to jpeg if unknown
+                media_type = "image/jpeg"
+        except Exception:
+            media_type = "image/jpeg"
+        
+        image_content = ImageContent(image_base64=image, media_type=media_type)
         
         user_message = UserMessage(
             text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
