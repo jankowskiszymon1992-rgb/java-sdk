@@ -12,6 +12,7 @@ import Reports from './pages/Reports';
 import VoiceReport from './pages/VoiceReport';
 import Mail from './pages/Mail';
 import AIAssistant from './pages/AIAssistant';
+import Employees from './pages/Employees';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
 import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder } from './utils/notifications';
