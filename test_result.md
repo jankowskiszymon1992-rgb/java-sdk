@@ -327,15 +327,33 @@ frontend:
   
   - task: "Employee Summary in Work Hours Page"
     implemented: true
-    working: "NA"
+    working: true
     file: "/frontend/src/pages/WorkHours.jsx, /frontend/src/api/api.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Dodano nową sekcję 'Podsumowanie pracowników' na stronie Godziny pracy. Tabela pokazuje: Imię i nazwisko, Suma godzin w miesiącu, Zarobek w miesiącu. Dodano wybór miesiąca (month picker). Backend endpoint /api/employee-work-entries/summary działa - zwraca agregację dla 4 pracowników w październiku 2025 (grand_total: 1250.75 zł). Frontend wymaga testów."
+      - working: true
+        agent: "main"
+        comment: "✅ SEKCJA DZIAŁA: Tabela pokazuje każdego pracownika osobno z sumą godzin i zarobków. Usunięto wiersz 'SUMA CAŁKOWITA' zgodnie z wymaganiami. Month picker umożliwia wybór miesiąca."
+  
+  - task: "Dashboard - Total Hours This Month"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Dashboard pokazuje 0 godzin w pracy w miesiącu, mimo że są wpisy"
+      - working: true
+        agent: "main"
+        comment: "✅ NAPRAWIONO: Dashboard endpoint /api/projects/stats/dashboard teraz sumuje godziny z DWÓCH źródeł: 1) workhours (godziny związane z projektami), 2) employee_work_entries (godziny pracowników). Weryfikacja: Dashboard pokazuje 25 godzin (wszystkie z employee_work_entries październik 2025)."
 
 metadata:
   created_by: "main_agent"
