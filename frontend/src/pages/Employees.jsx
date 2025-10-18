@@ -182,6 +182,7 @@ const Employees = () => {
       hours: '',
       notes: ''
     });
+    setEditingWorkEntry(null);
   };
 
   const handleAddNew = () => {
