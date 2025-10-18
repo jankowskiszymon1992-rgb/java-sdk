@@ -3025,14 +3025,15 @@ Pisz KONKRETNIE, z liczbami i nazwami. Po polsku."""
         if not llm_key:
             return {"error": "Brak klucza EMERGENT_LLM_KEY"}
         
-        llm = EmergentLLM(api_key=llm_key)
+        # Użyj LlmChat z Emergent Integrations
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"market-analysis-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+            system_message="Jesteś ekspertem ds. analizy rynku artykułów elektrycznych. Generujesz szczegółowe raporty w języku polskim z konkretnymi liczbami i nazwami."
+        ).with_model("anthropic", "claude-4-sonnet-20250514")
         
-        response = llm.chat_completion(
-            model="claude-sonnet-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=2000
-        )
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
         
         # Parsuj odpowiedź
         import json
