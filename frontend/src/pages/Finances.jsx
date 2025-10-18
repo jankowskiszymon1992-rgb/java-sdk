@@ -213,6 +213,18 @@ const Finances = () => {
     // Don't auto-enable OCR - let user choose
   };
 
+  const handleExportExcel = () => {
+    const url = `${API}/financial-entries/export/excel?month=${selectedMonth}`;
+    window.open(url, '_blank');
+    toast.success('Pobieranie pliku Excel...');
+  };
+
+  const handleExportPDF = () => {
+    const url = `${API}/financial-entries/export/pdf?month=${selectedMonth}`;
+    window.open(url, '_blank');
+    toast.success('Pobieranie pliku PDF...');
+  };
+
   if (loading) {
     return <div className="text-center py-12">Ładowanie...</div>;
   }
