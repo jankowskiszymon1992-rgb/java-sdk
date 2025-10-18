@@ -167,6 +167,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/employees endpoint działa poprawnie. Zwraca listę wszystkich pracowników z pełną strukturą danych. Testowano - znaleziono 2 pracowników, w tym testowego 'Bart'. Status 200, dane pobierane z MongoDB."
+      - working: true
+        agent: "testing"
+        comment: "✅ RETESTED 2025-10-18: GET /api/employees DZIAŁA POPRAWNIE. Zwraca listę 4 pracowników, w tym Jana Kowalskiego z poprawną stawką 35.50 zł/h. Wszystkie wymagane pola są obecne (id, name, hourly_rate, notes, created_at, updated_at). Status 200."
   
   - task: "Employee Work Entries - Create Entry"
     implemented: true
