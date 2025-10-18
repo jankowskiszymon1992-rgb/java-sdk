@@ -418,12 +418,13 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 4
+  test_sequence: 5
   run_ui: false
   fix_date: "2025-01-12"
   ai_test_date: "2025-10-14"
   employee_test_date: "2025-10-18"
   new_functionality_test_date: "2025-10-18"
+  financial_system_test_date: "2025-10-18"
 
 test_plan:
   current_focus:
