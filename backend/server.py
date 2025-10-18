@@ -3368,36 +3368,113 @@ async def get_latest_trend_analysis():
 async def chat_with_gpt5(message: str, session_id: Optional[str] = None):
     """
     Chat z GPT-5 - zadawaj pytania o produkty, ceny, trendy
+    PEŁNY DOSTĘP do wszystkich danych i kontroli systemu
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        # Pobierz aktualne dane rynkowe jako kontekst
-        price_data = await compare_prices()
-        usd_rate = await db.usd_rates.find_one({}, {"_id": 0}, sort=[("date", -1)])
+        # ==== PEŁNY DOSTĘP DO BAZY DANYCH ====
         
-        # Pobierz ostatnią analizę trendów jeśli istnieje
-        trend_analysis = await db.trend_analyses.find_one({}, {"_id": 0}, sort=[("created_at", -1)])
+        # 1. WSZYSTKIE ceny produktów (nie tylko top 30)
+        all_prices = await db.product_prices.find({}, {"_id": 0}).sort("scraped_at", -1).limit(500).to_list(500)
         
-        # Przygotuj kontekst
-        products_info = []
-        for product in price_data.get("products", [])[:30]:  # Pierwsze 30 produktów
-            if product.get("prices"):
-                products_info.append({
-                    "nazwa": product.get("_id"),
-                    "cena_min": product.get("min_price"),
-                    "cena_max": product.get("max_price"),
-                    "najtańszy": next((p["supplier"] for p in product["prices"] if p["price"] == product.get("min_price")), "N/A")
+        # Grupuj po produktach
+        products_prices = {}
+        for price in all_prices:
+            prod_name = price.get("product_name")
+            if prod_name not in products_prices:
+                products_prices[prod_name] = []
+            products_prices[prod_name].append({
+                "supplier": price.get("supplier"),
+                "price": price.get("price"),
+                "date": price.get("scraped_at")
+            })
+        
+        # 2. Historia USD (ostatnie 30 dni)
+        usd_history = await db.usd_rates.find({}, {"_id": 0}).sort("date", -1).limit(30).to_list(30)
+        usd_current = usd_history[0] if usd_history else None
+        
+        # 3. Logi botów scrapujących
+        scraping_logs = await db.scraping_logs.find({}, {"_id": 0}).sort("started_at", -1).limit(20).to_list(20)
+        
+        # 4. Ostatnie analizy trendów
+        trend_analyses = await db.trend_analyses.find({}, {"_id": 0}).sort("created_at", -1).limit(5).to_list(5)
+        
+        # 5. Ostatnie raporty AI
+        ai_reports = await db.ai_reports.find({}, {"_id": 0}).sort("created_at", -1).limit(3).to_list(3)
+        
+        # ==== PRZYGOTUJ ROZSZERZONY KONTEKST ====
+        
+        products_summary = []
+        for prod_name, prices in products_prices.items():
+            if prices:
+                prices_vals = [p["price"] for p in prices]
+                products_summary.append({
+                    "nazwa": prod_name,
+                    "cena_min": min(prices_vals),
+                    "cena_max": max(prices_vals),
+                    "liczba_ofert": len(prices),
+                    "dostawcy": [p["supplier"] for p in prices],
+                    "najtańszy": next((p["supplier"] for p in prices if p["price"] == min(prices_vals)), "N/A")
                 })
         
-        context = f"""DANE RYNKOWE:
-- Kurs USD/PLN: {usd_rate['rate'] if usd_rate else 'N/A'} ({usd_rate['date'] if usd_rate else 'N/A'})
-- Monitorowane produkty: {len(MONITORED_PRODUCTS)}
+        # Status botów
+        bot_status = []
+        for log in scraping_logs[:5]:
+            bot_status.append({
+                "supplier": log.get("supplier"),
+                "status": log.get("status"),
+                "products_scraped": log.get("products_scraped", 0),
+                "czas": log.get("started_at"),
+                "błąd": log.get("error_message")
+            })
+        
+        # Trend USD
+        usd_trend = "stabilny"
+        if len(usd_history) >= 7:
+            current = usd_history[0]["rate"]
+            week_ago = usd_history[6]["rate"]
+            change = ((current - week_ago) / week_ago) * 100
+            if change > 2:
+                usd_trend = f"rośnie ({change:+.1f}% w tyg.)"
+            elif change < -2:
+                usd_trend = f"spada ({change:+.1f}% w tyg.)"
+        
+        context = f"""=== PEŁNY DOSTĘP DO SYSTEMU MARKET INTELLIGENCE ===
 
-AKTUALNE CENY (top 30):
-{products_info}
+🔍 BAZA DANYCH (Ostatnie 500 wpisów):
+- Liczba produktów: {len(products_summary)}
+- Liczba zapisanych cen: {len(all_prices)}
+- Produkty z cenami: {len([p for p in products_summary if p['liczba_ofert'] > 0])}
 
-Odpowiadaj KONKRETNIE, z danymi i liczbami. Jeśli użytkownik pyta o produkt którego nie ma w danych, powiedz że nie masz informacji o nim."""
+💰 CENY PRODUKTÓW (WSZYSTKIE):
+{products_summary}
+
+📊 KURS USD/PLN:
+- Aktualny: {usd_current['rate'] if usd_current else 'N/A'} ({usd_current['date'] if usd_current else 'N/A'})
+- Trend: {usd_trend}
+- Historia 30 dni dostępna
+
+🤖 STATUS BOTÓW SCRAPUJĄCYCH:
+{bot_status}
+
+📈 OSTATNIE ANALIZY:
+- Liczba analiz trendów: {len(trend_analyses)}
+- Liczba raportów AI: {len(ai_reports)}
+
+🎯 MONITOROWANE PRODUKTY (definicja):
+- Łącznie: {len(MONITORED_PRODUCTS)}
+- Kategorie: przewody, gniazda, naświetlacze, rozdzielnice, bezpieczniki, żarówki, lampy, świetlówki, peszle, rurki, odgromienie, bednarka, kostki, taśmy
+
+📋 MOŻLIWOŚCI:
+- Możesz analizować wszystkie dane
+- Możesz sprawdzić status botów
+- Możesz polecić uruchomienie scrapingu (powiedz "uruchom scraping dla [dostawca]")
+- Możesz analizować trendy historyczne
+
+INSTRUKCJA:
+Odpowiadaj KONKRETNIE z danymi. Jeśli użytkownik pyta o cenę - podaj DOKŁADNĄ wartość z bazy.
+Jeśli nie ma danych o produkcie - powiedz "Brak danych w bazie, uruchomić scraping?"""
 
         llm_key = os.environ.get('EMERGENT_LLM_KEY')
         if not llm_key:
