@@ -28,49 +28,59 @@ export const showNotification = async (title, options = {}) => {
     console.log('Permission result:', permission);
     if (permission !== 'granted') {
       alert('Powiadomienia są zablokowane. Włącz je w ustawieniach przeglądarki.');
-      return;
+      return false;
     }
   }
 
-  if ('serviceWorker' in navigator) {
-    console.log('Service Worker available, checking registration...');
-    
-    // Check current registration state
-    const registration = await navigator.serviceWorker.getRegistration();
-    console.log('Current SW registration:', registration);
-    console.log('SW state:', registration?.active?.state);
-    
-    try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Service Worker timeout - nie odpowiada')), 5000)
-      );
+  try {
+    // Try Service Worker first (for PWA)
+    if ('serviceWorker' in navigator) {
+      console.log('Trying Service Worker notification...');
       
-      const readyPromise = navigator.serviceWorker.ready;
-      const reg = await Promise.race([readyPromise, timeoutPromise]);
-      
-      console.log('Service Worker ready:', reg);
-      console.log('Active SW:', reg.active);
-      
-      await reg.showNotification(title, {
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
-        vibrate: [200, 100, 200],
-        tag: 'elektron-notification',
-        requireInteraction: false,
-        ...options,
-      });
-      
-      console.log('✅ Notification shown successfully!');
-      return true;
-    } catch (error) {
-      console.error('❌ Error showing notification:', error);
-      alert(`Błąd powiadomienia: ${error.message}\n\nService Worker może nie być aktywny. Odśwież stronę (Ctrl+Shift+R) i spróbuj ponownie.`);
-      return false;
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration && registration.active) {
+        console.log('SW is active, using SW notification');
+        
+        await registration.showNotification(title, {
+          icon: '/icon-192.png',
+          badge: '/icon-192.png',
+          vibrate: [200, 100, 200],
+          tag: options.tag || 'elektron-notification',
+          requireInteraction: false,
+          body: options.body || '',
+          ...options,
+        });
+        
+        console.log('✅ SW Notification shown successfully!');
+        return true;
+      }
     }
-  } else {
-    console.error('Service Worker not supported');
-    alert('Ta przeglądarka nie obsługuje powiadomień PWA');
+    
+    // Fallback: Direct browser notification (simpler, always works)
+    console.log('Using direct browser notification (fallback)');
+    const notification = new Notification(title, {
+      icon: '/icon-192.png',
+      body: options.body || '',
+      tag: options.tag || 'elektron-notification',
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+    });
+    
+    // Auto-close after 10 seconds
+    setTimeout(() => notification.close(), 10000);
+    
+    // Handle click
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+    
+    console.log('✅ Direct notification shown successfully!');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Error showing notification:', error);
+    alert(`Błąd powiadomienia: ${error.message}`);
     return false;
   }
 };
