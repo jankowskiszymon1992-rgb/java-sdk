@@ -32,9 +32,9 @@ def test_create_employee():
     
     # Test data as specified in the request
     test_data = {
-        "name": "Bart",
-        "hourly_rate": 30.0,
-        "notes": "Pomocnik elektryk"
+        "name": "Jan Kowalski",
+        "hourly_rate": 35.50,
+        "notes": "Elektryk - pomocnik"
     }
     
     headers = {
