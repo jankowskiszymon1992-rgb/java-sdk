@@ -15,6 +15,10 @@ const AIAnalyst = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [analyzingTrends, setAnalyzingTrends] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
 
   useEffect(() => {
     loadData();
