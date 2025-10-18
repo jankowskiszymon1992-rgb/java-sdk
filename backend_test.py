@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Employee Endpoints
-Tests the new Employee management endpoints
+Backend API Testing for Financial System
+Tests the new Financial system with OCR for invoices
 """
 
 import requests
