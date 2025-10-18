@@ -283,6 +283,239 @@ async def delete_client(client_id: str):
     return {"message": "Klient usunięty pomyślnie"}
 
 
+# ============= EMPLOYEE ENDPOINTS =============
+
+@api_router.post("/employees", response_model=Employee)
+async def create_employee(employee_input: EmployeeCreate):
+    employee = Employee(**employee_input.dict())
+    await db.employees.insert_one(employee.dict())
+    return employee
+
+
+@api_router.get("/employees", response_model=List[Employee])
+async def get_employees():
+    employees = await db.employees.find().to_list(None)
+    return [Employee(**emp) for emp in employees]
+
+
+@api_router.get("/employees/{employee_id}", response_model=Employee)
+async def get_employee(employee_id: str):
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
+    return Employee(**employee)
+
+
+@api_router.put("/employees/{employee_id}", response_model=Employee)
+async def update_employee(employee_id: str, employee_input: EmployeeUpdate):
+    employee = await db.employees.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
+    
+    update_data = {k: v for k, v in employee_input.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.employees.update_one({"id": employee_id}, {"$set": update_data})
+    updated_employee = await db.employees.find_one({"id": employee_id})
+    return Employee(**updated_employee)
+
+
+@api_router.delete("/employees/{employee_id}")
+async def delete_employee(employee_id: str):
+    result = await db.employees.delete_one({"id": employee_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
+    return {"message": "Pracownik usunięty pomyślnie"}
+
+
+# ============= EMPLOYEE WORK ENTRIES =============
+
+@api_router.post("/employee-work-entries", response_model=EmployeeWorkEntry)
+async def create_work_entry(entry_input: EmployeeWorkEntryCreate):
+    # Get employee to fetch current rate and name
+    employee = await db.employees.find_one({"id": entry_input.employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Pracownik nie znaleziony")
+    
+    total_earnings = entry_input.hours * employee["hourly_rate"]
+    
+    entry = EmployeeWorkEntry(
+        employee_id=entry_input.employee_id,
+        employee_name=employee["name"],
+        date=entry_input.date,
+        hours=entry_input.hours,
+        hourly_rate=employee["hourly_rate"],
+        total_earnings=total_earnings,
+        notes=entry_input.notes
+    )
+    
+    await db.employee_work_entries.insert_one(entry.dict())
+    return entry
+
+
+@api_router.get("/employee-work-entries", response_model=List[EmployeeWorkEntry])
+async def get_work_entries(
+    employee_id: Optional[str] = None,
+    month: Optional[str] = None  # Format: YYYY-MM
+):
+    query = {}
+    if employee_id:
+        query["employee_id"] = employee_id
+    if month:
+        # Filter by month (date starts with YYYY-MM)
+        query["date"] = {"$regex": f"^{month}"}
+    
+    entries = await db.employee_work_entries.find(query).sort("date", -1).to_list(None)
+    return [EmployeeWorkEntry(**entry) for entry in entries]
+
+
+@api_router.get("/employee-work-entries/summary")
+async def get_work_summary(month: Optional[str] = None):
+    """Get summary of earnings by employee for a given month"""
+    match_stage = {}
+    if month:
+        match_stage = {"date": {"$regex": f"^{month}"}}
+    
+    pipeline = [
+        {"$match": match_stage},
+        {
+            "$group": {
+                "_id": "$employee_id",
+                "employee_name": {"$first": "$employee_name"},
+                "total_hours": {"$sum": "$hours"},
+                "total_earnings": {"$sum": "$total_earnings"}
+            }
+        }
+    ]
+    
+    summary = await db.employee_work_entries.aggregate(pipeline).to_list(None)
+    
+    return {
+        "month": month if month else "all_time",
+        "employees": [
+            {
+                "employee_id": item["_id"],
+                "employee_name": item["employee_name"],
+                "total_hours": item["total_hours"],
+                "total_earnings": item["total_earnings"]
+            }
+            for item in summary
+        ],
+        "grand_total": sum(item["total_earnings"] for item in summary)
+    }
+
+
+@api_router.delete("/employee-work-entries/{entry_id}")
+async def delete_work_entry(entry_id: str):
+    result = await db.employee_work_entries.delete_one({"id": entry_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Wpis nie znaleziony")
+    return {"message": "Wpis usunięty pomyślnie"}
+
+
+# ============= VOICE WORK ENTRY (WITH LLM PARSING) =============
+
+@api_router.post("/employee-work-entries/voice")
+async def create_voice_work_entry(request: VoiceWorkEntryRequest):
+    """Parse voice transcript and create work entries"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Brak klucza API")
+        
+        # Get all employees for context
+        employees = await db.employees.find().to_list(None)
+        employee_names = [emp["name"] for emp in employees]
+        
+        # Use LLM to parse the transcript
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        prompt = f"""Analyze this transcript and extract work hours information.
+
+Available employees: {', '.join(employee_names)}
+
+Transcript: "{request.transcript}"
+
+Extract:
+1. Employee names (match to available employees)
+2. Hours worked for each employee
+3. Date mentioned (interpret "dzisiaj"=today, "wczoraj"=yesterday, or specific date)
+
+Return ONLY valid JSON in this format:
+{{
+  "entries": [
+    {{"employee_name": "Name", "hours": 8.0, "date": "YYYY-MM-DD"}}
+  ]
+}}
+
+Today's date is: {datetime.now(timezone.utc).strftime("%Y-%m-%d")}
+"""
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"voice_work_{datetime.now().timestamp()}"
+        ).with_model("anthropic", "claude-3-7-sonnet-20250219")
+        
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON from response
+        import json
+        import re
+        
+        # Extract JSON from response (might be wrapped in markdown)
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if not json_match:
+            raise HTTPException(status_code=400, detail="Nie udało się sparsować odpowiedzi")
+        
+        parsed_data = json.loads(json_match.group())
+        
+        # Create work entries
+        created_entries = []
+        for entry_data in parsed_data.get("entries", []):
+            # Find employee by name
+            employee = next(
+                (emp for emp in employees if emp["name"].lower() == entry_data["employee_name"].lower()),
+                None
+            )
+            
+            if not employee:
+                continue  # Skip if employee not found
+            
+            # Create entry
+            entry_input = EmployeeWorkEntryCreate(
+                employee_id=employee["id"],
+                date=entry_data["date"],
+                hours=float(entry_data["hours"]),
+                notes=f"Dodano głosowo: {request.transcript}"
+            )
+            
+            total_earnings = entry_input.hours * employee["hourly_rate"]
+            
+            entry = EmployeeWorkEntry(
+                employee_id=entry_input.employee_id,
+                employee_name=employee["name"],
+                date=entry_input.date,
+                hours=entry_input.hours,
+                hourly_rate=employee["hourly_rate"],
+                total_earnings=total_earnings,
+                notes=entry_input.notes
+            )
+            
+            await db.employee_work_entries.insert_one(entry.dict())
+            created_entries.append(entry)
+        
+        return {
+            "success": True,
+            "entries_created": len(created_entries),
+            "entries": created_entries
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in voice work entry: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd przetwarzania: {str(e)}")
+
+
 # ============= PROJECT ENDPOINTS =============
 
 @api_router.post("/projects", response_model=Project)
