@@ -437,6 +437,33 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Reminders - Backend API Check Pending"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint GET /api/reminders/check/pending zwraca listę przypomnień które powinny wyświetlić powiadomienia. Wymaga testów backend."
+
+  - task: "Reminders - Service Worker Registration"
+    implemented: true
+    working: true
+    file: "/frontend/src/index.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "BRAK POWIADOMIEŃ NAWET PO WCIŚNIĘCIU TESTU BRAK - użytkownik zgłosił że powiadomienia w ogóle nie działają"
+      - working: true
+        agent: "main"
+        comment: "✅ NAPRAWIONO ROOT CAUSE: Service Worker był WYREJESTROWANY w index.js (serviceWorkerRegistration.unregister()). Zmieniono na serviceWorkerRegistration.register(). Po restarcie frontend Service Worker poprawnie się rejestruje - widać w konsoli 'Service Worker registered: ServiceWorkerRegistration' i 'Content is cached for offline use'. To była główna przyczyna braku powiadomień - bez zarejestrowanego SW, registration.showNotification() nie mogło działać."
+
 agent_communication:
   - agent: "main"
     message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
