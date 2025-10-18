@@ -122,6 +122,47 @@ class VoiceWorkEntryRequest(BaseModel):
     transcript: str  # Text from Whisper
 
 
+# ============= REMINDERS MODELS =============
+
+class ReminderType(str, Enum):
+    custom = "custom"  # Własne przypomnienie
+    zus = "zus"  # ZUS - 18-go miesiąca
+    taxes = "taxes"  # Podatki - 18-go miesiąca
+
+
+class Reminder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    reminder_date: str  # Format: YYYY-MM-DD
+    reminder_time: str = "09:00"  # Format: HH:MM
+    reminder_type: ReminderType = ReminderType.custom
+    is_recurring: bool = False  # Powtarza się co miesiąc (dla ZUS/podatków)
+    is_completed: bool = False
+    sent: bool = False  # Czy powiadomienie zostało wysłane
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ReminderCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    reminder_date: str
+    reminder_time: str = "09:00"
+    reminder_type: ReminderType = ReminderType.custom
+    is_recurring: bool = False
+
+
+class ReminderUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_date: Optional[str] = None
+    reminder_time: Optional[str] = None
+    is_completed: Optional[bool] = None
+
+
 # ============= FINANCIAL ENTRIES MODELS =============
 
 class FinancialCategory(str, Enum):
