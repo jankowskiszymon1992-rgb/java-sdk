@@ -27,7 +27,29 @@ export const showNotification = async (title, options = {}) => {
     const permission = await Notification.requestPermission();
     console.log('Permission result:', permission);
     if (permission !== 'granted') {
-      alert('Powiadomienia są zablokowane. Włącz je w ustawieniach przeglądarki.');
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+      
+      const message = isStandalone 
+        ? 'POWIADOMIENIA SĄ WYŁĄCZONE!\n\n' +
+          'Aby włączyć powiadomienia w aplikacji PWA:\n\n' +
+          '📱 ANDROID:\n' +
+          '1. Otwórz Ustawienia telefonu\n' +
+          '2. Wyszukaj "Elektron" lub "Aplikacje"\n' +
+          '3. Znajdź aplikację Elektron\n' +
+          '4. Przejdź do "Powiadomienia"\n' +
+          '5. Włącz wszystkie powiadomienia\n\n' +
+          '🍎 iOS:\n' +
+          '1. Otwórz Ustawienia\n' +
+          '2. Przewiń do aplikacji Elektron\n' +
+          '3. Włącz "Powiadomienia"\n' +
+          '4. Włącz wszystkie opcje powiadomień'
+        : 'Powiadomienia są zablokowane.\n\n' +
+          'Kliknij ikonę 🔒 lub 🔔 w pasku adresu przeglądarki,\n' +
+          'a następnie włącz powiadomienia dla tej strony.\n\n' +
+          'Po włączeniu, odśwież stronę i spróbuj ponownie.';
+      
+      alert(message);
       return false;
     }
   }
