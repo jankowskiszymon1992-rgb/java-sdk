@@ -18,25 +18,43 @@ export const requestNotificationPermission = async () => {
   return false;
 };
 
-export const showNotification = (title, options = {}) => {
-  if (Notification.permission === 'granted') {
-    if ('serviceWorker' in navigator) {
-      // Always use service worker for PWA
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.showNotification(title, {
-          icon: '/icon-192.png',
-          badge: '/icon-192.png',
-          vibrate: [200, 100, 200],
-          ...options,
-        });
-      }).catch((error) => {
-        console.error('Error showing notification:', error);
+export const showNotification = async (title, options = {}) => {
+  console.log('showNotification called:', title);
+  console.log('Notification.permission:', Notification.permission);
+  
+  if (Notification.permission !== 'granted') {
+    console.warn('Notification permission not granted. Requesting...');
+    const permission = await Notification.requestPermission();
+    console.log('Permission result:', permission);
+    if (permission !== 'granted') {
+      alert('Powiadomienia są zablokowane. Włącz je w ustawieniach przeglądarki.');
+      return;
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    console.log('Service Worker available, checking registration...');
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      console.log('Service Worker ready:', registration);
+      
+      await registration.showNotification(title, {
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        vibrate: [200, 100, 200],
+        tag: 'elektron-notification',
+        requireInteraction: false,
+        ...options,
       });
-    } else {
-      console.warn('Service Worker not available - notifications may not work');
+      
+      console.log('✅ Notification shown successfully!');
+    } catch (error) {
+      console.error('❌ Error showing notification:', error);
+      alert(`Błąd powiadomienia: ${error.message}`);
     }
   } else {
-    console.warn('Notification permission not granted');
+    console.error('Service Worker not supported');
+    alert('Ta przeglądarka nie obsługuje powiadomień PWA');
   }
 };
 
