@@ -153,6 +153,8 @@ const WorkHours = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="project_id">Zlecenie *</Label>
+                  {console.log('🔍 Projects in render:', projects)}
+                  {console.log('🔍 Projects length:', projects?.length)}
                   <Select
                     value={formData.project_id}
                     onValueChange={(value) => setFormData({ ...formData, project_id: value })}
@@ -162,11 +164,15 @@ const WorkHours = () => {
                       <SelectValue placeholder="Wybierz zlecenie" />
                     </SelectTrigger>
                     <SelectContent>
-                      {projects.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.title} ({project.client?.name})
-                        </SelectItem>
-                      ))}
+                      {projects && projects.length > 0 ? (
+                        projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.title} ({project.client?.name})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="px-2 py-1 text-sm text-gray-500">Brak zleceń</div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
