@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Bell, Plus, Edit2, Trash2, Check, Calendar, Clock, RefreshCw } from 'lucide-react';
+import { Bell, Plus, Edit2, Trash2, Check, Calendar, Clock, RefreshCw, Send } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { showNotification, checkPendingReminders } from '../utils/notifications';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
