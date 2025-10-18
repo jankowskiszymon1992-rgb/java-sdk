@@ -1926,20 +1926,24 @@ async def export_financial_entries_pdf(month: Optional[str] = None):
 
 
 @api_router.get("/financial-entries/charts")
-async def get_financial_charts_data(months: int = 6):
+async def get_financial_charts_data(year: Optional[int] = None):
     """
-    Get data for financial charts - last N months
+    Get data for financial charts - full year (January to December)
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime
     from collections import defaultdict
     
-    # Calculate date range
-    today = datetime.now(timezone.utc)
-    start_date = (today - timedelta(days=months * 31)).replace(day=1).date().isoformat()
+    # Use current year if not specified
+    if not year:
+        year = datetime.now(timezone.utc).year
     
-    # Get all entries from start_date
+    # Calculate date range - full year
+    start_date = f"{year}-01-01"
+    end_date = f"{year}-12-31"
+    
+    # Get all entries for the year
     entries = await db.financial_entries.find(
-        {"date": {"$gte": start_date}},
+        {"date": {"$gte": start_date, "$lte": end_date}},
         {"_id": 0}
     ).to_list(10000)
     
@@ -1948,6 +1952,11 @@ async def get_financial_charts_data(months: int = 6):
     category_data = defaultdict(lambda: {"income": 0, "expense": 0})
     
     income_categories = ["invoice_sales", "cash_income"]
+    
+    # Initialize all 12 months with 0
+    for month in range(1, 13):
+        month_key = f"{year}-{month:02d}"
+        monthly_data[month_key] = {"income": 0, "expense": 0}
     
     for entry in entries:
         date_str = entry.get("date", "")
@@ -1967,7 +1976,7 @@ async def get_financial_charts_data(months: int = 6):
         else:
             category_data[category]["expense"] += amount
     
-    # Convert to lists
+    # Convert to lists - all 12 months
     months_list = sorted(monthly_data.keys())
     monthly_chart = [
         {
@@ -2003,6 +2012,7 @@ async def get_financial_charts_data(months: int = 6):
     ]
     
     return {
+        "year": year,
         "monthly": monthly_chart,
         "by_category": category_chart
     }
