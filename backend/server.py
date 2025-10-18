@@ -1568,6 +1568,105 @@ async def delete_financial_entry(entry_id: str):
     return {"message": "Wpis usunięty pomyślnie"}
 
 
+@api_router.post("/financial-entries/ocr")
+async def create_financial_entry_with_ocr(
+    category: FinancialCategory,
+    image: str,  # base64 encoded image
+    date: Optional[str] = None
+):
+    """
+    Extract data from invoice image using OCR (Claude Sonnet 4 Vision)
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Brak klucza API")
+        
+        # Category name mapping
+        category_names = {
+            "invoice_sales": "faktura sprzedażowa",
+            "invoice_purchase": "faktura zakupowa",
+            "fuel": "paragon paliwa"
+        }
+        cat_name = category_names.get(category, "dokument")
+        
+        # Initialize Claude with vision
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"ocr_{uuid.uuid4()}",
+            system_message=f"""Jesteś ekspertem w analizie faktur i paragonów. 
+Twoim zadaniem jest wyciągnięcie danych z {cat_name} w języku polskim.
+Zwróć TYLKO JSON bez dodatkowego tekstu."""
+        ).with_model("anthropic", "claude-sonnet-4-20250514")
+        
+        # Create message with image
+        image_content = ImageContent(image_base64=image)
+        
+        user_message = UserMessage(
+            text=f"""Przeanalizuj ten dokument ({cat_name}) i wyciągnij następujące dane.
+Zwróć odpowiedź TYLKO w formacie JSON bez żadnego dodatkowego tekstu:
+
+{{
+  "document_number": "numer faktury/paragonu lub 'brak'",
+  "date": "data w formacie YYYY-MM-DD",
+  "vendor": "nazwa sprzedawcy/dostawcy",
+  "buyer": "nazwa nabywcy (jeśli jest na fakturze)",
+  "amount_net": kwota netto jako liczba (float),
+  "amount_gross": kwota brutto jako liczba (float),
+  "vat_rate": stawka VAT jako liczba (float) lub null,
+  "description": "krótki opis co było kupione/sprzedane"
+}}
+
+Jeśli jakiejś wartości nie ma na dokumencie, użyj null lub "brak".
+Kwoty muszą być liczbami, nie tekstem.""",
+            file_contents=[image_content]
+        )
+        
+        # Get response from Claude
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON response
+        import json
+        # Clean response - remove markdown if present
+        cleaned_response = response.strip()
+        if cleaned_response.startswith("```"):
+            # Remove ```json and ``` markers
+            cleaned_response = cleaned_response.split("```")[1]
+            if cleaned_response.startswith("json"):
+                cleaned_response = cleaned_response[4:]
+        
+        ocr_data = json.loads(cleaned_response.strip())
+        
+        # Create financial entry
+        entry_data = FinancialEntryCreate(
+            date=date or ocr_data.get("date", datetime.now(timezone.utc).date().isoformat()),
+            category=category,
+            description=ocr_data.get("document_number", "brak") + " - " + ocr_data.get("description", ""),
+            amount_net=float(ocr_data.get("amount_net", 0)),
+            amount_gross=float(ocr_data.get("amount_gross", 0)),
+            vat_rate=float(ocr_data.get("vat_rate")) if ocr_data.get("vat_rate") else None,
+            notes=f"Dostawca: {ocr_data.get('vendor', 'brak')}"
+        )
+        
+        entry_obj = FinancialEntry(**entry_data.model_dump())
+        doc = serialize_doc(entry_obj.model_dump())
+        await db.financial_entries.insert_one(doc)
+        
+        return {
+            "entry": entry_obj,
+            "ocr_data": ocr_data
+        }
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Błąd parsowania odpowiedzi OCR: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Błąd OCR: {str(e)}")
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
