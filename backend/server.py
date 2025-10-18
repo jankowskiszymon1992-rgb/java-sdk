@@ -72,6 +72,56 @@ class ClientUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+# ============= EMPLOYEE MODELS =============
+
+class Employee(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    hourly_rate: float  # Stawka za godzinę
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class EmployeeCreate(BaseModel):
+    name: str
+    hourly_rate: float
+    notes: Optional[str] = None
+
+
+class EmployeeUpdate(BaseModel):
+    name: Optional[str] = None
+    hourly_rate: Optional[float] = None
+    notes: Optional[str] = None
+
+
+class EmployeeWorkEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    employee_id: str
+    employee_name: str  # Denormalized for easier queries
+    date: str  # Format: YYYY-MM-DD
+    hours: float
+    hourly_rate: float  # Snapshot of rate at time of entry
+    total_earnings: float  # hours * hourly_rate
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class EmployeeWorkEntryCreate(BaseModel):
+    employee_id: str
+    date: str
+    hours: float
+    notes: Optional[str] = None
+
+
+class VoiceWorkEntryRequest(BaseModel):
+    transcript: str  # Text from Whisper
+
+
 class Project(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
