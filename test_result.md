@@ -281,8 +281,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AI Assistant Chat Endpoint - TESTED ✅"
-    - "AI Assistant History Endpoint - TESTED ✅"
+    - "Employee Management - Create Employee - TESTED ✅"
+    - "Employee Management - Get Employees List - TESTED ✅"
+    - "Employee Work Entries - Create Entry - TESTED ✅"
+    - "Employee Work Entries - Get History - TESTED ✅"
+    - "Employee Work Entries - Summary Report - TESTED ✅"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
