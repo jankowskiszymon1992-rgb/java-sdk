@@ -33,6 +33,17 @@
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
+        <!-- Disable console logs to prevent DevTools auto-opening -->
+        <script>
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                // Production mode - disable all console methods except error and warn
+                const noop = function() {};
+                console.log = noop;
+                console.info = noop;
+                console.debug = noop;
+                console.trace = noop;
+            }
+        </script>
         <div id="root"></div>
         <!--
       This HTML file is a template.
