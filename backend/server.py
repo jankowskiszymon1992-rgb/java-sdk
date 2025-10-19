@@ -3897,6 +3897,55 @@ async def get_chat_history(session_id: str, limit: int = 50):
     return {"history": history, "count": len(history)}
 
 
+@api_router.get("/ai-analyst/chat/sessions")
+async def get_chat_sessions(limit: int = 50):
+    """Pobierz listę wszystkich sesji czatu GPT-5"""
+    pipeline = [
+        {"$sort": {"created_at": -1}},
+        {
+            "$group": {
+                "_id": "$session_id",
+                "title": {"$first": "$session_title"},
+                "first_message": {"$first": "$user_message"},
+                "last_message": {"$last": "$user_message"},
+                "message_count": {"$sum": 1},
+                "created_at": {"$first": "$created_at"},
+                "updated_at": {"$last": "$created_at"}
+            }
+        },
+        {"$sort": {"updated_at": -1}},
+        {"$limit": limit}
+    ]
+    
+    sessions = await db.ai_chat_history.aggregate(pipeline).to_list(limit)
+    
+    # Dodaj automatyczny tytuł jeśli nie ma
+    for session in sessions:
+        if not session.get("title"):
+            session["title"] = session.get("first_message", "")[:50] + "..."
+    
+    return {"sessions": sessions, "count": len(sessions)}
+
+
+@api_router.put("/ai-analyst/chat/sessions/{session_id}/title")
+async def update_session_title(session_id: str, title: str):
+    """Zaktualizuj tytuł sesji"""
+    result = await db.ai_chat_history.update_many(
+        {"session_id": session_id},
+        {"$set": {"session_title": title}}
+    )
+    
+    return {"success": True, "updated": result.modified_count}
+
+
+@api_router.delete("/ai-analyst/chat/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """Usuń całą sesję rozmowy"""
+    result = await db.ai_chat_history.delete_many({"session_id": session_id})
+    
+    return {"success": True, "deleted": result.deleted_count}
+
+
 @api_router.get("/ai-analyst/comparison-table")
 async def get_comparison_table():
     """
