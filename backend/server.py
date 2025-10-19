@@ -1748,7 +1748,8 @@ params:
                 action_executed = f"❌ Błąd wykonania akcji: {str(e)}"
         
         # Usuń blok ```action``` z odpowiedzi dla użytkownika
-        clean_response = re.sub(r'```action\n.*?```', '', response, flags=re.DOTALL).strip()
+        import re as regex_module
+        clean_response = regex_module.sub(r'```action\n.*?```', '', response, flags=regex_module.DOTALL).strip()
         
         # Dodaj info o wykonanej akcji
         if action_executed:
