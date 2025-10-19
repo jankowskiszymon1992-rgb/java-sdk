@@ -339,15 +339,31 @@ const AIAssistant = () => {
               <Bot className="h-5 w-5" />
               Chat z Claude Sonnet 4
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearChat}
-              disabled={messages.length === 0}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Wyczyść historię
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadSessions}
+              >
+                📜 Historia
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={startNewConversation}
+              >
+                ➕ Nowa
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearChat}
+                disabled={messages.length === 0}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Wyczyść
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
