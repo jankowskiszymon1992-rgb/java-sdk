@@ -39,7 +39,7 @@ Profesjonalna aplikacja webowa (PWA) do zarządzania firmą elektryczną.
 Zobacz szczegółową instrukcję: [INSTRUKCJA_INSTALACJI_PWA.md](./INSTRUKCJA_INSTALACJI_PWA.md)
 
 ### Szybki start:
-1. Otwórz https://elektron-finance.preview.emergentagent.com w Chrome
+1. Otwórz https://elektron-smart.preview.emergentagent.com w Chrome
 2. Kliknij "Zainstaluj" gdy pojawi się baner
 3. Gotowe! Aplikacja jest na Twoim urządzeniu
 
@@ -73,4 +73,4 @@ Otrzymuj przypomnienia o:
 
 ## 🌐 URL aplikacji
 
-https://elektron-finance.preview.emergentagent.com
+https://elektron-smart.preview.emergentagent.com
