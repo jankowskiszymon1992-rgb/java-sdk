@@ -283,13 +283,25 @@ const AIAnalyst = () => {
       {/* Chat z GPT-5 */}
       <Card className="border-2 border-blue-200">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-          <CardTitle className="flex items-center">
-            <Brain className="h-5 w-5 mr-2 text-blue-600" />
-            Zapytaj GPT-5 o Produkty i Ceny
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-2">
-            Zadawaj pytania np: "Czy powinienem kupić przewody teraz?" lub "Co jest teraz najtańsze?"
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="flex items-center">
+                <Brain className="h-5 w-5 mr-2 text-blue-600" />
+                Zapytaj GPT-5 o Produkty i Ceny
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-2">
+                Zadawaj pytania np: "Czy powinienem kupić przewody teraz?" lub "Co jest teraz najtańsze?"
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={loadSessions} variant="outline" size="sm" className="text-xs">
+                📜 Historia
+              </Button>
+              <Button onClick={startNewConversation} variant="outline" size="sm" className="text-xs">
+                ➕ Nowa rozmowa
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Historia czatu */}
