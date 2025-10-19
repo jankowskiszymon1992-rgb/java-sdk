@@ -1758,7 +1758,8 @@ params:
             "id": str(uuid.uuid4()),
             "session_id": session_id,
             "user_message": message.text,
-            "ai_response": response,
+            "ai_response": clean_response,
+            "action_executed": action_executed,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "model": "claude-3-7-sonnet-20250219"
         }
@@ -1766,8 +1767,9 @@ params:
         await db.ai_conversations.insert_one(conversation_entry)
         
         return {
-            "response": response,
+            "response": clean_response,
             "session_id": session_id,
+            "action_executed": action_executed,
             "timestamp": conversation_entry["timestamp"]
         }
         
