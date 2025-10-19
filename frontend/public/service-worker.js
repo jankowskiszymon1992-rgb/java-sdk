@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v8-full-ai-system-2025';
+const CACHE_NAME = 'elektron-v9-production-build-2025';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
