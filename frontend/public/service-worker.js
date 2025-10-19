@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v11-cache-fix-2025';
+const CACHE_NAME = 'elektron-v12-icons-fix-2025';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
