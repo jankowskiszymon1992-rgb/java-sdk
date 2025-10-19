@@ -123,6 +123,46 @@ const AIAssistant = () => {
     }
   };
 
+  const startNewConversation = () => {
+    const newSessionId = `ai-session-${Date.now()}`;
+    setSessionId(newSessionId);
+    localStorage.setItem('ai_session_id', newSessionId);
+    setMessages([]);
+    setError(null);
+  };
+
+  const loadSessions = async () => {
+    try {
+      const response = await axios.get(`${API}/ai/sessions?limit=50`);
+      setSessions(response.data.sessions || []);
+      setShowHistory(true);
+    } catch (error) {
+      console.error('Błąd ładowania historii:', error);
+      setError('Nie udało się załadować historii');
+    }
+  };
+
+  const loadSession = async (sid) => {
+    try {
+      const response = await axios.post(`${API}/ai/history`, { session_id: sid });
+      const history = response.data || [];
+      
+      const loadedMessages = history.flatMap(h => [
+        { role: 'user', content: h.user_message },
+        { role: 'assistant', content: h.ai_response }
+      ]);
+      
+      setMessages(loadedMessages);
+      setSessionId(sid);
+      localStorage.setItem('ai_session_id', sid);
+      setShowHistory(false);
+    } catch (error) {
+      console.error('Błąd ładowania rozmowy:', error);
+      setError('Nie udało się wczytać rozmowy');
+    }
+  };
+
+  const handleDeleteHistory = async () => {
   const clearChat = async () => {
     if (!window.confirm('Czy na pewno chcesz wyczyścić całą historię rozmowy?')) {
       return;
