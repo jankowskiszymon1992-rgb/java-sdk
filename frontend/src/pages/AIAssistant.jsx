@@ -20,6 +20,8 @@ const AIAssistant = () => {
   const [error, setError] = useState(null);
   const [speakingIndex, setSpeakingIndex] = useState(null);
   const chatContainerRef = useRef(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
     // Generate or load session ID
