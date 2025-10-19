@@ -49,6 +49,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // NIE CACHUJ POST requestów (API calls)
+  if (event.request.method !== 'GET') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
@@ -61,7 +67,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
 
-        // Clone the response
+        // Clone the response - TYLKO dla GET
         const responseToCache = response.clone();
 
         caches.open(CACHE_NAME).then((cache) => {
