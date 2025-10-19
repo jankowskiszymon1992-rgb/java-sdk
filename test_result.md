@@ -427,10 +427,24 @@ metadata:
   financial_system_test_date: "2025-10-18"
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "PROBLEM: Asystent AI nie zapisuje godzin pracy - WYMAGA NAPRAWY"
+    - "PROBLEM: Brak możliwości wglądu do historii rozmów (oba agenty) - WYMAGA NAPRAWY"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  
+urgent_issues:
+  - issue: "Asystent AI - dodawanie godzin pracy nie działa"
+    description: "User pisze 'Wpisz 8h pracy na projekcie X' ale godziny nie są zapisywane w bazie"
+    status: "investigating"
+    priority: "CRITICAL"
+    
+  - issue: "Historia rozmów - przyciski nie działają"
+    description: "Przyciski 📜 Historia i ➕ Nowa rozmowa dodane w kodzie ale nie widoczne w UI"
+    status: "investigating" 
+    priority: "HIGH"
+    possible_cause: "Cache przeglądarki / Service Worker"
 
   - task: "Reminders - Backend API Check Pending"
     implemented: true
