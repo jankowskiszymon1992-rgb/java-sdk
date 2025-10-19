@@ -1817,6 +1817,47 @@ async def delete_chat_history(session_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/ai/sessions")
+async def get_ai_sessions(limit: int = 50):
+    """Pobierz listę wszystkich sesji Asystenta AI"""
+    pipeline = [
+        {"$sort": {"timestamp": -1}},
+        {
+            "$group": {
+                "_id": "$session_id",
+                "title": {"$first": "$session_title"},
+                "first_message": {"$first": "$user_message"},
+                "last_message": {"$last": "$user_message"},
+                "message_count": {"$sum": 1},
+                "created_at": {"$first": "$timestamp"},
+                "updated_at": {"$last": "$timestamp"}
+            }
+        },
+        {"$sort": {"updated_at": -1}},
+        {"$limit": limit}
+    ]
+    
+    sessions = await db.ai_conversations.aggregate(pipeline).to_list(limit)
+    
+    # Dodaj automatyczny tytuł jeśli nie ma
+    for session in sessions:
+        if not session.get("title"):
+            session["title"] = session.get("first_message", "")[:50] + "..."
+    
+    return {"sessions": sessions, "count": len(sessions)}
+
+
+@api_router.put("/ai/sessions/{session_id}/title")
+async def update_ai_session_title(session_id: str, title: str):
+    """Zaktualizuj tytuł sesji Asystenta AI"""
+    result = await db.ai_conversations.update_many(
+        {"session_id": session_id},
+        {"$set": {"session_title": title}}
+    )
+    
+    return {"success": True, "updated": result.modified_count}
+
+
 # ============= VOICE (WHISPER) =============
 
 from fastapi import File, UploadFile
