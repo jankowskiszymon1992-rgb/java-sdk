@@ -1573,11 +1573,180 @@ You: "Znalazłem zlecenie 'Montaż instalacji - Kowalski', klient: Jan Kowalski,
 Jeśli nie ma danych - powiedz "Nie znalazłem w bazie"."""
         ).with_model("anthropic", "claude-3-7-sonnet-20250219")
         
+        # ==== WYKRYJ AKCJE (dodaj, wpisz, stwórz) ====
+        action_executed = None
+        user_intent = message.text.lower()
+        
+        # Funkcje pomocnicze do wykonywania akcji
+        async def add_reminder(title: str, description: str, date: str, time: str):
+            reminder = {
+                "id": str(uuid.uuid4()),
+                "title": title,
+                "description": description,
+                "reminder_date": date,
+                "reminder_time": time,
+                "is_recurring": False,
+                "is_completed": False,
+                "sent": False,
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+            await db.reminders.insert_one(serialize_doc(reminder))
+            return f"✅ Dodano przypomnienie: {title} na {date} o {time}"
+        
+        async def add_work_hours(project_name: str, hours: float, date_str: str, notes: str = ""):
+            entry = {
+                "id": str(uuid.uuid4()),
+                "project_name": project_name,
+                "hours": hours,
+                "date": date_str,
+                "notes": notes,
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.work_hours.insert_one(serialize_doc(entry))
+            return f"✅ Dodano {hours}h pracy dla projektu '{project_name}' na {date_str}"
+        
+        async def add_report(title: str, content: str, date_str: str):
+            report = {
+                "id": str(uuid.uuid4()),
+                "title": title,
+                "content": content,
+                "date": date_str,
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.reports.insert_one(serialize_doc(report))
+            return f"✅ Dodano raport: {title} z {date_str}"
+        
+        async def add_financial_entry(category: str, description: str, net_price: float, gross_price: float, date_str: str):
+            entry = {
+                "id": str(uuid.uuid4()),
+                "category": category,
+                "description": description,
+                "net_price": net_price,
+                "gross_price": gross_price,
+                "date": date_str,
+                "notes": "",
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.financial_entries.insert_one(serialize_doc(entry))
+            return f"✅ Dodano wpis finansowy: {description} ({category}) - {net_price} PLN netto"
+        
+        # Przekaż AI informację o możliwościach zapisu
+        enhanced_message = f"""{message.text}
+
+[SYSTEM INFO - AI ma możliwość wykonywania akcji]
+Jeśli użytkownik prosi o DODANIE/WPISANIE czegoś, możesz to zrobić.
+
+Format odpowiedzi z akcją:
+```action
+type: reminder|work_hours|report|financial
+params:
+  title: "tytuł"
+  description: "opis"
+  date: "YYYY-MM-DD"
+  time: "HH:MM"
+  hours: 8.5
+  category: "invoice_sales"
+  net_price: 1000.00
+  gross_price: 1230.00
+```
+
+PRZYKŁAD:
+User: "Dodaj przypomnienie o wysłaniu faktury Kowalskiemu za 2 dni o 10:00"
+You: "Dodam przypomnienie o wysłaniu faktury.
+```action
+type: reminder
+params:
+  title: Wysłać fakturę Kowalski
+  description: Przypomnienie o wysłaniu faktury
+  date: {(datetime.now(timezone.utc) + timedelta(days=2)).strftime('%Y-%m-%d')}
+  time: 10:00
+```"
+
+User: "Wpisz 8 godzin pracy na projekcie Montaż Nowak dzisiaj"
+You: "Zapisuję godziny pracy.
+```action
+type: work_hours
+params:
+  project_name: Montaż Nowak
+  hours: 8.0
+  date: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}
+  notes: Wpisane przez AI
+```"
+"""
+        
         # Create user message
-        user_message = UserMessage(text=message.text)
+        user_message = UserMessage(text=enhanced_message)
         
         # Send message and get response
         response = await chat.send_message(user_message)
+        
+        # ==== PARSUJ I WYKONAJ AKCJE ====
+        if "```action" in response:
+            try:
+                import re
+                # Wyciągnij blok akcji
+                action_match = re.search(r'```action\n(.*?)```', response, re.DOTALL)
+                if action_match:
+                    action_block = action_match.group(1)
+                    lines = [l.strip() for l in action_block.split('\n') if l.strip()]
+                    
+                    action_type = None
+                    params = {}
+                    
+                    for line in lines:
+                        if line.startswith('type:'):
+                            action_type = line.split(':', 1)[1].strip()
+                        elif ':' in line and action_type:
+                            key, value = line.split(':', 1)
+                            params[key.strip()] = value.strip()
+                    
+                    # Wykonaj akcję
+                    if action_type == 'reminder':
+                        result = await add_reminder(
+                            params.get('title', ''),
+                            params.get('description', ''),
+                            params.get('date', ''),
+                            params.get('time', '09:00')
+                        )
+                        action_executed = result
+                    
+                    elif action_type == 'work_hours':
+                        result = await add_work_hours(
+                            params.get('project_name', ''),
+                            float(params.get('hours', 0)),
+                            params.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d')),
+                            params.get('notes', '')
+                        )
+                        action_executed = result
+                    
+                    elif action_type == 'report':
+                        result = await add_report(
+                            params.get('title', ''),
+                            params.get('content', ''),
+                            params.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+                        )
+                        action_executed = result
+                    
+                    elif action_type == 'financial':
+                        result = await add_financial_entry(
+                            params.get('category', 'money_no_invoice'),
+                            params.get('description', ''),
+                            float(params.get('net_price', 0)),
+                            float(params.get('gross_price', 0)),
+                            params.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+                        )
+                        action_executed = result
+            
+            except Exception as e:
+                action_executed = f"❌ Błąd wykonania akcji: {str(e)}"
+        
+        # Usuń blok ```action``` z odpowiedzi dla użytkownika
+        clean_response = re.sub(r'```action\n.*?```', '', response, flags=re.DOTALL).strip()
+        
+        # Dodaj info o wykonanej akcji
+        if action_executed:
+            clean_response = f"{clean_response}\n\n{action_executed}"
         
         # Save conversation to database
         conversation_entry = {
