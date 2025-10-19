@@ -13,28 +13,6 @@ module.exports = {
     },
     configure: (webpackConfig) => {
       
-      // Remove console.logs in production using babel plugin
-      if (process.env.NODE_ENV === 'production') {
-        // Find babel-loader and add transform-remove-console plugin
-        const babelLoader = webpackConfig.module.rules.find(
-          (rule) => rule.oneOf
-        );
-        
-        if (babelLoader && babelLoader.oneOf) {
-          const babelRule = babelLoader.oneOf.find(
-            (rule) => rule.loader && rule.loader.includes('babel-loader')
-          );
-          
-          if (babelRule && babelRule.options && babelRule.options.plugins) {
-            // Add plugin to remove console.log in production
-            babelRule.options.plugins.push([
-              'transform-remove-console',
-              { exclude: ['error', 'warn'] } // Keep console.error and console.warn
-            ]);
-          }
-        }
-      }
-      
       // Disable hot reload completely if environment variable is set
       if (config.disableHotReload) {
         // Remove hot reload related plugins
@@ -77,6 +55,21 @@ module.exports = {
           ],
         })
       );
+
+      // Suppress DevTools auto-open by removing console logs in production
+      if (process.env.NODE_ENV === 'production') {
+        // Configure Terser to remove console.logs
+        const TerserPlugin = require('terser-webpack-plugin');
+        webpackConfig.optimization.minimizer = [
+          new TerserPlugin({
+            terserOptions: {
+              compress: {
+                drop_console: true, // Remove all console statements
+              },
+            },
+          }),
+        ];
+      }
       
       return webpackConfig;
     },
