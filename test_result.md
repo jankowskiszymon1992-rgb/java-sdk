@@ -428,8 +428,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "PROBLEM: Asystent AI nie zapisuje godzin pracy - WYMAGA NAPRAWY"
-    - "PROBLEM: Brak możliwości wglądu do historii rozmów (oba agenty) - WYMAGA NAPRAWY"
+    - "✅ ROZWIĄZANO: Problem z cache Service Worker - wszystkie nowe funkcje widoczne"
+    - "TODO: Asystent AI - zapytać użytkownika czy funkcja zapisu godzin pracy przez chat jest potrzebna"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
