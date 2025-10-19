@@ -435,16 +435,18 @@ test_plan:
   test_priority: "high_first"
   
 urgent_issues:
-  - issue: "Asystent AI - dodawanie godzin pracy nie działa"
-    description: "User pisze 'Wpisz 8h pracy na projekcie X' ale godziny nie są zapisywane w bazie"
-    status: "investigating"
+  - issue: "Cache / Deployment - ROZWIĄZANY 2025-01-19"
+    description: "Problem z cache Service Worker - użytkownik nie widział nowych funkcji mimo że były w kodzie"
+    status: "FIXED"
     priority: "CRITICAL"
+    solution: "Zmieniono wersję cache w Service Worker z 'elektron-v10-fixed-sw-2025' na 'elektron-v11-cache-fix-2025', wykonano produkcyjny build (yarn build), zrestartowano wszystkie serwisy. Wszystkie nowe funkcje są teraz widoczne."
+    verified: "✅ Przyciski Historia/Nowa widoczne w Asystent AI, ✅ Market Intelligence działa, ✅ AI Analityk działa"
     
-  - issue: "Historia rozmów - przyciski nie działają"
-    description: "Przyciski 📜 Historia i ➕ Nowa rozmowa dodane w kodzie ale nie widoczne w UI"
-    status: "investigating" 
+  - issue: "Asystent AI - dodawanie godzin pracy przez chat"
+    description: "User pisze 'Wpisz 8h pracy na projekcie X' ale godziny mogą nie być zapisywane w bazie (do przetestowania)"
+    status: "TODO"
     priority: "HIGH"
-    possible_cause: "Cache przeglądarki / Service Worker"
+    note: "Wymaga implementacji lub weryfikacji funkcjonalności zapisu godzin pracy przez AI Assistant"
 
   - task: "Reminders - Backend API Check Pending"
     implemented: true
