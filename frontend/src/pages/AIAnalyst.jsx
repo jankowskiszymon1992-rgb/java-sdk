@@ -84,6 +84,42 @@ const AIAnalyst = () => {
     }
   };
 
+  const startNewConversation = () => {
+    setSessionId(null);
+    setChatMessages([]);
+    toast.success('Rozpoczęto nową rozmowę');
+  };
+
+  const loadSessions = async () => {
+    try {
+      const response = await axios.get(`${API}/ai-analyst/chat/sessions?limit=50`);
+      setSessions(response.data.sessions || []);
+      setShowHistory(true);
+    } catch (error) {
+      console.error('Błąd ładowania historii:', error);
+      toast.error('Nie udało się załadować historii');
+    }
+  };
+
+  const loadSession = async (sid) => {
+    try {
+      const response = await axios.get(`${API}/ai-analyst/chat/history`, { params: { session_id: sid } });
+      const history = response.data.history || [];
+      
+      setChatMessages(history.map(h => ([
+        { role: 'user', content: h.user_message },
+        { role: 'assistant', content: h.ai_response }
+      ])).flat());
+      
+      setSessionId(sid);
+      setShowHistory(false);
+      toast.success('Wczytano rozmowę');
+    } catch (error) {
+      console.error('Błąd ładowania rozmowy:', error);
+      toast.error('Nie udało się wczytać rozmowy');
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
     
