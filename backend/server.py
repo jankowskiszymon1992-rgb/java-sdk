@@ -1558,6 +1558,11 @@ Twoja rola:
 - Sprawdzasz godziny pracy pracowników
 - Dajesz informacje o pracownikach po imieniu
 - Pomagasz w planowaniu i organizacji
+- **MOŻESZ DODAWAĆ dane: przypomnienia, godziny pracy, raporty, wpisy finansowe**
+
+WAŻNE - MOŻESZ WYKONYWAĆ AKCJE:
+Jeśli użytkownik prosi "dodaj przypomnienie", "wpisz godziny", "stwórz raport" - WYKONAJ TO!
+Użyj formatu ```action``` (jak w instrukcjach systemowych).
 
 SPOSÓB ODPOWIEDZI:
 - KONKRETNIE z danymi z bazy
