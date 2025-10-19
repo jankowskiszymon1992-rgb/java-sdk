@@ -13,6 +13,25 @@ module.exports = {
     },
     configure: (webpackConfig) => {
       
+      // Remove console.logs in production
+      if (process.env.NODE_ENV === 'production') {
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          minimizer: webpackConfig.optimization.minimizer.map((plugin) => {
+            if (plugin.constructor.name === 'TerserPlugin') {
+              plugin.options.terserOptions = {
+                ...plugin.options.terserOptions,
+                compress: {
+                  ...plugin.options.terserOptions.compress,
+                  drop_console: true, // Remove all console.* calls
+                },
+              };
+            }
+            return plugin;
+          }),
+        };
+      }
+      
       // Disable hot reload completely if environment variable is set
       if (config.disableHotReload) {
         // Remove hot reload related plugins
