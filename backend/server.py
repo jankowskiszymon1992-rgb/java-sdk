@@ -3382,16 +3382,15 @@ async def generate_ai_analysis(price_data: dict, usd_data: dict):
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        # Przygotuj dane do analizy
+        # Przygotuj dane do analizy (TYLKO TOP 20 żeby nie timeout)
         products_summary = []
-        for product in price_data.get("products", []):
+        for product in price_data.get("products", [])[:20]:  # LIMIT 20 produktów
             prod_info = {
                 "nazwa": product.get("_id"),
                 "cena_min": product.get("min_price"),
                 "cena_max": product.get("max_price"),
                 "średnia": product.get("avg_price"),
-                "rozpiętość": f"{product.get('spread_percent', 0):.1f}%",
-                "ceny": product.get("prices", [])
+                "rozpiętość": f"{product.get('spread_percent', 0):.1f}%"
             }
             products_summary.append(prod_info)
         
