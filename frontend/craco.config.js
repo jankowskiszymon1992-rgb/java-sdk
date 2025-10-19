@@ -13,23 +13,26 @@ module.exports = {
     },
     configure: (webpackConfig) => {
       
-      // Remove console.logs in production
+      // Remove console.logs in production using babel plugin
       if (process.env.NODE_ENV === 'production') {
-        webpackConfig.optimization = {
-          ...webpackConfig.optimization,
-          minimizer: webpackConfig.optimization.minimizer.map((plugin) => {
-            if (plugin.constructor.name === 'TerserPlugin') {
-              plugin.options.terserOptions = {
-                ...plugin.options.terserOptions,
-                compress: {
-                  ...plugin.options.terserOptions.compress,
-                  drop_console: true, // Remove all console.* calls
-                },
-              };
-            }
-            return plugin;
-          }),
-        };
+        // Find babel-loader and add transform-remove-console plugin
+        const babelLoader = webpackConfig.module.rules.find(
+          (rule) => rule.oneOf
+        );
+        
+        if (babelLoader && babelLoader.oneOf) {
+          const babelRule = babelLoader.oneOf.find(
+            (rule) => rule.loader && rule.loader.includes('babel-loader')
+          );
+          
+          if (babelRule && babelRule.options && babelRule.options.plugins) {
+            // Add plugin to remove console.log in production
+            babelRule.options.plugins.push([
+              'transform-remove-console',
+              { exclude: ['error', 'warn'] } // Keep console.error and console.warn
+            ]);
+          }
+        }
       }
       
       // Disable hot reload completely if environment variable is set
