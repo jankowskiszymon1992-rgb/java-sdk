@@ -163,6 +163,21 @@ const AIAssistant = () => {
   };
 
   const handleDeleteHistory = async () => {
+    if (!window.confirm('Czy na pewno chcesz usunąć całą historię rozmów?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/ai/sessions`);
+      setSessions([]);
+      setShowHistory(false);
+      setError(null);
+    } catch (error) {
+      console.error('Błąd usuwania historii:', error);
+      setError('Nie udało się usunąć historii');
+    }
+  };
+
   const clearChat = async () => {
     if (!window.confirm('Czy na pewno chcesz wyczyścić całą historię rozmowy?')) {
       return;
