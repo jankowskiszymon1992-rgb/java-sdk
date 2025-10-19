@@ -695,6 +695,7 @@ Today's date is: {datetime.now(timezone.utc).strftime("%Y-%m-%d")}
         ).with_model("anthropic", "claude-3-7-sonnet-20250219")
         
         user_message = UserMessage(text=prompt)
+        # Zwiększ timeout i zmniejsz max_tokens
         response = await chat.send_message(user_message)
         
         # Parse JSON from response
