@@ -218,8 +218,8 @@ const AIAssistant = () => {
     
     try {
       await axios.delete(`${API}/ai/history/${sid}?_t=${Date.now()}`);
-      // Odśwież listę sesji
-      setSessions(prev => prev.filter(s => s.session_id !== sid));
+      // Odśwież listę sesji - filtruj po _id
+      setSessions(prev => prev.filter(s => s._id !== sid));
       console.log('✅ Sesja usunięta:', sid); // DEBUG
     } catch (error) {
       console.error('❌ Błąd usuwania sesji:', error);
