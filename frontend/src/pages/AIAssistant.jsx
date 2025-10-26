@@ -159,21 +159,38 @@ const AIAssistant = () => {
 
   const loadSession = async (sid) => {
     try {
-      const response = await axios.post(`${API}/ai/history`, { session_id: sid });
-      const history = response.data || [];
+      // Cache busting
+      const response = await axios.post(`${API}/ai/history?_t=${Date.now()}`, { 
+        session_id: sid,
+        limit: 100
+      });
       
-      const loadedMessages = history.flatMap(h => [
-        { role: 'user', content: h.user_message },
-        { role: 'assistant', content: h.ai_response }
-      ]);
+      const conversations = response.data.conversations || [];
+      
+      // Format messages z conversations
+      const loadedMessages = [];
+      conversations.forEach(conv => {
+        loadedMessages.push({
+          type: 'user',
+          text: conv.user_message,
+          timestamp: conv.timestamp
+        });
+        loadedMessages.push({
+          type: 'ai',
+          text: conv.ai_response,
+          timestamp: conv.timestamp
+        });
+      });
       
       setMessages(loadedMessages);
       setSessionId(sid);
       localStorage.setItem('ai_session_id', sid);
       setShowHistory(false);
+      console.log('✅ Sesja załadowana:', sid, loadedMessages.length, 'wiadomości'); // DEBUG
     } catch (error) {
-      console.error('Błąd ładowania rozmowy:', error);
+      console.error('❌ Błąd ładowania rozmowy:', error);
       setError('Nie udało się wczytać rozmowy');
+      alert('Błąd ładowania sesji: ' + (error.response?.data?.detail || error.message));
     }
   };
 
