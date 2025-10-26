@@ -522,6 +522,30 @@ urgent_issues:
         agent: "main"
         comment: "✅ NAPRAWIONO ROOT CAUSE: Service Worker był WYREJESTROWANY w index.js (serviceWorkerRegistration.unregister()). Zmieniono na serviceWorkerRegistration.register(). Po restarcie frontend Service Worker poprawnie się rejestruje - widać w konsoli 'Service Worker registered: ServiceWorkerRegistration' i 'Content is cached for offline use'. To była główna przyczyna braku powiadomień - bez zarejestrowanego SW, registration.showNotification() nie mogło działać."
 
+  - task: "AI Assistant - Chat History Backend API"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ AI ASSISTANT CHAT HISTORY ENDPOINTS TESTED SUCCESSFULLY 2025-01-19: TEST 1 ✅ GET /api/ai/sessions?limit=50 - zwraca listę 32 sesji z poprawnymi polami (session_id, title, message_count, last_message, updated_at), dane posortowane po updated_at (najnowsze pierwsze). TEST 2 ✅ POST /api/ai/history - dla session_id 'session_1761499517420' zwraca conversations z polami (user_message, ai_response, timestamp), struktura odpowiedzi poprawna. TEST 5 ✅ Empty sessions handling - endpoint zwraca pustą listę dla nieistniejących sesji (nie błąd). Wszystkie endpointy zwracają status 200, struktura danych zgodna z oczekiwaną przez frontend. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "AI Analyst - Chat History Backend API"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ AI ANALYST CHAT HISTORY ENDPOINTS TESTED SUCCESSFULLY 2025-01-19: TEST 3 ✅ GET /api/ai-analyst/chat/sessions?limit=50 - zwraca listę 29 sesji czatu AI Analityk z poprawnymi polami (session_id, title, message_count, last_message, updated_at), dane posortowane po updated_at (najnowsze pierwsze). TEST 4 ✅ GET /api/ai-analyst/chat/history?session_id={session_id} - dla session_id 'chat-20251026182549' zwraca history z polami (user_message, ai_response, created_at), dane poprawnie posortowane chronologicznie. TEST 5 ✅ Empty sessions handling - endpoint zwraca pustą listę dla nieistniejących sesji. Wszystkie endpointy zwracają status 200, struktura danych zgodna z oczekiwaną. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
   - task: "AI Assistant - Chat History UI"
     implemented: true
     working: "NA"
