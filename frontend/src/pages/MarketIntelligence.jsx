@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, DollarSign, RefreshCw, Package, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TrendingUp, DollarSign, RefreshCw, Package, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -12,6 +16,13 @@ const MarketIntelligence = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scraping, setScraping] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [showProductDialog, setShowProductDialog] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: 'przewody',
+    usd_sensitive: false
+  });
 
   useEffect(() => {
     loadDashboard();
