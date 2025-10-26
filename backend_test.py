@@ -1701,32 +1701,25 @@ def test_ai_chat_default_date():
             
             ai_response = response_data.get("response", "")
             
-            # Check if AI used ```action``` block
-            if "```action" in ai_response:
-                print("✅ AI używa ```action``` block")
+            # Check if AI executed action (action_executed field shows the result)
+            action_executed = response_data.get("action_executed", "")
+            
+            if action_executed:
+                print("✅ AI wykonał akcję (action_executed field present)")
+                print(f"Action executed: {action_executed}")
                 
-                # Extract action block to check date parameter
-                import re
-                action_match = re.search(r'```action\n(.*?)```', ai_response, re.DOTALL)
-                if action_match:
-                    action_block = action_match.group(1)
-                    print(f"Action block content:\n{action_block}")
-                    
-                    # Check if date parameter matches today's date (default)
-                    if f"date: {expected_today}" in action_block or f"date: \"{expected_today}\"" in action_block:
-                        print(f"✅ KRYTYCZNE: AI używa dzisiejszej daty jako domyślnej: {expected_today}")
-                        print("✅ TEST 4 PASSED - AI używa dzisiejszej daty jako domyślnej")
-                        return True
-                    else:
-                        print(f"❌ KRYTYCZNE: AI nie używa dzisiejszej daty jako domyślnej!")
-                        print(f"   Oczekiwana data (dzisiaj): {expected_today}")
-                        print(f"   Znaleziono w action block: {action_block}")
-                        return False
+                # Check if the executed action contains today's date (default)
+                if expected_today in action_executed:
+                    print(f"✅ KRYTYCZNE: AI używa dzisiejszej daty jako domyślnej: {expected_today}")
+                    print("✅ TEST 4 PASSED - AI używa dzisiejszej daty jako domyślnej")
+                    return True
                 else:
-                    print("❌ Nie można wyciągnąć action block z odpowiedzi AI")
+                    print(f"❌ KRYTYCZNE: AI nie używa dzisiejszej daty jako domyślnej!")
+                    print(f"   Oczekiwana data (dzisiaj): {expected_today}")
+                    print(f"   Znaleziono w action_executed: {action_executed}")
                     return False
             else:
-                print("❌ AI nie używa ```action``` block - może nie rozpoznać komendy")
+                print("❌ AI nie wykonał akcji - brak action_executed field")
                 print(f"AI response: {ai_response}")
                 return False
             
