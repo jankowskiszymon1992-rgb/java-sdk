@@ -181,6 +181,118 @@ const MarketIntelligence = () => {
         </Card>
       </div>
 
+
+
+      {/* Zarządzanie produktami */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center">
+              <Package className="h-5 w-5 mr-2 text-blue-600" />
+              Zarządzanie Produktami
+            </CardTitle>
+            <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Dodaj produkt
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Dodaj nowy produkt</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="product-name">Nazwa produktu</Label>
+                    <Input
+                      id="product-name"
+                      placeholder="np. Kabel YDYp 3x1.5mm"
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="product-category">Kategoria</Label>
+                    <Select
+                      value={newProduct.category}
+                      onValueChange={(value) => setNewProduct({...newProduct, category: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="przewody">Przewody</SelectItem>
+                        <SelectItem value="gniazda">Gniazda i wtyczki</SelectItem>
+                        <SelectItem value="lampy">Lampy LED</SelectItem>
+                        <SelectItem value="wylaczniki">Wyłączniki</SelectItem>
+                        <SelectItem value="puszki">Puszki i osprzęt</SelectItem>
+                        <SelectItem value="narzedzia">Narzędzia</SelectItem>
+                        <SelectItem value="inne">Inne</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="usd-sensitive"
+                      checked={newProduct.usd_sensitive}
+                      onChange={(e) => setNewProduct({...newProduct, usd_sensitive: e.target.checked})}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="usd-sensitive">Wrażliwy na kurs USD (np. kable miedziane)</Label>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowProductDialog(false)}>
+                    Anuluj
+                  </Button>
+                  <Button onClick={handleAddProduct} className="bg-green-600 hover:bg-green-700">
+                    Dodaj produkt
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Brak monitorowanych produktów</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Kliknij "Dodaj produkt" aby rozpocząć monitorowanie cen
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                >
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{product.name}</h4>
+                    <p className="text-sm text-gray-500">
+                      Kategoria: {product.category}
+                      {product.usd_sensitive && ' • Wrażliwy na USD'}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteProduct(product.id, product.name)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Porównanie cen */}
       <Card>
         <CardHeader>
