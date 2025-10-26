@@ -419,29 +419,43 @@ const AIAssistant = () => {
               sessions.map((session, idx) => (
                 <div
                   key={session.session_id || idx}
-                  onClick={() => loadSession(session.session_id)}
-                  className="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                  className="p-4 border rounded-lg hover:bg-blue-50 transition-colors relative group"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">
-                        {session.title || `Rozmowa ${idx + 1}`}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {session.message_count || 0} wiadomości
-                      </p>
-                      {session.last_message && (
-                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
-                          {session.last_message}
+                  <div 
+                    onClick={() => loadSession(session.session_id)}
+                    className="cursor-pointer"
+                  >
+                    <div className="flex justify-between items-start pr-8">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">
+                          {session.title || `Rozmowa ${idx + 1}`}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {session.message_count || 0} wiadomości
                         </p>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {session.updated_at
-                        ? new Date(session.updated_at).toLocaleDateString('pl-PL')
-                        : 'Brak daty'}
+                        {session.last_message && (
+                          <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                            {session.last_message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {session.updated_at
+                          ? new Date(session.updated_at).toLocaleDateString('pl-PL')
+                          : 'Brak daty'}
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Przycisk Usuń */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => deleteSession(session.session_id, e)}
+                    className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               ))
             )}
