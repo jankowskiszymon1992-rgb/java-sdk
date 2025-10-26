@@ -43,6 +43,15 @@
                 console.debug = noop;
                 console.trace = noop;
             }
+            
+            // Suppress ResizeObserver errors globally
+            window.addEventListener('error', function(event) {
+                if (event.message && event.message.includes('ResizeObserver')) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    return true;
+                }
+            });
         </script>
         <div id="root"></div>
         <!--
