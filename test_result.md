@@ -581,6 +581,12 @@ urgent_issues:
       - working: "NA"
         agent: "main"
         comment: "NAPRAWIONO 2025-01-19: Identyczny problem jak w AI Assistant - brak UI modalu historii. Dodano pełny Dialog z listą sesji czatu AI Analityk, możliwością kliknięcia aby załadować rozmowę. Naprawiono loadSession() aby poprawnie formatować wiadomości (role: 'user'/'assistant', content). Dodano cache busting. Wymaga testów frontend."
+      - working: "NA"
+        agent: "user"
+        comment: "Historia się pojawia ale po kliknięciu rozmowy nie wraca do komunikatora AI. Brak możliwości usuwania pojedynczych rozmów z historii."
+      - working: "NA"
+        agent: "main"
+        comment: "DODATKOWA NAPRAWA 2025-01-19: Dodano szczegółowe console.log do loadSession() aby debugować ładowanie rozmów. Dodano funkcję deleteSession() z możliwością usuwania pojedynczych rozmów (przycisk Usuń pojawia się na hover). Dodano lepszą obsługę błędów z toast notifications i alertami. Wymaga testów aby zweryfikować czy rozmowy się ładują poprawnie i czy usuwanie działa."
 
 agent_communication:
   - agent: "main"
