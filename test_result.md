@@ -456,9 +456,11 @@ urgent_issues:
     
   - issue: "Asystent AI - dodawanie godzin pracy przez chat"
     description: "User pisze 'Wpisz 8h pracy na projekcie X' ale godziny mogą nie być zapisywane w bazie (do przetestowania)"
-    status: "TODO"
+    status: "FIXED"
     priority: "HIGH"
-    note: "Wymaga implementacji lub weryfikacji funkcjonalności zapisu godzin pracy przez AI Assistant"
+    note: "✅ NAPRAWIONO: Znaleziono i naprawiono błąd w kodzie - AI zapisywał do kolekcji 'work_hours' ale API czytał z 'workhours'. Zmieniono AI na używanie poprawnej kolekcji 'workhours'. Wszystkie testy przeszły pomyślnie."
+    solution: "Zmieniono w server.py linię 1623: await db.work_hours.insert_one(entry) na await db.workhours.insert_one(entry). Podobnie w liniach 1154 i 1487. AI teraz poprawnie zapisuje godziny pracy do bazy danych."
+    verified: "✅ TEST 1: Projekty w bazie - PASSED, ✅ TEST 2: AI Chat dodaje godziny - PASSED, ✅ TEST 3: Wpis w bazie danych - PASSED, ✅ TEST 4: Usuwanie wpisu - PASSED, ✅ TEST 5: Usuwanie pracownika - PASSED"
 
   - task: "Reminders - Backend API Check Pending"
     implemented: true
