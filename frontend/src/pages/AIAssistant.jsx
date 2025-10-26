@@ -347,6 +347,74 @@ const AIAssistant = () => {
         </p>
       </div>
 
+      {/* Modal Historii */}
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-blue-600" />
+                Historia Rozmów
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHistory(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3 mt-4">
+            {sessions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Bot className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p>Brak zapisanych rozmów</p>
+              </div>
+            ) : (
+              sessions.map((session, idx) => (
+                <div
+                  key={session.session_id || idx}
+                  onClick={() => loadSession(session.session_id)}
+                  className="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">
+                        {session.title || `Rozmowa ${idx + 1}`}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {session.message_count || 0} wiadomości
+                      </p>
+                      {session.last_message && (
+                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                          {session.last_message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {session.updated_at
+                        ? new Date(session.updated_at).toLocaleDateString('pl-PL')
+                        : 'Brak daty'}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mt-4 pt-4 border-t flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowHistory(false)}
+            >
+              Zamknij
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Card className="flex-1 flex flex-col">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
           <div className="flex justify-between items-center">
