@@ -1745,7 +1745,8 @@ def test_ai_analyst_history(session_id):
             # If we have history, verify structure
             if len(history) > 0:
                 for i, entry in enumerate(history):
-                    required_entry_fields = ["user_message", "ai_response", "timestamp"]
+                    # AI Analyst uses 'created_at' instead of 'timestamp'
+                    required_entry_fields = ["user_message", "ai_response", "created_at"]
                     missing_entry_fields = [field for field in required_entry_fields if field not in entry]
                     
                     if missing_entry_fields:
@@ -1760,8 +1761,8 @@ def test_ai_analyst_history(session_id):
                 # Verify data is properly sorted (chronological order)
                 if len(history) > 1:
                     for i in range(len(history) - 1):
-                        current_time = history[i].get("timestamp")
-                        next_time = history[i + 1].get("timestamp")
+                        current_time = history[i].get("created_at")
+                        next_time = history[i + 1].get("created_at")
                         if current_time > next_time:
                             print("❌ History is not sorted chronologically")
                             return False
