@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v15-chat-fix-2025';
+const CACHE_NAME = 'elektron-v16-products-history-2025';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
