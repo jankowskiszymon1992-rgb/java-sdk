@@ -425,11 +425,11 @@ const AIAssistant = () => {
             ) : (
               sessions.map((session, idx) => (
                 <div
-                  key={session.session_id || idx}
+                  key={session._id || idx}
                   className="p-4 border rounded-lg hover:bg-blue-50 transition-colors relative group"
                 >
                   <div 
-                    onClick={() => loadSession(session.session_id)}
+                    onClick={() => loadSession(session._id)}
                     className="cursor-pointer"
                   >
                     <div className="flex justify-between items-start pr-8">
@@ -458,7 +458,7 @@ const AIAssistant = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => deleteSession(session.session_id, e)}
+                    onClick={(e) => deleteSession(session._id, e)}
                     className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
