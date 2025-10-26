@@ -300,6 +300,18 @@ backend:
         agent: "testing"
         comment: "✅ SYSTEM FINANSOWY PRZETESTOWANY 2025-10-18: DELETE /api/financial-entries/{id} DZIAŁA POPRAWNIE. Testowano usunięcie wpisu paliwa. Wpis usunięty pomyślnie z komunikatem 'Wpis usunięty pomyślnie'. Weryfikacja: GET /api/financial-entries/summary - kategoria fuel nie występuje w podsumowaniu, totals zaktualizowane (expense_net: 500.00, expense_gross: 500.00, balance_net: 500.00, balance_gross: 730.00). Status 200."
 
+  - task: "Financial Entries - Salaries Category Complete Flow"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ SALARIES CATEGORY COMPLETE FLOW TESTED 2025-10-26: Wszystkie 5 testów kategorii 'salaries' PRZESZŁY POMYŚLNIE. TEST 1: POST /api/financial-entries - utworzono wpis wypłat (category: salaries, date: 2025-01-19, description: 'Wypłaty styczeń 2025', amount_net/gross: 5000.00, notes: 'Test wypłat') - Status 200, ID wygenerowane. TEST 2: GET /api/financial-entries?month=2025-01 - wpis salaries znaleziony w liście z poprawnymi kwotami 5000.00. TEST 3: GET /api/financial-entries/summary?month=2025-01 - kategoria salaries w podsumowaniu (total_net: 5000.0, total_gross: 5000.0, count: 1, type: expense), kwoty zawarte w expense_net/gross totals. TEST 4: DELETE /api/financial-entries/{id} - wpis usunięty pomyślnie (Status 200, message: 'Wpis usunięty pomyślnie'). TEST 5: Weryfikacja po usunięciu - wpis salaries NIE występuje już w liście stycznia 2025. Backend URL: https://elektron-smart.preview.emergentagent.com"
+
 frontend:
   - task: "React removeChild Error Fix"
     implemented: true
