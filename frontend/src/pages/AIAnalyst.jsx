@@ -307,7 +307,15 @@ const AIAnalyst = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={loadSessions} variant="outline" size="sm" className="text-xs">
+              <Button 
+                onClick={() => {
+                  console.log('🔘 [AI Analyst] Przycisk Historia kliknięty!'); // DEBUG
+                  loadSessions();
+                }} 
+                variant="outline" 
+                size="sm" 
+                className="text-xs"
+              >
                 📜 Historia
               </Button>
               <Button onClick={startNewConversation} variant="outline" size="sm" className="text-xs">
