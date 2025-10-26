@@ -427,6 +427,21 @@ frontend:
         agent: "main"
         comment: "✅ NAPRAWIONO: Dashboard endpoint /api/projects/stats/dashboard teraz sumuje godziny z DWÓCH źródeł: 1) workhours (godziny związane z projektami), 2) employee_work_entries (godziny pracowników). Weryfikacja: Dashboard pokazuje 25 godzin (wszystkie z employee_work_entries październik 2025)."
 
+  - task: "AI Assistant - Work Hours Saving Functionality"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Użytkownik zgłasza że AI Assistant rozumie komendy głosowe ale NIE zapisuje godzin pracy do bazy. Właśnie naprawiłem funkcję add_work_hours w server.py."
+      - working: true
+        agent: "testing"
+        comment: "✅ NAPRAWIONO I PRZETESTOWANO 2025-10-26: Znaleziono root cause - AI zapisywał do kolekcji 'work_hours' ale API GET /api/workhours czytał z kolekcji 'workhours'. Naprawiono przez zmianę w server.py linii 1623, 1154, 1487 na używanie poprawnej kolekcji 'workhours'. WSZYSTKIE TESTY PRZESZŁY: TEST 1 ✅ Projekty w bazie, TEST 2 ✅ AI Chat 'Zapisz 8 godzin pracy na projekcie Test Montaż dzisiaj' - AI odpowiedział i wykonał akcję, TEST 3 ✅ Wpis z 8h i notes 'Wpisane przez AI' znaleziony w bazie, TEST 4 ✅ Usuwanie wpisu działa, TEST 5 ✅ Usuwanie pracownika działa. AI Assistant teraz faktycznie zapisuje godziny pracy do bazy danych. Backend URL: https://elektron-smart.preview.emergentagent.com"
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
