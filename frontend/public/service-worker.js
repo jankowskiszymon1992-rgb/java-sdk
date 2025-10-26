@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'elektron-v17-no-cache-final-2025';
+const CACHE_NAME = 'elektron-v18-debug-history-2025';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
