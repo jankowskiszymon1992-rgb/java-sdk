@@ -55,6 +55,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // NIE CACHUJ API requestów - zawsze pobieraj świeże dane
+  if (event.request.url.includes('/api/')) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Jeśli offline, spróbuj zwrócić z cache
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
