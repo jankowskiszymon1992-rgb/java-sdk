@@ -3334,8 +3334,9 @@ async def add_monitored_product(product: dict):
         if existing:
             raise HTTPException(status_code=400, detail="Produkt o tej nazwie już istnieje")
         
+        product_id = str(uuid.uuid4())
         product_doc = {
-            "id": str(uuid.uuid4()),
+            "id": product_id,
             "name": product["name"],
             "category": product["category"],
             "usd_sensitive": product.get("usd_sensitive", False),
@@ -3345,7 +3346,18 @@ async def add_monitored_product(product: dict):
         
         await db.monitored_products.insert_one(product_doc)
         
-        return {"message": "Produkt dodany pomyślnie", "product": product_doc}
+        # Return bez _id (MongoDB ObjectId)
+        return {
+            "message": "Produkt dodany pomyślnie", 
+            "product": {
+                "id": product_id,
+                "name": product_doc["name"],
+                "category": product_doc["category"],
+                "usd_sensitive": product_doc["usd_sensitive"],
+                "created_at": product_doc["created_at"],
+                "updated_at": product_doc["updated_at"]
+            }
+        }
     except HTTPException:
         raise
     except Exception as e:
