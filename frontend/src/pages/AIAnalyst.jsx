@@ -120,22 +120,25 @@ const AIAnalyst = () => {
   const loadSession = async (sid) => {
     try {
       // Cache busting dla pojedynczej sesji
-      const response = await axios.get(`${API}/ai-analyst/chat/history`, { 
-        params: { session_id: sid, _t: Date.now() } 
-      });
+      const response = await axios.get(`${API}/ai-analyst/chat/history?session_id=${sid}&_t=${Date.now()}`);
       const history = response.data.history || [];
       
-      setChatMessages(history.map(h => ([
-        { role: 'user', content: h.user_message },
-        { role: 'assistant', content: h.ai_response }
-      ])).flat());
+      // Format messages poprawnie
+      const loadedMessages = [];
+      history.forEach(h => {
+        loadedMessages.push({ role: 'user', content: h.user_message });
+        loadedMessages.push({ role: 'assistant', content: h.ai_response });
+      });
       
+      setChatMessages(loadedMessages);
       setSessionId(sid);
       setShowHistory(false);
       toast.success('Wczytano rozmowę');
+      console.log('✅ [AI Analyst] Sesja załadowana:', sid, loadedMessages.length, 'wiadomości'); // DEBUG
     } catch (error) {
-      console.error('Błąd ładowania rozmowy:', error);
+      console.error('❌ [AI Analyst] Błąd ładowania rozmowy:', error);
       toast.error('Nie udało się wczytać rozmowy');
+      alert('Błąd ładowania sesji: ' + (error.response?.data?.detail || error.message));
     }
   };
 
