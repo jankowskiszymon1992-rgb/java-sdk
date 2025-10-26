@@ -7,6 +7,21 @@ const config = {
 };
 
 module.exports = {
+  devServer: {
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+        runtimeErrors: (error) => {
+          // Ignore ResizeObserver errors - they are harmless
+          if (error.message && error.message.includes('ResizeObserver')) {
+            return false;
+          }
+          return true;
+        },
+      },
+    },
+  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
