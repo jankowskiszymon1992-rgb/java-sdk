@@ -370,7 +370,7 @@ def main():
     success, message, sessions = test_problem_2_ai_analyst_sessions()
     results['problem_2_sessions'] = {'success': success, 'message': message}
     
-    if success and sessions and len(sessions) > 0:
+    if success and sessions and isinstance(sessions, list) and len(sessions) > 0:
         # 2.2: Check history for existing session
         session_id = sessions[0].get('session_id') or sessions[0].get('id') or 'test-session'
         success, message = test_problem_2_ai_analyst_history(session_id)
