@@ -3353,6 +3353,87 @@ def main_ai_dates():
         print("\n❌ SOME AI DATE TESTS FAILED!")
         return False
 
+def main_chat_history():
+    """Main function for AI Assistant and AI Analyst chat history testing"""
+    print("💬 AI CHAT HISTORY TESTING STARTED")
+    print(f"Backend URL: {BASE_URL}")
+    print(f"API URL: {API_URL}")
+    print("=" * 80)
+    
+    # Test backend health first
+    if not test_backend_health():
+        print("❌ Backend is not responding. Cannot run tests.")
+        return False
+    
+    # Test results tracking
+    results = []
+    
+    # TEST 1: AI Assistant Sessions
+    print("\n🔍 TESTING AI ASSISTANT ENDPOINTS")
+    success, ai_session_id = test_ai_assistant_sessions()
+    results.append(("AI Assistant Sessions", success))
+    
+    # TEST 2: AI Assistant History
+    if success and ai_session_id:
+        success = test_ai_assistant_history(ai_session_id)
+        results.append(("AI Assistant History", success))
+    else:
+        print("⚠️  Skipping AI Assistant History test - no sessions available")
+        results.append(("AI Assistant History", None))
+    
+    # TEST 3: AI Analyst Sessions
+    print("\n🔍 TESTING AI ANALYST ENDPOINTS")
+    success, analyst_session_id = test_ai_analyst_sessions()
+    results.append(("AI Analyst Sessions", success))
+    
+    # TEST 4: AI Analyst History
+    if success and analyst_session_id:
+        success = test_ai_analyst_history(analyst_session_id)
+        results.append(("AI Analyst History", success))
+    else:
+        print("⚠️  Skipping AI Analyst History test - no sessions available")
+        results.append(("AI Analyst History", None))
+    
+    # TEST 5: Empty Sessions Handling
+    print("\n🔍 TESTING EMPTY SESSIONS HANDLING")
+    success = test_empty_sessions_handling()
+    results.append(("Empty Sessions Handling", success))
+    
+    # Summary
+    print("\n" + "=" * 80)
+    print("📊 CHAT HISTORY TESTING SUMMARY")
+    print("=" * 80)
+    
+    passed = 0
+    failed = 0
+    skipped = 0
+    
+    for test_name, result in results:
+        if result is True:
+            print(f"✅ {test_name}: PASSED")
+            passed += 1
+        elif result is False:
+            print(f"❌ {test_name}: FAILED")
+            failed += 1
+        else:
+            print(f"⚠️  {test_name}: SKIPPED")
+            skipped += 1
+    
+    print(f"\nTotal: {len(results)} tests")
+    print(f"✅ Passed: {passed}")
+    print(f"❌ Failed: {failed}")
+    print(f"⚠️  Skipped: {skipped}")
+    
+    if failed == 0:
+        print("\n🎉 ALL CRITICAL TESTS PASSED!")
+        return True
+    else:
+        print(f"\n⚠️  {failed} TESTS FAILED - REQUIRES ATTENTION")
+        return False
+    
+    print("\n" + "=" * 80)
+    print("💬 AI CHAT HISTORY TESTING COMPLETED")
+
 if __name__ == "__main__":
     # Check if we should run specific tests
     import sys
@@ -3363,9 +3444,11 @@ if __name__ == "__main__":
             main_salaries()
         elif sys.argv[1] == "ai-dates":
             main_ai_dates()
+        elif sys.argv[1] == "chat-history":
+            main_chat_history()
         else:
-            print("Available test modes: reminders, salaries, ai-dates")
-            print("Usage: python backend_test.py [reminders|salaries|ai-dates]")
+            print("Available test modes: reminders, salaries, ai-dates, chat-history")
+            print("Usage: python backend_test.py [reminders|salaries|ai-dates|chat-history]")
     else:
-        # Default: run AI date tests as requested
-        main_ai_dates()
+        # Default: run chat history tests as requested
+        main_chat_history()
