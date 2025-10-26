@@ -1602,16 +1602,30 @@ Jeśli nie ma danych - powiedz "Nie znalazłem w bazie"."""
             return f"✅ Dodano przypomnienie: {title} na {date} o {time}"
         
         async def add_work_hours(project_name: str, hours: float, date_str: str, notes: str = ""):
+            # Znajdź projekt po nazwie lub użyj domyślnego
+            project = await db.projects.find_one(
+                {"name": {"$regex": project_name, "$options": "i"}},
+                {"_id": 0}
+            )
+            
+            # Jeśli nie znaleziono projektu, użyj NULL (można później przypisać)
+            project_id = project["id"] if project else None
+            
             entry = {
                 "id": str(uuid.uuid4()),
-                "project_name": project_name,
+                "project_id": project_id,
                 "hours": hours,
                 "date": date_str,
-                "notes": notes,
-                "created_at": datetime.now(timezone.utc)
+                "notes": notes or f"Dodane przez AI dla: {project_name}",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
-            await db.work_hours.insert_one(serialize_doc(entry))
-            return f"✅ Dodano {hours}h pracy dla projektu '{project_name}' na {date_str}"
+            await db.work_hours.insert_one(entry)
+            
+            if project:
+                return f"✅ Dodano {hours}h pracy dla projektu '{project_name}' na {date_str}"
+            else:
+                return f"✅ Dodano {hours}h pracy (projekt '{project_name}' nie znaleziony - możesz przypisać później) na {date_str}"
         
         async def add_report(title: str, content: str, date_str: str):
             report = {
