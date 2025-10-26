@@ -1620,7 +1620,7 @@ Jeśli nie ma danych - powiedz "Nie znalazłem w bazie"."""
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }
-            await db.work_hours.insert_one(entry)
+            await db.workhours.insert_one(entry)
             
             if project:
                 return f"✅ Dodano {hours}h pracy dla projektu '{project_name}' na {date_str}"
