@@ -133,7 +133,9 @@ const AIAssistant = () => {
 
   const loadSessions = async () => {
     try {
-      const response = await axios.get(`${API}/ai/sessions?limit=50`);
+      // Cache busting - dodaj timestamp do URL aby wymusić świeże dane
+      const cacheBuster = `?limit=50&_t=${Date.now()}`;
+      const response = await axios.get(`${API}/ai/sessions${cacheBuster}`);
       setSessions(response.data.sessions || []);
       setShowHistory(true);
     } catch (error) {
