@@ -3207,7 +3207,13 @@ async def trigger_scraping(supplier: Optional[str] = None):
             scraper_func = SCRAPERS[supp]
             products_scraped = 0
             
-            for product in MONITORED_PRODUCTS:
+            # Pobierz produkty z bazy zamiast hardcoded listy
+            monitored_products = await db.monitored_products.find({}, {"_id": 0}).to_list(1000)
+            if not monitored_products:
+                # Fallback do hardcoded jeśli baza pusta
+                monitored_products = MONITORED_PRODUCTS
+            
+            for product in monitored_products:
                 # Automatyczne generowanie search term z nazwy produktu
                 product_name = product["name"]
                 search_term = product.get("search_terms", {}).get(supp, product_name.lower())
