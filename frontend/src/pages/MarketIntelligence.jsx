@@ -26,6 +26,7 @@ const MarketIntelligence = () => {
 
   useEffect(() => {
     loadDashboard();
+    loadProducts();
   }, []);
 
   const loadDashboard = async () => {
@@ -37,6 +38,46 @@ const MarketIntelligence = () => {
       toast.error('Nie udało się załadować danych');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const response = await axios.get(`${API}/market-intelligence/products`);
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Błąd ładowania produktów:', error);
+    }
+  };
+
+  const handleAddProduct = async () => {
+    if (!newProduct.name.trim()) {
+      toast.error('Podaj nazwę produktu');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/market-intelligence/products`, newProduct);
+      toast.success('Produkt dodany pomyślnie');
+      setNewProduct({ name: '', category: 'przewody', usd_sensitive: false });
+      setShowProductDialog(false);
+      loadProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Błąd dodawania produktu');
+    }
+  };
+
+  const handleDeleteProduct = async (productId, productName) => {
+    if (!window.confirm(`Czy na pewno usunąć produkt "${productName}"?`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/market-intelligence/products/${productId}`);
+      toast.success('Produkt usunięty');
+      loadProducts();
+    } catch (error) {
+      toast.error('Błąd usuwania produktu');
     }
   };
 
