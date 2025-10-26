@@ -1653,10 +1653,29 @@ Jeśli nie ma danych - powiedz "Nie znalazłem w bazie"."""
             return f"✅ Dodano wpis finansowy: {description} ({category}) - {net_price} PLN netto"
         
         # Przekaż AI informację o możliwościach zapisu
+        # WAŻNE: Oblicz aktualną datę w polskiej strefie czasowej
+        from datetime import timedelta
+        poland_tz = timezone(timedelta(hours=1))  # UTC+1 (zimą) - AI dostosuje jeśli lato
+        current_date = datetime.now(poland_tz).strftime('%Y-%m-%d')
+        current_datetime = datetime.now(poland_tz).strftime('%Y-%m-%d %H:%M')
+        yesterday = (datetime.now(poland_tz) - timedelta(days=1)).strftime('%Y-%m-%d')
+        
         enhanced_message = f"""{message.text}
 
 [SYSTEM INFO - AI ma możliwość wykonywania akcji]
 Jeśli użytkownik prosi o DODANIE/WPISANIE czegoś, możesz to zrobić.
+
+AKTUALNA DATA I CZAS (Polska):
+- Dzisiaj: {current_date}
+- Aktualny czas: {current_datetime}
+- Wczoraj: {yesterday}
+
+PARSOWANIE DAT - WAŻNE:
+- "dzisiaj", "dziś", "z dzisiaj" → użyj daty: {current_date}
+- "wczoraj", "z wczoraj" → użyj daty: {yesterday}
+- "przedwczoraj" → użyj daty: {(datetime.now(poland_tz) - timedelta(days=2)).strftime('%Y-%m-%d')}
+- Konkretna data np. "19 stycznia" → oblicz poprawną datę YYYY-MM-DD
+- Jeśli użytkownik nie podał daty → domyślnie użyj dzisiejszej: {current_date}
 
 Format odpowiedzi z akcją:
 ```action
@@ -1672,7 +1691,7 @@ params:
   gross_price: 1230.00
 ```
 
-PRZYKŁAD:
+PRZYKŁADY:
 User: "Dodaj przypomnienie o wysłaniu faktury Kowalskiemu za 2 dni o 10:00"
 You: "Dodam przypomnienie o wysłaniu faktury.
 ```action
@@ -1680,19 +1699,30 @@ type: reminder
 params:
   title: Wysłać fakturę Kowalski
   description: Przypomnienie o wysłaniu faktury
-  date: {(datetime.now(timezone.utc) + timedelta(days=2)).strftime('%Y-%m-%d')}
+  date: {(datetime.now(poland_tz) + timedelta(days=2)).strftime('%Y-%m-%d')}
   time: 10:00
 ```"
 
 User: "Wpisz 8 godzin pracy na projekcie Montaż Nowak dzisiaj"
-You: "Zapisuję godziny pracy.
+You: "Zapisuję godziny pracy na dzisiaj ({current_date}).
 ```action
 type: work_hours
 params:
   project_name: Montaż Nowak
   hours: 8.0
-  date: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}
+  date: {current_date}
   notes: Wpisane przez AI
+```"
+
+User: "Zapisz 5 godzin pracy wczoraj"
+You: "Zapisuję godziny pracy na wczoraj ({yesterday}).
+```action
+type: work_hours
+params:
+  project_name: Różne prace
+  hours: 5.0
+  date: {yesterday}
+  notes: Wpisane przez AI - wczoraj
 ```"
 """
         
