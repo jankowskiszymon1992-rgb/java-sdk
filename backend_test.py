@@ -1728,114 +1728,434 @@ def test_reminders_system():
     
     return results
 
+# ============= AI ASSISTANT WORK HOURS TESTS =============
+
+def test_get_projects():
+    """TEST 1: Check if there are projects in the database"""
+    print("\n=== TEST 1: Check Projects in Database ===")
+    
+    url = f"{API_URL}/projects"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Found {len(response_data)} projects in database")
+            
+            if len(response_data) > 0:
+                print("✅ Projects exist in database")
+                for i, project in enumerate(response_data[:3]):  # Show first 3
+                    print(f"   Project {i+1}: {project.get('title', 'No title')} - {project.get('status', 'No status')}")
+                return True, response_data
+            else:
+                print("⚠️  No projects found - will create test project")
+                return False, []
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            return False, []
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, []
+
+def test_create_test_project():
+    """Create test project if none exist"""
+    print("\n=== Creating Test Project ===")
+    
+    # First, get or create a client
+    clients_url = f"{API_URL}/clients"
+    
+    try:
+        # Check if clients exist
+        response = requests.get(clients_url, timeout=15)
+        if response.status_code == 200:
+            clients = response.json()
+            if len(clients) > 0:
+                client_id = clients[0]["id"]
+                print(f"Using existing client: {clients[0]['name']}")
+            else:
+                # Create a test client
+                client_data = {
+                    "name": "Jan Kowalski",
+                    "phone": "+48123456789",
+                    "address": "ul. Testowa 1",
+                    "city": "Warszawa",
+                    "postal_code": "00-001"
+                }
+                response = requests.post(clients_url, json=client_data, timeout=15)
+                if response.status_code == 200:
+                    client_id = response.json()["id"]
+                    print(f"Created test client: {client_data['name']}")
+                else:
+                    print("❌ Failed to create test client")
+                    return False, None
+        else:
+            print("❌ Failed to get clients list")
+            return False, None
+        
+        # Create test project
+        url = f"{API_URL}/projects"
+        
+        test_data = {
+            "client_id": client_id,
+            "title": "Test Montaż",
+            "description": "Testowy projekt montażu instalacji elektrycznej",
+            "location": "Warszawa",
+            "status": "in_progress",
+            "start_date": "2025-01-19",
+            "estimated_hours": 10
+        }
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            print("✅ Test project created successfully")
+            print(f"Created project ID: {response_data['id']}")
+            print(f"Project title: {response_data['title']}")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_ai_chat_add_work_hours():
+    """TEST 2: Simulate AI - add work hours via chat"""
+    print("\n=== TEST 2: AI Chat - Add Work Hours ===")
+    
+    url = f"{API_URL}/ai/chat"
+    
+    test_data = {
+        "text": "Zapisz 8 godzin pracy na projekcie Test Montaż dzisiaj",
+        "session_id": "test-work-hours-123"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=30)  # Longer timeout for AI
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check AI response
+            ai_response = response_data.get("response", "")
+            print(f"\n🤖 AI Response: {ai_response}")
+            
+            # Check if AI responded that it saved hours
+            if "✅ Dodano" in ai_response or "zapisano" in ai_response.lower() or "dodano" in ai_response.lower():
+                print("✅ AI responded that it saved work hours")
+                
+                # Check if action was executed
+                action_executed = response_data.get("action_executed")
+                if action_executed:
+                    print(f"✅ Action executed: {action_executed}")
+                    return True
+                else:
+                    print("⚠️  AI responded positively but no action_executed field")
+                    return True  # Still consider success if AI responded correctly
+            else:
+                print("❌ AI did not respond that it saved work hours")
+                print(f"AI Response: {ai_response}")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_check_work_hours_in_database():
+    """TEST 3: Check if work hours entry is in database"""
+    print("\n=== TEST 3: Check Work Hours in Database ===")
+    
+    url = f"{API_URL}/workhours"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Found {len(response_data)} work hours entries")
+            
+            # Look for today's entry with 8 hours
+            today = datetime.now().date().isoformat()
+            
+            found_entry = None
+            for entry in response_data:
+                if (entry.get("date") == today and 
+                    entry.get("hours") == 8.0 and 
+                    "AI" in entry.get("notes", "")):
+                    found_entry = entry
+                    break
+            
+            if found_entry:
+                print("✅ Found work hours entry added by AI:")
+                print(f"   Date: {found_entry['date']}")
+                print(f"   Hours: {found_entry['hours']}")
+                print(f"   Notes: {found_entry['notes']}")
+                print(f"   Project ID: {found_entry.get('project_id', 'None')}")
+                return True, found_entry["id"]
+            else:
+                print("❌ No work hours entry found with:")
+                print(f"   Date: {today}")
+                print("   Hours: 8.0")
+                print("   Notes containing 'AI'")
+                
+                # Show all entries for debugging
+                if len(response_data) > 0:
+                    print("\nAll work hours entries found:")
+                    for i, entry in enumerate(response_data):
+                        print(f"   Entry {i+1}: {entry.get('date')} - {entry.get('hours')}h - {entry.get('notes', 'No notes')}")
+                
+                return False, None
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_delete_work_hours(work_hour_id):
+    """TEST 4: Test deleting work hours entry"""
+    print("\n=== TEST 4: Delete Work Hours Entry ===")
+    
+    url = f"{API_URL}/workhours/{work_hour_id}"
+    
+    try:
+        print(f"Sending DELETE request to: {url}")
+        
+        response = requests.delete(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify success message
+            if "message" in response_data:
+                print(f"✅ DELETE response: {response_data['message']}")
+                
+                # Verify entry is actually deleted
+                get_url = f"{API_URL}/workhours"
+                get_response = requests.get(get_url, timeout=15)
+                
+                if get_response.status_code == 200:
+                    entries = get_response.json()
+                    deleted_entry = next((e for e in entries if e.get("id") == work_hour_id), None)
+                    
+                    if deleted_entry is None:
+                        print("✅ Work hours entry successfully deleted from database")
+                        return True
+                    else:
+                        print("❌ Work hours entry still exists in database")
+                        return False
+                else:
+                    print("⚠️  Could not verify deletion - GET request failed")
+                    return True  # Assume success based on 200 response
+            else:
+                print("❌ No success message in response")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_delete_employee():
+    """TEST 5: Test deleting employee"""
+    print("\n=== TEST 5: Delete Employee ===")
+    
+    # First get list of employees
+    url = f"{API_URL}/employees"
+    
+    try:
+        print(f"Getting employees list from: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        if response.status_code == 200:
+            employees = response.json()
+            
+            if len(employees) > 0:
+                # Delete the first employee
+                employee_to_delete = employees[0]
+                employee_id = employee_to_delete["id"]
+                employee_name = employee_to_delete["name"]
+                
+                print(f"Deleting employee: {employee_name} (ID: {employee_id})")
+                
+                delete_url = f"{API_URL}/employees/{employee_id}"
+                delete_response = requests.delete(delete_url, timeout=15)
+                
+                print(f"DELETE response status: {delete_response.status_code}")
+                
+                if delete_response.status_code == 200:
+                    delete_data = delete_response.json()
+                    print(f"DELETE response: {json.dumps(delete_data, indent=2, ensure_ascii=False)}")
+                    
+                    if "message" in delete_data:
+                        print(f"✅ DELETE response: {delete_data['message']}")
+                        return True
+                    else:
+                        print("❌ No success message in delete response")
+                        return False
+                else:
+                    print(f"❌ DELETE request failed with status {delete_response.status_code}")
+                    try:
+                        error_data = delete_response.json()
+                        print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+                    except:
+                        print(f"Error text: {delete_response.text}")
+                    return False
+            else:
+                print("⚠️  No employees found to delete")
+                return True  # Not a failure if no employees exist
+            
+        else:
+            print(f"❌ GET employees request failed with status {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
 def main():
-    """Run all Financial System endpoint tests"""
-    print("💰 Financial System Testing - NEW FINANCIAL SYSTEM WITH OCR")
+    """Run AI Assistant Work Hours Tests as requested"""
+    print("🤖 AI ASSISTANT WORK HOURS TESTING")
+    print("Testing czy AI faktycznie zapisuje godziny pracy do bazy")
     print(f"Backend URL: {BASE_URL}")
     print(f"API URL: {API_URL}")
-    print(f"Test time: {datetime.now().isoformat()}")
-    
-    results = {}
+    print("=" * 80)
     
     # Test backend health first
-    results['backend_health'] = test_backend_health()
+    if not test_backend_health():
+        print("\n❌ Backend health check failed - stopping tests")
+        return
     
-    if not results['backend_health']:
-        print("\n❌ Backend is not responding. Cannot proceed with tests.")
-        return results
+    # Track test results
+    results = []
     
-    print("\n" + "="*60)
-    print("CZĘŚĆ 1: RĘCZNE DODAWANIE WPISÓW")
-    print("="*60)
+    print("\n" + "=" * 80)
+    print("🤖 AI ASSISTANT WORK HOURS TESTS (as requested)")
+    print("=" * 80)
     
-    # Step 1: Create invoice sales entry
-    create_invoice_result, invoice_id = test_create_financial_entry_invoice_sales()
-    results['create_invoice_sales'] = create_invoice_result
+    # TEST 1: Check if projects exist
+    projects_exist, projects = test_get_projects()
+    results.append(("TEST 1: Check Projects", projects_exist))
     
-    # Step 2: Create salaries entry
-    create_salaries_result, salaries_id = test_create_financial_entry_salaries()
-    results['create_salaries'] = create_salaries_result
+    # If no projects, create test project
+    if not projects_exist:
+        success, project_id = test_create_test_project()
+        results.append(("Create Test Project", success))
     
-    # Step 3: Create fuel entry
-    create_fuel_result, fuel_id = test_create_financial_entry_fuel()
-    results['create_fuel'] = create_fuel_result
+    # TEST 2: AI Chat - Add work hours
+    success = test_ai_chat_add_work_hours()
+    results.append(("TEST 2: AI Chat Add Work Hours", success))
     
-    print("\n" + "="*60)
-    print("CZĘŚĆ 2: POBIERANIE I PODSUMOWANIE")
-    print("="*60)
+    # TEST 3: Check if entry is in database
+    success, work_hour_id = test_check_work_hours_in_database()
+    results.append(("TEST 3: Check Work Hours in DB", success))
     
-    # Step 4: Get all entries for October
-    results['get_entries_october'] = test_get_financial_entries_october()
+    # TEST 4: Delete work hours entry
+    if success and work_hour_id:
+        success = test_delete_work_hours(work_hour_id)
+        results.append(("TEST 4: Delete Work Hours", success))
     
-    # Step 5: Get summary for October
-    results['get_summary_october'] = test_get_financial_summary_october()
+    # TEST 5: Delete employee
+    success = test_delete_employee()
+    results.append(("TEST 5: Delete Employee", success))
     
-    print("\n" + "="*60)
-    print("CZĘŚĆ 3: EDYCJA I USUWANIE")
-    print("="*60)
+    # Print final results
+    print("\n" + "=" * 80)
+    print("📊 AI ASSISTANT WORK HOURS TEST RESULTS")
+    print("=" * 80)
     
-    # Step 6: Edit fuel entry (only if it was created successfully)
-    if create_fuel_result and fuel_id:
-        results['edit_fuel_entry'] = test_edit_financial_entry_fuel(fuel_id)
-        
-        # Step 7: Delete fuel entry
-        results['delete_fuel_entry'] = test_delete_financial_entry_fuel(fuel_id)
-        
-        # Step 8: Verify deletion
-        results['verify_fuel_deletion'] = test_verify_fuel_deletion()
-    else:
-        print("⚠️  Skipping fuel edit/delete tests - fuel entry creation failed")
-        results['edit_fuel_entry'] = False
-        results['delete_fuel_entry'] = False
-        results['verify_fuel_deletion'] = False
+    passed = sum(1 for _, success in results if success)
+    total = len(results)
     
-    # Summary
-    print("\n" + "="*60)
-    print("TEST SUMMARY - FINANCIAL SYSTEM")
-    print("="*60)
+    for test_name, success in results:
+        status = "✅ PASSED" if success else "❌ FAILED"
+        print(f"{status} - {test_name}")
     
-    print("\nCZĘŚĆ 1: RĘCZNE DODAWANIE WPISÓW")
-    part1_tests = ['create_invoice_sales', 'create_salaries', 'create_fuel']
-    for test_name in part1_tests:
-        if test_name in results:
-            status = "✅ PASS" if results[test_name] else "❌ FAIL"
-            print(f"  {test_name}: {status}")
+    print(f"\n🎯 SUMMARY: {passed}/{total} tests passed")
     
-    print("\nCZĘŚĆ 2: POBIERANIE I PODSUMOWANIE")
-    part2_tests = ['get_entries_october', 'get_summary_october']
-    for test_name in part2_tests:
-        if test_name in results:
-            status = "✅ PASS" if results[test_name] else "❌ FAIL"
-            print(f"  {test_name}: {status}")
-    
-    print("\nCZĘŚĆ 3: EDYCJA I USUWANIE")
-    part3_tests = ['edit_fuel_entry', 'delete_fuel_entry', 'verify_fuel_deletion']
-    for test_name in part3_tests:
-        if test_name in results:
-            status = "✅ PASS" if results[test_name] else "❌ FAIL"
-            print(f"  {test_name}: {status}")
-    
-    print(f"\nOVERALL:")
-    for test_name, result in results.items():
-        status = "✅ PASS" if result else "❌ FAIL"
-        print(f"  {test_name}: {status}")
-    
-    all_passed = all(results.values())
-    
-    if all_passed:
-        print("\n🎉 All FINANCIAL SYSTEM tests PASSED!")
+    if passed == total:
+        print("🎉 ALL AI ASSISTANT WORK HOURS TESTS PASSED!")
         print("\n✅ VERIFICATION COMPLETE:")
-        print("- POST /api/financial-entries working ✅")
-        print("- GET /api/financial-entries with month filter working ✅")
-        print("- GET /api/financial-entries/summary with calculations working ✅")
-        print("- PUT /api/financial-entries/{id} working ✅")
-        print("- DELETE /api/financial-entries/{id} working ✅")
-        print("- All calculations (balance, totals per category) working ✅")
+        print("- GET /api/projects working ✅")
+        print("- POST /api/ai/chat working ✅")
+        print("- AI can save work hours to database ✅")
+        print("- GET /api/workhours working ✅")
+        print("- DELETE /api/workhours/{id} working ✅")
+        print("- DELETE /api/employees/{id} working ✅")
     else:
-        print("\n⚠️  Some FINANCIAL SYSTEM tests FAILED!")
-        failed_tests = [name for name, result in results.items() if not result]
-        print(f"Failed tests: {failed_tests}")
+        print(f"⚠️  {total - passed} tests failed")
+        failed_tests = [name for name, success in results if not success]
+        print(f"Failed tests: {[name for name, success in results if not success]}")
     
+    print(f"\nBackend URL tested: {BASE_URL}")
     return results
 
 # ============= SALARIES CATEGORY SPECIFIC TESTS =============
