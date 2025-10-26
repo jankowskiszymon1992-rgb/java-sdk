@@ -392,7 +392,7 @@ def main():
     success, message, sessions = test_problem_3_ai_assistant_sessions()
     results['problem_3_sessions'] = {'success': success, 'message': message}
     
-    if success and sessions and len(sessions) > 0:
+    if success and sessions and isinstance(sessions, list) and len(sessions) > 0:
         # 3.2: Check history for existing session
         session_id = sessions[0].get('session_id') or sessions[0].get('id') or 'test-session'
         success, message = test_problem_3_ai_assistant_history(session_id)
