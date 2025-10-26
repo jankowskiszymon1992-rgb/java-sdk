@@ -442,6 +442,21 @@ frontend:
         agent: "testing"
         comment: "✅ NAPRAWIONO I PRZETESTOWANO 2025-10-26: Znaleziono root cause - AI zapisywał do kolekcji 'work_hours' ale API GET /api/workhours czytał z kolekcji 'workhours'. Naprawiono przez zmianę w server.py linii 1623, 1154, 1487 na używanie poprawnej kolekcji 'workhours'. WSZYSTKIE TESTY PRZESZŁY: TEST 1 ✅ Projekty w bazie, TEST 2 ✅ AI Chat 'Zapisz 8 godzin pracy na projekcie Test Montaż dzisiaj' - AI odpowiedział i wykonał akcję, TEST 3 ✅ Wpis z 8h i notes 'Wpisane przez AI' znaleziony w bazie, TEST 4 ✅ Usuwanie wpisu działa, TEST 5 ✅ Usuwanie pracownika działa. AI Assistant teraz faktycznie zapisuje godziny pracy do bazy danych. Backend URL: https://elektron-smart.preview.emergentagent.com"
 
+  - task: "AI Assistant - Polish Timezone Date Recognition"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "Użytkownik zgłasza że AI wpisuje złą datę gdy mówi 'zapisz dzisiaj'. Właśnie naprawiłem kod aby używał polskiej strefy czasowej (UTC+1) zamiast UTC."
+      - working: true
+        agent: "testing"
+        comment: "✅ PRZETESTOWANO 2025-10-26: AI Assistant używa POPRAWNYCH DAT w polskiej strefie czasowej (UTC+1). WSZYSTKIE 4 TESTY PRZESZŁY POMYŚLNIE: TEST 1 ✅ AI rozpoznaje 'dzisiaj' i używa poprawnej daty (2025-10-26), TEST 2 ✅ AI rozpoznaje 'wczoraj' i używa poprawnej daty (2025-10-25), TEST 3 ✅ Wpisy w bazie mają poprawne daty, TEST 4 ✅ AI używa dzisiejszej daty jako domyślnej. KRYTYCZNE: AI poprawnie oblicza daty używając poland_tz = timezone(timedelta(hours=1)) w linii 1658 server.py. Kod używa current_date = datetime.now(poland_tz).strftime('%Y-%m-%d') dla 'dzisiaj' i yesterday = (datetime.now(poland_tz) - timedelta(days=1)).strftime('%Y-%m-%d') dla 'wczoraj'. Backend URL: https://elektron-smart.preview.emergentagent.com"
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
