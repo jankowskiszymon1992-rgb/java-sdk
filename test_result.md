@@ -560,6 +560,12 @@ urgent_issues:
       - working: "NA"
         agent: "main"
         comment: "NAPRAWIONO 2025-01-19: Zidentyfikowano root cause - brak UI modalu historii. Mimo że loadSessions() pobierał dane z backendu i zapisywał do state, w JSX nie było żadnego Dialog/Modal komponentu który by wyświetlił historię użytkownikowi. Dodano pełny Dialog z listą sesji, tytułami, liczbą wiadomości, możliwością kliknięcia aby załadować rozmowę. Naprawiono także loadSession() aby poprawnie formatować wiadomości (type: 'user'/'ai', text, timestamp). Dodano cache busting z timestamp do wszystkich żądań. Wymaga testów frontend."
+      - working: "NA"
+        agent: "user"
+        comment: "Historia się pojawia ale po kliknięciu rozmowy nie wraca do komunikatora AI. Brak możliwości usuwania pojedynczych rozmów z historii."
+      - working: "NA"
+        agent: "main"
+        comment: "DODATKOWA NAPRAWA 2025-01-19: Dodano szczegółowe console.log do loadSession() aby debugować ładowanie rozmów. Dodano funkcję deleteSession() z możliwością usuwania pojedynczych rozmów (przycisk Usuń pojawia się na hover w liście sesji). Dodano force scroll to bottom po załadowaniu sesji. Dodano lepszą obsługę błędów z alertami. Wymaga testów aby zweryfikować czy rozmowy się ładują i czy usuwanie działa."
 
   - task: "AI Analyst - Chat History UI"
     implemented: true
