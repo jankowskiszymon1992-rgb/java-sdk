@@ -3,6 +3,24 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Global axios configuration - wyłącz cache dla wszystkich requestów
+axios.interceptors.request.use((config) => {
+  // Dodaj nagłówki no-cache
+  config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+  config.headers['Pragma'] = 'no-cache';
+  config.headers['Expires'] = '0';
+  
+  // Dla GET requestów dodaj timestamp (cache busting)
+  if (config.method === 'get') {
+    config.params = {
+      ...config.params,
+      _t: Date.now()
+    };
+  }
+  
+  return config;
+});
+
 // Clients API
 export const clientsApi = {
   getAll: () => axios.get(`${API}/clients`),
