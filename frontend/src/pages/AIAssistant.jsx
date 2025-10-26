@@ -2,8 +2,14 @@ import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Send, Trash2, Loader2, User, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Bot, Send, Trash2, Loader2, User, Mic, MicOff, Volume2, VolumeX, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
