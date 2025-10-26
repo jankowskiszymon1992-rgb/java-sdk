@@ -352,7 +352,10 @@ const AIAssistant = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={loadSessions}
+                onClick={() => {
+                  console.log('🔘 Przycisk Historia kliknięty!'); // DEBUG
+                  loadSessions();
+                }}
               >
                 📜 Historia
               </Button>
