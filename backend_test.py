@@ -1437,6 +1437,389 @@ def test_verify_fuel_deletion():
         print(f"❌ Unexpected error: {str(e)}")
         return False
 
+# ============= AI ASSISTANT DATE TESTING =============
+
+def test_ai_chat_today_date():
+    """TEST 1: AI rozpoznaje 'dzisiaj' - sprawdź czy używa poprawnej daty polskiej strefy czasowej"""
+    print("\n=== TEST 1: AI Assistant - Rozpoznawanie 'dzisiaj' ===")
+    
+    url = f"{API_URL}/ai/chat"
+    
+    # Calculate expected date in Polish timezone (UTC+1)
+    from datetime import timedelta
+    poland_tz = timezone(timedelta(hours=1))
+    expected_today = datetime.now(poland_tz).strftime('%Y-%m-%d')
+    
+    test_data = {
+        "text": "Zapisz 8 godzin pracy dzisiaj na projekcie Test",
+        "session_id": "test-date-today"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        print(f"Expected today's date (Polish timezone UTC+1): {expected_today}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=30)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["response", "session_id"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            ai_response = response_data.get("response", "")
+            
+            # Check if AI used ```action``` block
+            if "```action" in ai_response:
+                print("✅ AI używa ```action``` block")
+                
+                # Extract action block to check date parameter
+                import re
+                action_match = re.search(r'```action\n(.*?)```', ai_response, re.DOTALL)
+                if action_match:
+                    action_block = action_match.group(1)
+                    print(f"Action block content:\n{action_block}")
+                    
+                    # Check if date parameter matches today's date
+                    if f"date: {expected_today}" in action_block or f"date: \"{expected_today}\"" in action_block:
+                        print(f"✅ KRYTYCZNE: AI używa poprawnej daty dzisiejszej: {expected_today}")
+                        print("✅ TEST 1 PASSED - AI rozpoznaje 'dzisiaj' i używa polskiej strefy czasowej")
+                        return True
+                    else:
+                        print(f"❌ KRYTYCZNE: AI używa niepoprawnej daty!")
+                        print(f"   Oczekiwana data: {expected_today}")
+                        print(f"   Znaleziono w action block: {action_block}")
+                        return False
+                else:
+                    print("❌ Nie można wyciągnąć action block z odpowiedzi AI")
+                    return False
+            else:
+                print("❌ AI nie używa ```action``` block - może nie rozpoznać komendy")
+                print(f"AI response: {ai_response}")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (30s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_ai_chat_yesterday_date():
+    """TEST 2: AI rozpoznaje 'wczoraj' - sprawdź czy używa poprawnej daty wczorajszej"""
+    print("\n=== TEST 2: AI Assistant - Rozpoznawanie 'wczoraj' ===")
+    
+    url = f"{API_URL}/ai/chat"
+    
+    # Calculate expected yesterday date in Polish timezone (UTC+1)
+    from datetime import timedelta
+    poland_tz = timezone(timedelta(hours=1))
+    expected_yesterday = (datetime.now(poland_tz) - timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    test_data = {
+        "text": "Wpisz 5 godzin pracy wczoraj",
+        "session_id": "test-date-yesterday"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        print(f"Expected yesterday's date (Polish timezone UTC+1): {expected_yesterday}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=30)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            ai_response = response_data.get("response", "")
+            
+            # Check if AI used ```action``` block
+            if "```action" in ai_response:
+                print("✅ AI używa ```action``` block")
+                
+                # Extract action block to check date parameter
+                import re
+                action_match = re.search(r'```action\n(.*?)```', ai_response, re.DOTALL)
+                if action_match:
+                    action_block = action_match.group(1)
+                    print(f"Action block content:\n{action_block}")
+                    
+                    # Check if date parameter matches yesterday's date
+                    if f"date: {expected_yesterday}" in action_block or f"date: \"{expected_yesterday}\"" in action_block:
+                        print(f"✅ KRYTYCZNE: AI używa poprawnej daty wczorajszej: {expected_yesterday}")
+                        print("✅ TEST 2 PASSED - AI rozpoznaje 'wczoraj' i używa polskiej strefy czasowej")
+                        return True
+                    else:
+                        print(f"❌ KRYTYCZNE: AI używa niepoprawnej daty!")
+                        print(f"   Oczekiwana data wczoraj: {expected_yesterday}")
+                        print(f"   Znaleziono w action block: {action_block}")
+                        return False
+                else:
+                    print("❌ Nie można wyciągnąć action block z odpowiedzi AI")
+                    return False
+            else:
+                print("❌ AI nie używa ```action``` block - może nie rozpoznać komendy")
+                print(f"AI response: {ai_response}")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_check_workhours_database():
+    """TEST 3: Sprawdź czy wpisy są w bazie z poprawnymi datami"""
+    print("\n=== TEST 3: Sprawdzenie wpisów w bazie danych ===")
+    
+    url = f"{API_URL}/workhours"
+    
+    # Calculate expected dates
+    from datetime import timedelta
+    poland_tz = timezone(timedelta(hours=1))
+    expected_today = datetime.now(poland_tz).strftime('%Y-%m-%d')
+    expected_yesterday = (datetime.now(poland_tz) - timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Found {len(response_data)} work hour entries in database")
+            
+            # Look for entries from TEST 1 and TEST 2
+            today_entries = [entry for entry in response_data if entry.get("date") == expected_today and "Test" in entry.get("notes", "")]
+            yesterday_entries = [entry for entry in response_data if entry.get("date") == expected_yesterday]
+            
+            print(f"\n📅 Entries for today ({expected_today}):")
+            for entry in today_entries:
+                print(f"   - {entry.get('hours')}h, notes: {entry.get('notes')}, date: {entry.get('date')}")
+            
+            print(f"\n📅 Entries for yesterday ({expected_yesterday}):")
+            for entry in yesterday_entries:
+                print(f"   - {entry.get('hours')}h, notes: {entry.get('notes')}, date: {entry.get('date')}")
+            
+            # Verify dates are correct
+            dates_correct = True
+            
+            if today_entries:
+                for entry in today_entries:
+                    if entry.get("date") == expected_today:
+                        print(f"✅ Entry from TEST 1 has correct date: {entry.get('date')}")
+                    else:
+                        print(f"❌ Entry from TEST 1 has wrong date: {entry.get('date')} (expected: {expected_today})")
+                        dates_correct = False
+            else:
+                print("⚠️  No entries found for today (TEST 1 may not have created entry)")
+            
+            if yesterday_entries:
+                for entry in yesterday_entries:
+                    if entry.get("date") == expected_yesterday:
+                        print(f"✅ Entry from TEST 2 has correct date: {entry.get('date')}")
+                    else:
+                        print(f"❌ Entry from TEST 2 has wrong date: {entry.get('date')} (expected: {expected_yesterday})")
+                        dates_correct = False
+            else:
+                print("⚠️  No entries found for yesterday (TEST 2 may not have created entry)")
+            
+            if dates_correct:
+                print("✅ TEST 3 PASSED - Daty w bazie danych są poprawne")
+                return True
+            else:
+                print("❌ TEST 3 FAILED - Znaleziono niepoprawne daty w bazie")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_ai_chat_default_date():
+    """TEST 4: Test bez podanej daty (domyślnie dzisiaj)"""
+    print("\n=== TEST 4: AI Assistant - Domyślna data (dzisiaj) ===")
+    
+    url = f"{API_URL}/ai/chat"
+    
+    # Calculate expected date in Polish timezone (UTC+1)
+    from datetime import timedelta
+    poland_tz = timezone(timedelta(hours=1))
+    expected_today = datetime.now(poland_tz).strftime('%Y-%m-%d')
+    
+    test_data = {
+        "text": "Zapisz 3 godziny pracy",
+        "session_id": "test-date-default"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        print(f"Expected default date (today, Polish timezone UTC+1): {expected_today}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=30)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            ai_response = response_data.get("response", "")
+            
+            # Check if AI used ```action``` block
+            if "```action" in ai_response:
+                print("✅ AI używa ```action``` block")
+                
+                # Extract action block to check date parameter
+                import re
+                action_match = re.search(r'```action\n(.*?)```', ai_response, re.DOTALL)
+                if action_match:
+                    action_block = action_match.group(1)
+                    print(f"Action block content:\n{action_block}")
+                    
+                    # Check if date parameter matches today's date (default)
+                    if f"date: {expected_today}" in action_block or f"date: \"{expected_today}\"" in action_block:
+                        print(f"✅ KRYTYCZNE: AI używa dzisiejszej daty jako domyślnej: {expected_today}")
+                        print("✅ TEST 4 PASSED - AI używa dzisiejszej daty jako domyślnej")
+                        return True
+                    else:
+                        print(f"❌ KRYTYCZNE: AI nie używa dzisiejszej daty jako domyślnej!")
+                        print(f"   Oczekiwana data (dzisiaj): {expected_today}")
+                        print(f"   Znaleziono w action block: {action_block}")
+                        return False
+                else:
+                    print("❌ Nie można wyciągnąć action block z odpowiedzi AI")
+                    return False
+            else:
+                print("❌ AI nie używa ```action``` block - może nie rozpoznać komendy")
+                print(f"AI response: {ai_response}")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_ai_date_comprehensive():
+    """Comprehensive test for AI Assistant date functionality"""
+    print("\n" + "="*80)
+    print("🤖 COMPREHENSIVE AI ASSISTANT DATE TESTING")
+    print("Testowanie czy AI używa POPRAWNYCH DAT (polska strefa czasowa UTC+1)")
+    print("="*80)
+    
+    # Calculate current dates for reference
+    from datetime import timedelta
+    poland_tz = timezone(timedelta(hours=1))
+    current_date_poland = datetime.now(poland_tz).strftime('%Y-%m-%d')
+    current_time_poland = datetime.now(poland_tz).strftime('%H:%M')
+    yesterday_poland = (datetime.now(poland_tz) - timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    print(f"📅 REFERENCE DATES (Polish timezone UTC+1):")
+    print(f"   Dzisiaj: {current_date_poland}")
+    print(f"   Wczoraj: {yesterday_poland}")
+    print(f"   Aktualny czas: {current_time_poland}")
+    
+    # Run all tests
+    test_results = []
+    
+    print(f"\n🔍 Rozpoczynam testy...")
+    
+    # TEST 1: "dzisiaj"
+    result1 = test_ai_chat_today_date()
+    test_results.append(("TEST 1: AI rozpoznaje 'dzisiaj'", result1))
+    
+    # TEST 2: "wczoraj"  
+    result2 = test_ai_chat_yesterday_date()
+    test_results.append(("TEST 2: AI rozpoznaje 'wczoraj'", result2))
+    
+    # TEST 3: Check database
+    result3 = test_check_workhours_database()
+    test_results.append(("TEST 3: Sprawdzenie bazy danych", result3))
+    
+    # TEST 4: Default date
+    result4 = test_ai_chat_default_date()
+    test_results.append(("TEST 4: Domyślna data", result4))
+    
+    # Summary
+    print(f"\n" + "="*80)
+    print("📊 PODSUMOWANIE TESTÓW AI ASSISTANT - DATY")
+    print("="*80)
+    
+    passed_tests = 0
+    total_tests = len(test_results)
+    
+    for test_name, result in test_results:
+        status = "✅ PASSED" if result else "❌ FAILED"
+        print(f"{status} - {test_name}")
+        if result:
+            passed_tests += 1
+    
+    print(f"\n📈 WYNIK KOŃCOWY: {passed_tests}/{total_tests} testów przeszło pomyślnie")
+    
+    if passed_tests == total_tests:
+        print("🎉 WSZYSTKIE TESTY PRZESZŁY - AI używa poprawnych dat w polskiej strefie czasowej!")
+        return True
+    else:
+        print("⚠️  NIEKTÓRE TESTY NIE PRZESZŁY - Problem z datami w AI Assistant")
+        return False
+
 # ============= REMINDERS SYSTEM TESTS =============
 
 def test_create_reminder_for_pending_check():
