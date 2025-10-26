@@ -522,6 +522,36 @@ urgent_issues:
         agent: "main"
         comment: "✅ NAPRAWIONO ROOT CAUSE: Service Worker był WYREJESTROWANY w index.js (serviceWorkerRegistration.unregister()). Zmieniono na serviceWorkerRegistration.register(). Po restarcie frontend Service Worker poprawnie się rejestruje - widać w konsoli 'Service Worker registered: ServiceWorkerRegistration' i 'Content is cached for offline use'. To była główna przyczyna braku powiadomień - bez zarejestrowanego SW, registration.showNotification() nie mogło działać."
 
+  - task: "AI Assistant - Chat History UI"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/AIAssistant.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Użytkownik zgłasza że przycisk Historia nie reaguje - zero reakcji. Przyciski Historia nie pokazują historii rozmów mimo że backend działa."
+      - working: "NA"
+        agent: "main"
+        comment: "NAPRAWIONO 2025-01-19: Zidentyfikowano root cause - brak UI modalu historii. Mimo że loadSessions() pobierał dane z backendu i zapisywał do state, w JSX nie było żadnego Dialog/Modal komponentu który by wyświetlił historię użytkownikowi. Dodano pełny Dialog z listą sesji, tytułami, liczbą wiadomości, możliwością kliknięcia aby załadować rozmowę. Naprawiono także loadSession() aby poprawnie formatować wiadomości (type: 'user'/'ai', text, timestamp). Dodano cache busting z timestamp do wszystkich żądań. Wymaga testów frontend."
+
+  - task: "AI Analyst - Chat History UI"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/AIAnalyst.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Użytkownik zgłasza że przycisk Historia nie reaguje - zero reakcji w AI Analityk."
+      - working: "NA"
+        agent: "main"
+        comment: "NAPRAWIONO 2025-01-19: Identyczny problem jak w AI Assistant - brak UI modalu historii. Dodano pełny Dialog z listą sesji czatu AI Analityk, możliwością kliknięcia aby załadować rozmowę. Naprawiono loadSession() aby poprawnie formatować wiadomości (role: 'user'/'assistant', content). Dodano cache busting. Wymaga testów frontend."
+
 agent_communication:
   - agent: "main"
     message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
