@@ -3280,6 +3280,93 @@ async def get_usd_rate_current():
         raise HTTPException(status_code=500, detail="Nie udało się pobrać kursu USD")
 
 
+@api_router.get("/market-intelligence/products")
+async def get_monitored_products():
+    """Pobierz listę monitorowanych produktów"""
+    try:
+        # Najpierw sprawdź czy są w bazie
+        products = await db.monitored_products.find({}, {"_id": 0}).to_list(1000)
+        
+        if not products:
+            # Jeśli baza pusta, zainicjalizuj z MONITORED_PRODUCTS
+            for product in MONITORED_PRODUCTS:
+                product_doc = {
+                    "id": str(uuid.uuid4()),
+                    "name": product["name"],
+                    "category": product["category"],
+                    "usd_sensitive": product.get("usd_sensitive", False),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.monitored_products.insert_one(product_doc)
+            
+            # Pobierz ponownie
+            products = await db.monitored_products.find({}, {"_id": 0}).to_list(1000)
+        
+        return {"products": products, "count": len(products)}
+    except Exception as e:
+        logger.error(f"Error getting monitored products: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/market-intelligence/products")
+async def add_monitored_product(product: dict):
+    """Dodaj nowy produkt do monitorowania"""
+    try:
+        required_fields = ["name", "category"]
+        for field in required_fields:
+            if field not in product:
+                raise HTTPException(status_code=400, detail=f"Brak wymaganego pola: {field}")
+        
+        # Sprawdź czy produkt już istnieje
+        existing = await db.monitored_products.find_one(
+            {"name": product["name"]},
+            {"_id": 0}
+        )
+        
+        if existing:
+            raise HTTPException(status_code=400, detail="Produkt o tej nazwie już istnieje")
+        
+        product_doc = {
+            "id": str(uuid.uuid4()),
+            "name": product["name"],
+            "category": product["category"],
+            "usd_sensitive": product.get("usd_sensitive", False),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.monitored_products.insert_one(product_doc)
+        
+        return {"message": "Produkt dodany pomyślnie", "product": product_doc}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding monitored product: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/market-intelligence/products/{product_id}")
+async def delete_monitored_product(product_id: str):
+    """Usuń produkt z monitorowania"""
+    try:
+        result = await db.monitored_products.delete_one({"id": product_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Produkt nie znaleziony")
+        
+        # Opcjonalnie usuń też wszystkie ceny tego produktu
+        await db.product_prices.delete_many({"product_name": {"$regex": ".*"}})  # Można doprecyzować
+        
+        return {"message": "Produkt usunięty pomyślnie"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting monitored product: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 @api_router.get("/market-intelligence/usd-rate/history")
 async def get_usd_rate_history(days: int = 30):
     """Historia kursu USD za ostatnie N dni"""
