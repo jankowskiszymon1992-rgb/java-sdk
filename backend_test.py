@@ -2939,6 +2939,27 @@ def main_reminders():
     """Run Reminders System tests specifically"""
     return test_reminders_system()
 
+def main_ai_dates():
+    """Run AI Assistant Date tests specifically"""
+    print("🤖 Starting AI Assistant Date Testing...")
+    print(f"Backend URL: {BASE_URL}")
+    print(f"API URL: {API_URL}")
+    
+    # Test backend health first
+    if not test_backend_health():
+        print("❌ Backend is not responding. Cannot run tests.")
+        return False
+    
+    # Run the comprehensive AI date test
+    success = test_ai_date_comprehensive()
+    
+    if success:
+        print("\n🎉 ALL AI DATE TESTS COMPLETED SUCCESSFULLY!")
+        return True
+    else:
+        print("\n❌ SOME AI DATE TESTS FAILED!")
+        return False
+
 if __name__ == "__main__":
     # Check if we should run specific tests
     import sys
@@ -2947,8 +2968,13 @@ if __name__ == "__main__":
             main_reminders()
         elif sys.argv[1] == "salaries":
             main_salaries()
+        elif sys.argv[1] == "ai-dates":
+            main_ai_dates()
         else:
-            print("Available test modes: reminders, salaries")
-            print("Usage: python backend_test.py [reminders|salaries]")
+            print("Available test modes: reminders, salaries, ai-dates")
+            print("Usage: python backend_test.py [reminders|salaries|ai-dates]")
+    else:
+        # Default: run AI date tests as requested
+        main_ai_dates()
     else:
         main()
