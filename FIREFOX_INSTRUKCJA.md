@@ -29,7 +29,7 @@
 
 1. W pasku adresu Firefox wpisz:
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 
 2. Naciśnij **Enter**
@@ -75,7 +75,7 @@ Teraz będziesz miał zakładkę na pasku zakładek.
 1. Otwórz Firefox
 2. W pasku adresu wpisz:
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 3. **Działa!** 🎉
 
@@ -108,7 +108,7 @@ https://elektron-smart.preview.emergentagent.com
 
 1. ⬇️ Pobierz Firefox: https://www.mozilla.org/pl/firefox/new/
 2. 📦 Zainstaluj (2 minuty)
-3. 🌐 Otwórz: https://elektron-smart.preview.emergentagent.com
+3. 🌐 Otwórz: https://pwa-troubleshoot-1.preview.emergentagent.com
 4. ✅ **DZIAŁA BEZ DEVTOOLS!**
 
 ---

@@ -58,7 +58,7 @@ Te błędy pochodziły z **STAREGO CACHE w Twojej przeglądarce**:
 5. Otwórz aplikację ponownie
 
 **Na Komputerze (Chrome/Edge):**
-1. Otwórz aplikację: https://elektron-smart.preview.emergentagent.com
+1. Otwórz aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. Otwórz DevTools: **F12**
 3. Kliknij prawym na przycisk **Odśwież** w przeglądarce
 4. Wybierz **"Wyczyść pamięć podręczną i wykonaj przeładowanie twarde"**

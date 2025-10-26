@@ -27,7 +27,7 @@ Nie musisz nic pobierać - wystarczy otworzyć Edge i wejść na aplikację.
 
 1. W pasku adresu (na górze) wpisz:
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 
 2. Naciśnij **Enter**
@@ -106,7 +106,7 @@ Edge jest też dostępny na telefonie:
 1. Otwórz Edge
 2. Wpisz w pasek:
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 3. **Działa!** 🎉
 
@@ -121,7 +121,7 @@ https://elektron-smart.preview.emergentagent.com
 ## 🎯 PODSUMOWANIE:
 
 1. 🌐 Otwórz **Microsoft Edge** (już masz!)
-2. 📝 Wpisz: https://elektron-smart.preview.emergentagent.com
+2. 📝 Wpisz: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. ✅ **DZIAŁA BEZ DEVTOOLS!**
 
 ---

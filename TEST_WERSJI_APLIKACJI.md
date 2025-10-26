@@ -12,7 +12,7 @@ navigator.serviceWorker.getRegistration().then(reg => console.log('Service Worke
 
 **POWINNO POKAZAĆ:**
 ```
-Service Worker version: https://elektron-smart.preview.emergentagent.com/service-worker.js
+Service Worker version: https://pwa-troubleshoot-1.preview.emergentagent.com/service-worker.js
 ```
 
 ---
@@ -91,7 +91,7 @@ Po wejściu na aplikację:
 
 ### Firefox - Tryb prywatny:
 1. Ctrl + Shift + P (tryb prywatny)
-2. Wejdź na: https://elektron-smart.preview.emergentagent.com
+2. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. F12 → Console
 4. Kliknij "Asystent AI" → "📜 Historia"
 5. Zobacz czy są logi z 🔘 🔍 📡

@@ -23,7 +23,7 @@
 
 6. **Wejdź na aplikację:**
    ```
-   https://elektron-smart.preview.emergentagent.com
+   https://pwa-troubleshoot-1.preview.emergentagent.com
    ```
 
 ---

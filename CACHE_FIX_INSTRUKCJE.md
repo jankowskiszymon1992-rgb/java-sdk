@@ -54,18 +54,18 @@ Mimo że aplikacja jest zaktualizowana na serwerze, Twoja przeglądarka może na
 
 3. **Odinstaluj i zainstaluj PWA ponownie:**
    - Jeśli aplikacja jest zainstalowana jako PWA, usuń ją z ekranu głównego
-   - Otwórz aplikację w przeglądarce: https://elektron-smart.preview.emergentagent.com
+   - Otwórz aplikację w przeglądarce: https://pwa-troubleshoot-1.preview.emergentagent.com
    - Zainstaluj ją ponownie (Chrome pokaże opcję "Dodaj do ekranu głównego")
 
 ### Na Komputerze (Desktop):
 
 1. **Chrome/Edge:**
-   - Otwórz stronę: https://elektron-smart.preview.emergentagent.com
+   - Otwórz stronę: https://pwa-troubleshoot-1.preview.emergentagent.com
    - Naciśnij **Ctrl + Shift + R** (Windows) lub **Cmd + Shift + R** (Mac)
    - To wymusi pełne odświeżenie i pobierze nowe pliki
 
 2. **Firefox:**
-   - Otwórz stronę: https://elektron-smart.preview.emergentagent.com
+   - Otwórz stronę: https://pwa-troubleshoot-1.preview.emergentagent.com
    - Naciśnij **Ctrl + F5** (Windows) lub **Cmd + Shift + R** (Mac)
 
 3. **Wyczyść cache ręcznie (Chrome):**

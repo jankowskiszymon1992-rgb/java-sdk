@@ -110,7 +110,7 @@ Przytrzymaj przycisk zasilania → Uruchom ponownie
 
 **KROK 6: Otwórz aplikację**
 ```
-Firefox → https://elektron-smart.preview.emergentagent.com
+Firefox → https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 
 ---
@@ -176,7 +176,7 @@ Usuń folder profilu, otwórz Firefox → utworzy nowy profil
 
 **KROK 8: Otwórz aplikację**
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 
 ---
@@ -235,7 +235,7 @@ Uruchom scraping dla TME - wyłącznik różnicoprądowy 40A
 ### **Ostateczny test - Tryb Incognito:**
 ```
 1. Ctrl + Shift + P (tryb incognito/prywatny)
-2. Wejdź na: https://elektron-smart.preview.emergentagent.com
+2. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. Sprawdź czy Historia działa
 ```
 
@@ -258,10 +258,10 @@ Uruchom scraping dla TME - wyłącznik różnicoprądowy 40A
 
 **Backend przetestowany - działa w 100%:**
 ```bash
-curl https://elektron-smart.preview.emergentagent.com/api/ai/sessions?limit=5
+curl https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai/sessions?limit=5
 # Zwraca 5 sesji ✅
 
-curl https://elektron-smart.preview.emergentagent.com/api/ai-analyst/chat/sessions?limit=5
+curl https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai-analyst/chat/sessions?limit=5
 # Zwraca 5 sesji ✅
 ```
 

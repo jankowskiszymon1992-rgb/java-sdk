@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
 Ta konfiguracja **automatycznie usuwa wszystkie `console.log()`, `console.info()` itp.** z wersji produkcyjnej, pozostawiając aplikację czystą i wydajną.
 
 ## 🔍 Sprawdzenie:
-1. Otwórz aplikację: https://elektron-smart.preview.emergentagent.com
+1. Otwórz aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. Otwórz DevTools (F12)
 3. Przejdź do zakładki **Console**
 4. Powinny być tylko 2 wiadomości od Service Workera

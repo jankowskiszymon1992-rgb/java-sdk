@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Backend URL
-BASE_URL = "https://elektron-smart.preview.emergentagent.com"
+BASE_URL = "https://pwa-troubleshoot-1.preview.emergentagent.com"
 API_URL = f"{BASE_URL}/api"
 
 def test_problem_1_scraping_search_terms():

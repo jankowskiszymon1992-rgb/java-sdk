@@ -15,7 +15,7 @@ Jeśli widzisz coś takiego:
 
 ### KROK 1: Otwórz aplikację
 ```
-https://elektron-smart.preview.emergentagent.com
+https://pwa-troubleshoot-1.preview.emergentagent.com
 ```
 
 ### KROK 2: Naciśnij F12 (lub prawy przycisk → "Zbadaj")
@@ -79,7 +79,7 @@ Lub nic się nie pojawi (wtedy jest problem z przyciskiem)
 ```
 🔘 Przycisk Historia kliknięty!
 🔍 loadSessions wywołana!
-📡 Wysyłam request do: https://elektron-smart.preview.emergentagent.com/api/ai/sessions?limit=50&_t=1234567890
+📡 Wysyłam request do: https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai/sessions?limit=50&_t=1234567890
 ✅ Odpowiedź otrzymana: Object {sessions: Array(5), count: 5}
   sessions: Array(5)
     0: {_id: "chat-123", title: "test...", message_count: 3}

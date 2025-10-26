@@ -69,7 +69,7 @@ Frontend (przeglądarka) ma **STARĄ WERSJĘ** z cache!
 
 ### Test 1: Asystent AI - Backend
 ```bash
-curl -X POST "https://elektron-smart.preview.emergentagent.com/api/ai/chat" \
+curl -X POST "https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai/chat" \
   -H "Content-Type: application/json" \
   -d '{"text": "Wpisz 5h pracy na projekcie TEST_VERIFY"}'
 
@@ -79,13 +79,13 @@ curl -X POST "https://elektron-smart.preview.emergentagent.com/api/ai/chat" \
 
 ### Test 2: Historia rozmów - Backend
 ```bash
-curl "https://elektron-smart.preview.emergentagent.com/api/ai/sessions"
+curl "https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai/sessions"
 # Powinno zwrócić listę sesji JSON
 ```
 
 ### Test 3: AI Analityk GPT-5 - Backend
 ```bash
-curl "https://elektron-smart.preview.emergentagent.com/api/ai-analyst/chat/sessions"
+curl "https://pwa-troubleshoot-1.preview.emergentagent.com/api/ai-analyst/chat/sessions"
 # Powinno zwrócić listę sesji JSON
 ```
 

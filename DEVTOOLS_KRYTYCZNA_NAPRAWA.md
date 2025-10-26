@@ -52,7 +52,7 @@ Aplikacja jest naprawiona na serwerze, ale **Twoja przeglądarka nadal ma STARY 
 
 1. Usuń ikonę aplikacji Elektron z ekranu głównego (przytrzymaj → Usuń)
 2. Otwórz Chrome
-3. Wejdź na: https://elektron-smart.preview.emergentagent.com
+3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 4. W menu (⋮) wybierz **"Dodaj do ekranu głównego"**
 5. Zainstaluj aplikację ponownie
 
@@ -62,7 +62,7 @@ Aplikacja jest naprawiona na serwerze, ale **Twoja przeglądarka nadal ma STARY 
 
 #### Metoda 1: Przeładowanie twarde (NAJSZYBSZA)
 
-1. Otwórz aplikację: https://elektron-smart.preview.emergentagent.com
+1. Otwórz aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. Naciśnij **Ctrl + Shift + R** (Windows) lub **Cmd + Shift + R** (Mac)
 3. To wymusi przeładowanie i pobierze nowe pliki
 
@@ -99,7 +99,7 @@ Aplikacja jest naprawiona na serwerze, ale **Twoja przeglądarka nadal ma STARY 
 
 Po wyczyszczeniu cache:
 
-1. Otwórz aplikację: https://elektron-smart.preview.emergentagent.com
+1. Otwórz aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. Otwórz DevTools (**F12**)
 3. Przejdź do zakładki **Console**
 4. Powinno być **PUSTO** (0 wiadomości) lub max 2 logi od Service Worker
@@ -112,7 +112,7 @@ Po wyczyszczeniu cache:
 ### Opcja 1: Użyj trybu incognito (test)
 
 1. Otwórz Chrome w **trybie incognito** (Ctrl+Shift+N)
-2. Wejdź na: https://elektron-smart.preview.emergentagent.com
+2. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. Jeśli tam działa - problem jest z cache w normalnym trybie
 4. Wyczyść cache według instrukcji powyżej
 

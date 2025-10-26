@@ -84,7 +84,7 @@ Wyłączenie breakpointów i zresetowanie DevTools powinno rozwiązać problem.
 Po wykonaniu kroków:
 1. Zamknij Chrome całkowicie
 2. Otwórz Chrome ponownie
-3. Wejdź na: https://elektron-smart.preview.emergentagent.com
+3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 4. **DevTools NIE POWINNY się otworzyć**
 
 ---

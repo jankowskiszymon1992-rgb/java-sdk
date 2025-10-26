@@ -46,7 +46,7 @@ about:serviceworkers
 4. Kliknij przycisk **Unregister** lub **Wyrejestruj**
 
 ### KROK 4: Wyczyść dane strony
-1. Wejdź na: https://elektron-smart.preview.emergentagent.com
+1. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. W menu (⋮) wybierz **Ustawienia**
 3. Przewiń do **Wyczyść prywatne dane**
 4. Zaznacz:
@@ -57,7 +57,7 @@ about:serviceworkers
 ### KROK 5: Zrestartuj Firefox
 1. Zamknij Firefox całkowicie (Ostatnie aplikacje → przesuń w górę)
 2. Otwórz Firefox ponownie
-3. Wejdź na: https://elektron-smart.preview.emergentagent.com
+3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 
 ### ✅ POWINNO DZIAŁAĆ!
 
@@ -93,13 +93,13 @@ about:serviceworkers
 
 6. **Wejdź na aplikację:**
    ```
-   https://elektron-smart.preview.emergentagent.com
+   https://pwa-troubleshoot-1.preview.emergentagent.com
    ```
 
 ### METODA 2: Tryb prywatny (SZYBKI TEST)
 
 1. Naciśnij **Ctrl + Shift + P** (tryb prywatny)
-2. Wejdź na: https://elektron-smart.preview.emergentagent.com
+2. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. **Jeśli tam działa** - problem jest z cache w normalnym Firefox
 4. Wróć do METODY 1 i wyczyść cache
 

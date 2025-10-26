@@ -21,7 +21,7 @@ Problem jest w **CACHE w Twojej przeglądarce**.
 
 ### KROK 3: Wyczyść dane strony
 1. Otwórz Chrome
-2. Wejdź na stronę: https://elektron-smart.preview.emergentagent.com
+2. Wejdź na stronę: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. W pasku adresu (obok URL) kliknij ikonę **🔒 (kłódka)**
 4. Kliknij **Ustawienia witryny**
 5. Przewiń na dół i kliknij **Wyczyść i zresetuj**
@@ -34,7 +34,7 @@ Problem jest w **CACHE w Twojej przeglądarce**.
 ### KROK 5: Otwórz aplikację ponownie
 1. Zamknij Chrome
 2. Otwórz Chrome
-3. Wejdź na: https://elektron-smart.preview.emergentagent.com
+3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 4. **DevTools NIE POWINNY się otworzyć**
 
 ---
@@ -43,7 +43,7 @@ Problem jest w **CACHE w Twojej przeglądarce**.
 
 ### METODA 1: Tryb Incognito (TEST)
 1. Naciśnij **Ctrl + Shift + N** (Windows) lub **Cmd + Shift + N** (Mac)
-2. W oknie Incognito wejdź na: https://elektron-smart.preview.emergentagent.com
+2. W oknie Incognito wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 3. **Jeśli TAM DZIAŁA** - problem jest w cache normalnego Chrome
 4. Przejdź do METODY 2
 
@@ -58,10 +58,10 @@ Problem jest w **CACHE w Twojej przeglądarce**.
 5. Kliknij **Wyczyść dane**
 6. Zamknij Chrome
 7. Otwórz Chrome
-8. Wejdź na: https://elektron-smart.preview.emergentagent.com
+8. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
 
 ### METODA 3: Przeładowanie twarde
-1. Otwórz: https://elektron-smart.preview.emergentagent.com
+1. Otwórz: https://pwa-troubleshoot-1.preview.emergentagent.com
 2. Otwórz DevTools: **F12**
 3. Kliknij PRAWYM przyciskiem na ikonę **Odśwież** (⟳) w przeglądarce
 4. Wybierz **"Opróżnij pamięć podręczną i wykonaj przeładowanie twarde"**
