@@ -525,6 +525,8 @@ urgent_issues:
 agent_communication:
   - agent: "main"
     message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
+  - agent: "testing"
+    message: "TESTOWANIE 3 PROBLEMÓW ZGŁOSZONYCH PRZEZ UŻYTKOWNIKA 2025-01-12: PROBLEM 1 ❌ - POST /api/market-intelligence/scrape timeout (30s) dla Conrad/TME/RS, PROBLEM 2 ✅ - AI Analyst sessions działają (15 sesji), ale POST /api/ai-analyst/chat wymaga parametru 'message' w query (błąd 422), PROBLEM 3 ✅ - AI Assistant sessions (29 sesji) i chat działają poprawnie. Szczegóły: AI Analyst ma aktywne sesje ale endpoint chat ma błędną strukturę API, AI Assistant działa w 100%, scraping endpoint nie odpowiada (timeout)."
   - agent: "troubleshoot"
     message: "Root cause: React 19 zmienił handling refs (special property -> regular prop), co psuje DOM manipulation w Radix UI 2.2.2. Fix: upgrade do @radix-ui/react-select@2.2.6+"
   - agent: "main"
