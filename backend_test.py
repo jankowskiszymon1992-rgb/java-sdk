@@ -2976,5 +2976,3 @@ if __name__ == "__main__":
     else:
         # Default: run AI date tests as requested
         main_ai_dates()
-    else:
-        main()
