@@ -119,9 +119,13 @@ const AIAnalyst = () => {
 
   const loadSession = async (sid) => {
     try {
+      console.log('📥 [AI Analyst] Ładuję sesję:', sid); // DEBUG
       // Cache busting dla pojedynczej sesji
       const response = await axios.get(`${API}/ai-analyst/chat/history?session_id=${sid}&_t=${Date.now()}`);
+      
+      console.log('📦 [AI Analyst] Odpowiedź z backendu:', response.data); // DEBUG
       const history = response.data.history || [];
+      console.log('💬 [AI Analyst] Liczba wiadomości:', history.length); // DEBUG
       
       // Format messages poprawnie
       const loadedMessages = [];
@@ -130,15 +134,35 @@ const AIAnalyst = () => {
         loadedMessages.push({ role: 'assistant', content: h.ai_response });
       });
       
+      console.log('✅ [AI Analyst] Załadowane wiadomości:', loadedMessages.length); // DEBUG
       setChatMessages(loadedMessages);
       setSessionId(sid);
       setShowHistory(false);
       toast.success('Wczytano rozmowę');
-      console.log('✅ [AI Analyst] Sesja załadowana:', sid, loadedMessages.length, 'wiadomości'); // DEBUG
     } catch (error) {
       console.error('❌ [AI Analyst] Błąd ładowania rozmowy:', error);
       toast.error('Nie udało się wczytać rozmowy');
       alert('Błąd ładowania sesji: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
+  const deleteSession = async (sid, event) => {
+    event.stopPropagation(); // Zapobiegaj kliknięciu na sesję
+    
+    if (!window.confirm('Czy na pewno chcesz usunąć tę rozmowę?')) {
+      return;
+    }
+    
+    try {
+      await axios.delete(`${API}/ai-analyst/chat/sessions/${sid}?_t=${Date.now()}`);
+      // Odśwież listę sesji
+      setSessions(prev => prev.filter(s => s.session_id !== sid));
+      toast.success('Rozmowa usunięta');
+      console.log('✅ [AI Analyst] Sesja usunięta:', sid); // DEBUG
+    } catch (error) {
+      console.error('❌ [AI Analyst] Błąd usuwania sesji:', error);
+      toast.error('Nie udało się usunąć rozmowy');
+      alert('Błąd usuwania: ' + (error.response?.data?.detail || error.message));
     }
   };
 
