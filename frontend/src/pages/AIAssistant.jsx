@@ -160,11 +160,16 @@ const AIAssistant = () => {
   const loadSession = async (sid) => {
     try {
       console.log('📥 Ładuję sesję:', sid); // DEBUG
+      console.log('🔍 Typ session_id:', typeof sid, 'Wartość:', sid); // DEBUG
+      
       // Cache busting
-      const response = await axios.post(`${API}/ai/history?_t=${Date.now()}`, { 
+      const requestData = { 
         session_id: sid,
         limit: 100
-      });
+      };
+      console.log('📤 Wysyłam dane:', JSON.stringify(requestData)); // DEBUG
+      
+      const response = await axios.post(`${API}/ai/history?_t=${Date.now()}`, requestData);
       
       console.log('📦 Odpowiedź z backendu:', response.data); // DEBUG
       const conversations = response.data.conversations || [];
@@ -197,8 +202,10 @@ const AIAssistant = () => {
       }, 100);
     } catch (error) {
       console.error('❌ Błąd ładowania rozmowy:', error);
-      setError('Nie udało się wczytać rozmowy');
-      alert('Błąd ładowania sesji: ' + (error.response?.data?.detail || error.message));
+      console.error('❌ Response data:', error.response?.data); // DEBUG - pokaż szczegóły błędu
+      console.error('❌ Status:', error.response?.status); // DEBUG
+      setError('Nie udało się wczytać rozmowy: ' + (error.response?.data?.detail || error.message));
+      alert('Błąd ładowania sesji (422):\n' + JSON.stringify(error.response?.data, null, 2));
     }
   };
 
