@@ -3216,7 +3216,8 @@ async def trigger_scraping(supplier: Optional[str] = None):
             for product in monitored_products:
                 # Automatyczne generowanie search term z nazwy produktu
                 product_name = product["name"]
-                search_term = product.get("search_terms", {}).get(supp, product_name.lower())
+                # Użyj nazwy produktu jako search term (prosta normalizacja)
+                search_term = product_name.lower().strip()
                 
                 scrape_result = await scraper_func(product_name, search_term)
                 
