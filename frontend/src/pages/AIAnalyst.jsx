@@ -155,8 +155,8 @@ const AIAnalyst = () => {
     
     try {
       await axios.delete(`${API}/ai-analyst/chat/sessions/${sid}?_t=${Date.now()}`);
-      // Odśwież listę sesji
-      setSessions(prev => prev.filter(s => s.session_id !== sid));
+      // Odśwież listę sesji - filtruj po _id
+      setSessions(prev => prev.filter(s => s._id !== sid));
       toast.success('Rozmowa usunięta');
       console.log('✅ [AI Analyst] Sesja usunięta:', sid); // DEBUG
     } catch (error) {
