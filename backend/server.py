@@ -1151,7 +1151,7 @@ async def process_voice(data: VoiceTranscript):
                     "created_at": datetime.now(timezone.utc).isoformat(),
                     "updated_at": datetime.now(timezone.utc).isoformat()
                 }
-                await db.work_hours.insert_one(work_hour_data)
+                await db.workhours.insert_one(work_hour_data)
                 work_hours_ids.append(work_hour_data["id"])
             
             return {
