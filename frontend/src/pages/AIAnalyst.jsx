@@ -92,7 +92,9 @@ const AIAnalyst = () => {
 
   const loadSessions = async () => {
     try {
-      const response = await axios.get(`${API}/ai-analyst/chat/sessions?limit=50`);
+      // Cache busting - dodaj timestamp
+      const cacheBuster = `?limit=50&_t=${Date.now()}`;
+      const response = await axios.get(`${API}/ai-analyst/chat/sessions${cacheBuster}`);
       setSessions(response.data.sessions || []);
       setShowHistory(true);
     } catch (error) {
@@ -103,7 +105,10 @@ const AIAnalyst = () => {
 
   const loadSession = async (sid) => {
     try {
-      const response = await axios.get(`${API}/ai-analyst/chat/history`, { params: { session_id: sid } });
+      // Cache busting dla pojedynczej sesji
+      const response = await axios.get(`${API}/ai-analyst/chat/history`, { 
+        params: { session_id: sid, _t: Date.now() } 
+      });
       const history = response.data.history || [];
       
       setChatMessages(history.map(h => ([
