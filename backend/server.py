@@ -3763,13 +3763,20 @@ async def get_latest_trend_analysis():
 
 
 @api_router.post("/ai-analyst/chat")
-async def chat_with_gpt5(message: str, session_id: Optional[str] = None):
+async def chat_with_gpt5(request: dict):
     """
     Chat z GPT-5 - zadawaj pytania o produkty, ceny, trendy
     PEŁNY DOSTĘP do wszystkich danych i kontroli systemu
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Extract parameters from request body
+        message = request.get("text") or request.get("message")
+        session_id = request.get("session_id")
+        
+        if not message:
+            raise HTTPException(status_code=400, detail="Brak parametru 'text' lub 'message'")
         
         # ==== PEŁNY DOSTĘP DO BAZY DANYCH ====
         
