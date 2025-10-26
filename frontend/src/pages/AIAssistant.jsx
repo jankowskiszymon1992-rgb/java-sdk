@@ -132,15 +132,22 @@ const AIAssistant = () => {
   };
 
   const loadSessions = async () => {
+    console.log('🔍 loadSessions wywołana!'); // DEBUG
     try {
       // Cache busting - dodaj timestamp do URL aby wymusić świeże dane
       const cacheBuster = `?limit=50&_t=${Date.now()}`;
+      console.log('📡 Wysyłam request do:', `${API}/ai/sessions${cacheBuster}`); // DEBUG
+      
       const response = await axios.get(`${API}/ai/sessions${cacheBuster}`);
+      console.log('✅ Odpowiedź otrzymana:', response.data); // DEBUG
+      
       setSessions(response.data.sessions || []);
       setShowHistory(true);
+      console.log('✅ Historia załadowana, sessions:', response.data.sessions?.length); // DEBUG
     } catch (error) {
-      console.error('Błąd ładowania historii:', error);
+      console.error('❌ Błąd ładowania historii:', error); // DEBUG
       setError('Nie udało się załadować historii');
+      alert('Błąd ładowania historii: ' + (error.response?.data?.detail || error.message)); // ALERT dla użytkownika
     }
   };
 
