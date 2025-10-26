@@ -1437,6 +1437,420 @@ def test_verify_fuel_deletion():
         print(f"❌ Unexpected error: {str(e)}")
         return False
 
+# ============= AI ASSISTANT & AI ANALYST CHAT HISTORY TESTING =============
+
+def test_ai_assistant_sessions():
+    """TEST 1: GET /api/ai/sessions?limit=50 - Sprawdź listę sesji AI Assistant"""
+    print("\n=== TEST 1: AI Assistant Sessions Endpoint ===")
+    
+    url = f"{API_URL}/ai/sessions?limit=50"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["sessions", "count"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify sessions is a list
+            sessions = response_data.get("sessions", [])
+            if not isinstance(sessions, list):
+                print("❌ Sessions field is not a list")
+                return False, None
+            
+            print(f"✅ Found {len(sessions)} AI Assistant sessions")
+            
+            # If we have sessions, verify structure
+            if len(sessions) > 0:
+                for i, session in enumerate(sessions):
+                    required_session_fields = ["_id", "title", "message_count", "updated_at"]
+                    missing_session_fields = [field for field in required_session_fields if field not in session]
+                    
+                    if missing_session_fields:
+                        print(f"❌ Session {i} missing fields: {missing_session_fields}")
+                        return False, None
+                    
+                    # Verify session_id field (mapped from _id)
+                    session_id = session.get("_id")
+                    if not session_id:
+                        print(f"❌ Session {i} has empty session_id")
+                        return False, None
+                
+                # Verify sessions are sorted by updated_at (newest first)
+                if len(sessions) > 1:
+                    for i in range(len(sessions) - 1):
+                        current_time = sessions[i].get("updated_at")
+                        next_time = sessions[i + 1].get("updated_at")
+                        if current_time < next_time:
+                            print("❌ Sessions are not sorted by updated_at (newest first)")
+                            return False, None
+                
+                print("✅ Sessions structure is correct and sorted properly")
+                print(f"   Sample session: ID={sessions[0].get('_id')}, Title='{sessions[0].get('title')}', Messages={sessions[0].get('message_count')}")
+                
+                # Return first session ID for history testing
+                return True, sessions[0].get("_id")
+            else:
+                print("⚠️  No AI Assistant sessions found")
+                return True, None
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (15s)")
+        return False, None
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False, None
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_ai_assistant_history(session_id):
+    """TEST 2: POST /api/ai/history - Sprawdź historię konwersacji AI Assistant"""
+    print("\n=== TEST 2: AI Assistant History Endpoint ===")
+    
+    if not session_id:
+        print("⚠️  No session_id provided - skipping history test")
+        return True
+    
+    url = f"{API_URL}/ai/history"
+    
+    test_data = {
+        "session_id": session_id,
+        "limit": 100
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["session_id", "conversations", "count"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify session_id matches
+            if response_data.get("session_id") != session_id:
+                print(f"❌ Session ID mismatch. Expected: {session_id}, Got: {response_data.get('session_id')}")
+                return False
+            
+            # Verify conversations is a list
+            conversations = response_data.get("conversations", [])
+            if not isinstance(conversations, list):
+                print("❌ Conversations field is not a list")
+                return False
+            
+            print(f"✅ Found {len(conversations)} conversations for session {session_id}")
+            
+            # If we have conversations, verify structure
+            if len(conversations) > 0:
+                for i, conv in enumerate(conversations):
+                    required_conv_fields = ["user_message", "ai_response", "timestamp"]
+                    missing_conv_fields = [field for field in required_conv_fields if field not in conv]
+                    
+                    if missing_conv_fields:
+                        print(f"❌ Conversation {i} missing fields: {missing_conv_fields}")
+                        return False
+                    
+                    # Verify fields are not empty
+                    if not conv.get("user_message") or not conv.get("ai_response"):
+                        print(f"❌ Conversation {i} has empty user_message or ai_response")
+                        return False
+                
+                print("✅ Conversations structure is correct")
+                print(f"   Sample conversation: User='{conversations[0].get('user_message')[:50]}...', AI='{conversations[0].get('ai_response')[:50]}...'")
+            else:
+                print("⚠️  No conversations found for this session")
+            
+            print("✅ AI Assistant History endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (15s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_ai_analyst_sessions():
+    """TEST 3: GET /api/ai-analyst/chat/sessions?limit=50 - Sprawdź listę sesji AI Analyst"""
+    print("\n=== TEST 3: AI Analyst Sessions Endpoint ===")
+    
+    url = f"{API_URL}/ai-analyst/chat/sessions?limit=50"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["sessions", "count"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify sessions is a list
+            sessions = response_data.get("sessions", [])
+            if not isinstance(sessions, list):
+                print("❌ Sessions field is not a list")
+                return False, None
+            
+            print(f"✅ Found {len(sessions)} AI Analyst sessions")
+            
+            # If we have sessions, verify structure
+            if len(sessions) > 0:
+                for i, session in enumerate(sessions):
+                    required_session_fields = ["_id", "title", "message_count", "updated_at"]
+                    missing_session_fields = [field for field in required_session_fields if field not in session]
+                    
+                    if missing_session_fields:
+                        print(f"❌ Session {i} missing fields: {missing_session_fields}")
+                        return False, None
+                    
+                    # Verify session_id field (mapped from _id)
+                    session_id = session.get("_id")
+                    if not session_id:
+                        print(f"❌ Session {i} has empty session_id")
+                        return False, None
+                
+                # Verify sessions are sorted by updated_at (newest first)
+                if len(sessions) > 1:
+                    for i in range(len(sessions) - 1):
+                        current_time = sessions[i].get("updated_at")
+                        next_time = sessions[i + 1].get("updated_at")
+                        if current_time < next_time:
+                            print("❌ Sessions are not sorted by updated_at (newest first)")
+                            return False, None
+                
+                print("✅ Sessions structure is correct and sorted properly")
+                print(f"   Sample session: ID={sessions[0].get('_id')}, Title='{sessions[0].get('title')}', Messages={sessions[0].get('message_count')}")
+                
+                # Return first session ID for history testing
+                return True, sessions[0].get("_id")
+            else:
+                print("⚠️  No AI Analyst sessions found")
+                return True, None
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (15s)")
+        return False, None
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False, None
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False, None
+
+def test_ai_analyst_history(session_id):
+    """TEST 4: GET /api/ai-analyst/chat/history?session_id={session_id} - Sprawdź historię AI Analyst"""
+    print("\n=== TEST 4: AI Analyst History Endpoint ===")
+    
+    if not session_id:
+        print("⚠️  No session_id provided - skipping history test")
+        return True
+    
+    url = f"{API_URL}/ai-analyst/chat/history?session_id={session_id}"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["history", "count"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify history is a list
+            history = response_data.get("history", [])
+            if not isinstance(history, list):
+                print("❌ History field is not a list")
+                return False
+            
+            print(f"✅ Found {len(history)} history entries for session {session_id}")
+            
+            # If we have history, verify structure
+            if len(history) > 0:
+                for i, entry in enumerate(history):
+                    required_entry_fields = ["user_message", "ai_response", "timestamp"]
+                    missing_entry_fields = [field for field in required_entry_fields if field not in entry]
+                    
+                    if missing_entry_fields:
+                        print(f"❌ History entry {i} missing fields: {missing_entry_fields}")
+                        return False
+                    
+                    # Verify fields are not empty
+                    if not entry.get("user_message") or not entry.get("ai_response"):
+                        print(f"❌ History entry {i} has empty user_message or ai_response")
+                        return False
+                
+                # Verify data is properly sorted (chronological order)
+                if len(history) > 1:
+                    for i in range(len(history) - 1):
+                        current_time = history[i].get("timestamp")
+                        next_time = history[i + 1].get("timestamp")
+                        if current_time > next_time:
+                            print("❌ History is not sorted chronologically")
+                            return False
+                
+                print("✅ History structure is correct and properly sorted")
+                print(f"   Sample entry: User='{history[0].get('user_message')[:50]}...', AI='{history[0].get('ai_response')[:50]}...'")
+            else:
+                print("⚠️  No history entries found for this session")
+            
+            print("✅ AI Analyst History endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (15s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_empty_sessions_handling():
+    """TEST 5: Sprawdź czy endpointy zwracają pustą listę gdy brak sesji"""
+    print("\n=== TEST 5: Empty Sessions Handling ===")
+    
+    # Test both endpoints with non-existent session
+    test_session_id = "non-existent-session-12345"
+    
+    # Test AI Assistant history with non-existent session
+    print("\n--- Testing AI Assistant with non-existent session ---")
+    url = f"{API_URL}/ai/history"
+    test_data = {"session_id": test_session_id, "limit": 10}
+    
+    try:
+        response = requests.post(url, json=test_data, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("count") == 0 and len(data.get("conversations", [])) == 0:
+                print("✅ AI Assistant returns empty list for non-existent session")
+                ai_assistant_empty_ok = True
+            else:
+                print("❌ AI Assistant should return empty list for non-existent session")
+                ai_assistant_empty_ok = False
+        else:
+            print(f"❌ AI Assistant returned error status {response.status_code} instead of empty list")
+            ai_assistant_empty_ok = False
+    except Exception as e:
+        print(f"❌ AI Assistant error: {str(e)}")
+        ai_assistant_empty_ok = False
+    
+    # Test AI Analyst history with non-existent session
+    print("\n--- Testing AI Analyst with non-existent session ---")
+    url = f"{API_URL}/ai-analyst/chat/history?session_id={test_session_id}"
+    
+    try:
+        response = requests.get(url, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("count") == 0 and len(data.get("history", [])) == 0:
+                print("✅ AI Analyst returns empty list for non-existent session")
+                ai_analyst_empty_ok = True
+            else:
+                print("❌ AI Analyst should return empty list for non-existent session")
+                ai_analyst_empty_ok = False
+        else:
+            print(f"❌ AI Analyst returned error status {response.status_code} instead of empty list")
+            ai_analyst_empty_ok = False
+    except Exception as e:
+        print(f"❌ AI Analyst error: {str(e)}")
+        ai_analyst_empty_ok = False
+    
+    # Final result
+    if ai_assistant_empty_ok and ai_analyst_empty_ok:
+        print("\n✅ Empty sessions handling test PASSED")
+        return True
+    else:
+        print("\n❌ Empty sessions handling test FAILED")
+        return False
+
 # ============= AI ASSISTANT DATE TESTING =============
 
 def test_ai_chat_today_date():
