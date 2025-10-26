@@ -1484,7 +1484,7 @@ async def ai_chat(message: ChatMessage):
         reports = await db.reports.find({}, {"_id": 0}).sort("date", -1).limit(30).to_list(30)
         
         # 4. GODZINY PRACY - ostatnie 100 wpisów (projekty)
-        work_hours_projects = await db.work_hours.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
+        work_hours_projects = await db.workhours.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
         
         # 5. GODZINY PRACY PRACOWNIKÓW - ostatnie 100
         work_hours_employees = await db.employee_work_entries.find({}, {"_id": 0}).sort("date", -1).limit(100).to_list(100)
