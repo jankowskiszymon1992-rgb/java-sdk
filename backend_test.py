@@ -1838,14 +1838,414 @@ def main():
     
     return results
 
+# ============= SALARIES CATEGORY SPECIFIC TESTS =============
+
+def test_salaries_category_complete_flow():
+    """Complete test flow for salaries category as requested in review"""
+    print("\n" + "="*80)
+    print("🧪 TESTING SALARIES CATEGORY - COMPLETE FLOW")
+    print("="*80)
+    
+    # TEST 1: Dodawanie wpisu "Wypłaty pracowników"
+    print("\n📝 TEST 1: Dodawanie wpisu 'Wypłaty pracowników'")
+    success, salary_id = test_create_salary_entry()
+    if not success:
+        print("❌ TEST 1 FAILED - Cannot continue with other tests")
+        return False
+    
+    # TEST 2: Weryfikacja w liście
+    print("\n📋 TEST 2: Weryfikacja w liście")
+    success = test_verify_salary_in_list()
+    if not success:
+        print("❌ TEST 2 FAILED")
+        return False
+    
+    # TEST 3: Weryfikacja w podsumowaniu
+    print("\n📊 TEST 3: Weryfikacja w podsumowaniu")
+    success = test_verify_salary_in_summary()
+    if not success:
+        print("❌ TEST 3 FAILED")
+        return False
+    
+    # TEST 4: Usuwanie wpisu
+    print("\n🗑️ TEST 4: Usuwanie wpisu")
+    success = test_delete_salary_entry(salary_id)
+    if not success:
+        print("❌ TEST 4 FAILED")
+        return False
+    
+    # TEST 5: Weryfikacja po usunięciu
+    print("\n✅ TEST 5: Weryfikacja po usunięciu")
+    success = test_verify_salary_deleted()
+    if not success:
+        print("❌ TEST 5 FAILED")
+        return False
+    
+    print("\n" + "="*80)
+    print("🎉 ALL SALARIES CATEGORY TESTS PASSED!")
+    print("="*80)
+    return True
+
+def test_create_salary_entry():
+    """TEST 1: POST /api/financial-entries - Create salary entry"""
+    print("\n=== TEST 1: Creating Salary Entry ===")
+    
+    url = f"{API_URL}/financial-entries"
+    
+    # Exact test data as specified in the review request
+    test_data = {
+        "category": "salaries",
+        "date": "2025-01-19",
+        "description": "Wypłaty styczeń 2025",
+        "amount_net": 5000.00,
+        "amount_gross": 5000.00,
+        "vat_rate": None,
+        "notes": "Test wypłat"
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        print(f"Request data: {json.dumps(test_data, indent=2, ensure_ascii=False)}")
+        
+        response = requests.post(url, json=test_data, headers=headers, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            required_fields = ["id", "date", "category", "description", "amount_net", "amount_gross", "notes", "created_at", "updated_at"]
+            missing_fields = [field for field in required_fields if field not in response_data]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False, None
+            
+            # Verify data matches exactly
+            if response_data["category"] != "salaries":
+                print(f"❌ Category mismatch. Expected: salaries, Got: {response_data['category']}")
+                return False, None
+            
+            if response_data["date"] != "2025-01-19":
+                print(f"❌ Date mismatch. Expected: 2025-01-19, Got: {response_data['date']}")
+                return False, None
+            
+            if response_data["description"] != "Wypłaty styczeń 2025":
+                print(f"❌ Description mismatch. Expected: 'Wypłaty styczeń 2025', Got: {response_data['description']}")
+                return False, None
+            
+            if response_data["amount_net"] != 5000.00:
+                print(f"❌ Amount net mismatch. Expected: 5000.00, Got: {response_data['amount_net']}")
+                return False, None
+            
+            if response_data["amount_gross"] != 5000.00:
+                print(f"❌ Amount gross mismatch. Expected: 5000.00, Got: {response_data['amount_gross']}")
+                return False, None
+            
+            if response_data["notes"] != "Test wypłat":
+                print(f"❌ Notes mismatch. Expected: 'Test wypłat', Got: {response_data['notes']}")
+                return False, None
+            
+            # Verify ID is generated
+            if not response_data["id"] or len(response_data["id"]) == 0:
+                print("❌ Salary entry ID is empty")
+                return False, None
+            
+            print("✅ TEST 1 PASSED: Salary entry created successfully")
+            print(f"✅ Status 200 returned")
+            print(f"✅ Created entry ID: {response_data['id']}")
+            print(f"✅ All required fields present and correct")
+            return True, response_data["id"]
+            
+        else:
+            print(f"❌ TEST 1 FAILED: Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ TEST 1 FAILED: Unexpected error: {str(e)}")
+        return False, None
+
+def test_verify_salary_in_list():
+    """TEST 2: GET /api/financial-entries?month=2025-01 - Verify salary in list"""
+    print("\n=== TEST 2: Verifying Salary in List ===")
+    
+    url = f"{API_URL}/financial-entries?month=2025-01"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Found {len(response_data)} entries for January 2025")
+            
+            # Verify response is a list
+            if not isinstance(response_data, list):
+                print("❌ Response is not a list")
+                return False
+            
+            # Look for our salary entry
+            salary_entry = None
+            for entry in response_data:
+                if (entry.get("category") == "salaries" and 
+                    entry.get("date") == "2025-01-19" and
+                    entry.get("description") == "Wypłaty styczeń 2025"):
+                    salary_entry = entry
+                    break
+            
+            if salary_entry:
+                print("✅ TEST 2 PASSED: Salary entry found in list")
+                print(f"✅ Category: {salary_entry['category']}")
+                print(f"✅ Date: {salary_entry['date']}")
+                print(f"✅ Description: {salary_entry['description']}")
+                print(f"✅ Amount Net: {salary_entry['amount_net']}")
+                print(f"✅ Amount Gross: {salary_entry['amount_gross']}")
+                
+                # Verify amounts are correct
+                if salary_entry['amount_net'] == 5000.00 and salary_entry['amount_gross'] == 5000.00:
+                    print("✅ Amounts are correct (5000.00)")
+                    return True
+                else:
+                    print(f"❌ Amount mismatch. Expected: 5000.00/5000.00, Got: {salary_entry['amount_net']}/{salary_entry['amount_gross']}")
+                    return False
+            else:
+                print("❌ TEST 2 FAILED: Salary entry not found in list")
+                print("Available entries:")
+                for entry in response_data:
+                    print(f"  - {entry.get('category')} | {entry.get('date')} | {entry.get('description')}")
+                return False
+            
+        else:
+            print(f"❌ TEST 2 FAILED: Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ TEST 2 FAILED: Unexpected error: {str(e)}")
+        return False
+
+def test_verify_salary_in_summary():
+    """TEST 3: GET /api/financial-entries/summary?month=2025-01 - Verify salary in summary"""
+    print("\n=== TEST 3: Verifying Salary in Summary ===")
+    
+    url = f"{API_URL}/financial-entries/summary?month=2025-01"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify response structure
+            if "categories" not in response_data or "totals" not in response_data:
+                print("❌ Missing categories or totals in response")
+                return False
+            
+            categories = response_data["categories"]
+            totals = response_data["totals"]
+            
+            # Look for salaries category
+            salaries_category = None
+            for category in categories:
+                if category.get("category") == "salaries":
+                    salaries_category = category
+                    break
+            
+            if salaries_category:
+                print("✅ TEST 3 PART 1 PASSED: Salaries category found in summary")
+                print(f"✅ Category: {salaries_category['category']}")
+                print(f"✅ Total Net: {salaries_category['total_net']}")
+                print(f"✅ Total Gross: {salaries_category['total_gross']}")
+                print(f"✅ Count: {salaries_category['count']}")
+                print(f"✅ Type: {salaries_category['type']}")
+                
+                # Verify amounts
+                if salaries_category['total_net'] == 5000.00 and salaries_category['total_gross'] == 5000.00:
+                    print("✅ Salaries category amounts are correct")
+                else:
+                    print(f"❌ Salaries category amounts incorrect. Expected: 5000.00/5000.00, Got: {salaries_category['total_net']}/{salaries_category['total_gross']}")
+                    return False
+            else:
+                print("❌ TEST 3 PART 1 FAILED: Salaries category not found in summary")
+                print("Available categories:")
+                for category in categories:
+                    print(f"  - {category.get('category')}: {category.get('total_net')}/{category.get('total_gross')}")
+                return False
+            
+            # Verify totals include salary amounts
+            print(f"\n📊 Checking totals:")
+            print(f"Expense Net: {totals.get('expense_net')}")
+            print(f"Expense Gross: {totals.get('expense_gross')}")
+            
+            # Since salaries is an expense, it should be included in expense totals
+            if totals.get('expense_net', 0) >= 5000.00 and totals.get('expense_gross', 0) >= 5000.00:
+                print("✅ TEST 3 PART 2 PASSED: Salary amounts included in expense totals")
+                print("✅ TEST 3 COMPLETE: Summary verification successful")
+                return True
+            else:
+                print(f"❌ TEST 3 PART 2 FAILED: Salary amounts not properly included in totals")
+                print(f"Expected expense totals to include at least 5000.00, got: {totals.get('expense_net')}/{totals.get('expense_gross')}")
+                return False
+            
+        else:
+            print(f"❌ TEST 3 FAILED: Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ TEST 3 FAILED: Unexpected error: {str(e)}")
+        return False
+
+def test_delete_salary_entry(salary_id):
+    """TEST 4: DELETE /api/financial-entries/{id} - Delete salary entry"""
+    print("\n=== TEST 4: Deleting Salary Entry ===")
+    
+    url = f"{API_URL}/financial-entries/{salary_id}"
+    
+    try:
+        print(f"Sending DELETE request to: {url}")
+        print(f"Deleting salary entry with ID: {salary_id}")
+        
+        response = requests.delete(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Verify success message
+            if "message" in response_data:
+                print(f"✅ TEST 4 PASSED: DELETE successful")
+                print(f"✅ Status 200 returned")
+                print(f"✅ Success message: {response_data['message']}")
+                return True
+            else:
+                print("❌ No success message in response")
+                return False
+            
+        else:
+            print(f"❌ TEST 4 FAILED: Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ TEST 4 FAILED: Unexpected error: {str(e)}")
+        return False
+
+def test_verify_salary_deleted():
+    """TEST 5: GET /api/financial-entries?month=2025-01 - Verify salary is deleted"""
+    print("\n=== TEST 5: Verifying Salary Entry Deleted ===")
+    
+    url = f"{API_URL}/financial-entries?month=2025-01"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=15)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Found {len(response_data)} entries for January 2025 after deletion")
+            
+            # Look for our deleted salary entry
+            salary_entry_found = False
+            for entry in response_data:
+                if (entry.get("category") == "salaries" and 
+                    entry.get("date") == "2025-01-19" and
+                    entry.get("description") == "Wypłaty styczeń 2025"):
+                    salary_entry_found = True
+                    break
+            
+            if not salary_entry_found:
+                print("✅ TEST 5 PASSED: Salary entry successfully deleted from list")
+                print("✅ Entry no longer appears in January 2025 entries")
+                return True
+            else:
+                print("❌ TEST 5 FAILED: Salary entry still found in list after deletion")
+                return False
+            
+        else:
+            print(f"❌ TEST 5 FAILED: Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ TEST 5 FAILED: Unexpected error: {str(e)}")
+        return False
+
+def main_salaries():
+    """Run Salaries Category tests specifically"""
+    print("🚀 Starting Salaries Category Testing...")
+    print(f"Backend URL: {BASE_URL}")
+    print(f"API URL: {API_URL}")
+    
+    # Test backend health first
+    if not test_backend_health():
+        print("❌ Backend is not responding. Cannot run tests.")
+        return False
+    
+    # Run the complete salaries category test flow
+    success = test_salaries_category_complete_flow()
+    
+    if success:
+        print("\n🎉 ALL SALARIES CATEGORY TESTS COMPLETED SUCCESSFULLY!")
+        return True
+    else:
+        print("\n❌ SOME SALARIES CATEGORY TESTS FAILED!")
+        return False
+
 def main_reminders():
     """Run Reminders System tests specifically"""
     return test_reminders_system()
 
 if __name__ == "__main__":
-    # Check if we should run reminders tests specifically
+    # Check if we should run specific tests
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "reminders":
-        main_reminders()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "reminders":
+            main_reminders()
+        elif sys.argv[1] == "salaries":
+            main_salaries()
+        else:
+            print("Available test modes: reminders, salaries")
+            print("Usage: python backend_test.py [reminders|salaries]")
     else:
         main()
