@@ -159,13 +159,16 @@ const AIAssistant = () => {
 
   const loadSession = async (sid) => {
     try {
+      console.log('📥 Ładuję sesję:', sid); // DEBUG
       // Cache busting
       const response = await axios.post(`${API}/ai/history?_t=${Date.now()}`, { 
         session_id: sid,
         limit: 100
       });
       
+      console.log('📦 Odpowiedź z backendu:', response.data); // DEBUG
       const conversations = response.data.conversations || [];
+      console.log('💬 Liczba konwersacji:', conversations.length); // DEBUG
       
       // Format messages z conversations
       const loadedMessages = [];
@@ -182,15 +185,38 @@ const AIAssistant = () => {
         });
       });
       
+      console.log('✅ Załadowane wiadomości:', loadedMessages.length); // DEBUG
       setMessages(loadedMessages);
       setSessionId(sid);
       localStorage.setItem('ai_session_id', sid);
       setShowHistory(false);
-      console.log('✅ Sesja załadowana:', sid, loadedMessages.length, 'wiadomości'); // DEBUG
+      
+      // Force scroll to bottom after loading
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     } catch (error) {
       console.error('❌ Błąd ładowania rozmowy:', error);
       setError('Nie udało się wczytać rozmowy');
       alert('Błąd ładowania sesji: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
+  const deleteSession = async (sid, event) => {
+    event.stopPropagation(); // Zapobiegaj kliknięciu na sesję
+    
+    if (!window.confirm('Czy na pewno chcesz usunąć tę rozmowę?')) {
+      return;
+    }
+    
+    try {
+      await axios.delete(`${API}/ai/history/${sid}?_t=${Date.now()}`);
+      // Odśwież listę sesji
+      setSessions(prev => prev.filter(s => s.session_id !== sid));
+      console.log('✅ Sesja usunięta:', sid); // DEBUG
+    } catch (error) {
+      console.error('❌ Błąd usuwania sesji:', error);
+      alert('Nie udało się usunąć rozmowy: ' + (error.response?.data?.detail || error.message));
     }
   };
 
