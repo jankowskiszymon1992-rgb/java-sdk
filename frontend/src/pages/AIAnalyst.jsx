@@ -91,15 +91,23 @@ const AIAnalyst = () => {
   };
 
   const loadSessions = async () => {
+    console.log('🔍 [AI Analyst] loadSessions wywołana!'); // DEBUG
     try {
       // Cache busting - dodaj timestamp
       const cacheBuster = `?limit=50&_t=${Date.now()}`;
+      console.log('📡 [AI Analyst] Wysyłam request do:', `${API}/ai-analyst/chat/sessions${cacheBuster}`); // DEBUG
+      
       const response = await axios.get(`${API}/ai-analyst/chat/sessions${cacheBuster}`);
+      console.log('✅ [AI Analyst] Odpowiedź:', response.data); // DEBUG
+      
       setSessions(response.data.sessions || []);
       setShowHistory(true);
+      console.log('✅ [AI Analyst] Historia załadowana, sessions:', response.data.sessions?.length); // DEBUG
+      toast.success('Historia załadowana!'); // Potwierdzenie wizualne
     } catch (error) {
-      console.error('Błąd ładowania historii:', error);
+      console.error('❌ [AI Analyst] Błąd ładowania historii:', error); // DEBUG
       toast.error('Nie udało się załadować historii');
+      alert('Błąd: ' + (error.response?.data?.detail || error.message)); // ALERT
     }
   };
 
