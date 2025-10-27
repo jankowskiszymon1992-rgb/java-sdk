@@ -3777,6 +3777,78 @@ def main_chat_history():
     print("\n" + "=" * 80)
     print("💬 AI CHAT HISTORY TESTING COMPLETED")
 
+def main_market_intelligence():
+    """Main function for Market Intelligence scraping tests"""
+    print("🔍 MARKET INTELLIGENCE SCRAPING TESTING STARTED")
+    print("Testing nowy endpoint scrapingu Market Intelligence z naprawionymi błędami")
+    print(f"Backend URL: {BASE_URL}")
+    print(f"API URL: {API_URL}")
+    print("=" * 80)
+    
+    # Test backend health first
+    if not test_backend_health():
+        print("❌ Backend is not responding. Cannot run tests.")
+        return False
+    
+    # Test results tracking
+    results = []
+    
+    # TEST 1: Scraping dla Kaczmarek Electric (nowy dostawca)
+    print("\n🔍 TEST 1: Scraping dla Kaczmarek Electric (nowy dostawca)")
+    success = test_market_intelligence_scrape_kaczmarek_electric()
+    results.append(("Kaczmarek Electric Scraping", success))
+    
+    # TEST 2: Scraping dla TME (naprawiony)
+    print("\n🔍 TEST 2: Scraping dla TME (naprawiony)")
+    success = test_market_intelligence_scrape_tme()
+    results.append(("TME Scraping (Fixed)", success))
+    
+    # TEST 3: Scraping dla Conrad (naprawiony)
+    print("\n🔍 TEST 3: Scraping dla Conrad (naprawiony)")
+    success = test_market_intelligence_scrape_conrad()
+    results.append(("Conrad Scraping (Fixed)", success))
+    
+    # TEST 4: Scraping dla RS Components (naprawiony)
+    print("\n🔍 TEST 4: Scraping dla RS Components (naprawiony)")
+    success = test_market_intelligence_scrape_rs_components()
+    results.append(("RS Components Scraping (Fixed)", success))
+    
+    # TEST 5: Pobierz logi scrapingu
+    print("\n🔍 TEST 5: Pobierz logi scrapingu")
+    success = test_market_intelligence_scraping_logs()
+    results.append(("Scraping Logs", success))
+    
+    # Summary
+    print("\n" + "=" * 80)
+    print("📊 MARKET INTELLIGENCE SCRAPING TEST RESULTS")
+    print("=" * 80)
+    
+    passed = sum(1 for _, success in results if success)
+    total = len(results)
+    
+    for test_name, success in results:
+        status = "✅ PASSED" if success else "❌ FAILED"
+        print(f"{status} - {test_name}")
+    
+    print(f"\n🎯 SUMMARY: {passed}/{total} tests passed")
+    
+    if passed == total:
+        print("🎉 ALL MARKET INTELLIGENCE SCRAPING TESTS PASSED!")
+        print("\n✅ OCZEKIWANE WYNIKI ZWERYFIKOWANE:")
+        print("- ✅ Wszystkie scrapingi zakończone sukcesem (status: 'success')")
+        print("- ✅ Kaczmarek Electric dodany jako nowy dostawca")
+        print("- ✅ TME/Conrad/RS Components działają bez błędów 'search_terms'")
+        print("- ✅ Każdy dostawca ma products_scraped > 0")
+        print("- ✅ Logi zapisane w bazie")
+        print("- ✅ Endpoint /scraping-logs zwraca dane")
+    else:
+        print(f"⚠️  {total - passed} tests failed")
+        failed_tests = [name for name, success in results if not success]
+        print(f"Failed tests: {failed_tests}")
+    
+    print(f"\nBackend URL tested: {BASE_URL}")
+    return results
+
 if __name__ == "__main__":
     # Check if we should run specific tests
     import sys
@@ -3789,9 +3861,11 @@ if __name__ == "__main__":
             main_ai_dates()
         elif sys.argv[1] == "chat-history":
             main_chat_history()
+        elif sys.argv[1] == "market-intelligence":
+            main_market_intelligence()
         else:
-            print("Available test modes: reminders, salaries, ai-dates, chat-history")
-            print("Usage: python backend_test.py [reminders|salaries|ai-dates|chat-history]")
+            print("Available test modes: reminders, salaries, ai-dates, chat-history, market-intelligence")
+            print("Usage: python backend_test.py [reminders|salaries|ai-dates|chat-history|market-intelligence]")
     else:
-        # Default: run chat history tests as requested
-        main_chat_history()
+        # Default: run market intelligence tests as requested
+        main_market_intelligence()
