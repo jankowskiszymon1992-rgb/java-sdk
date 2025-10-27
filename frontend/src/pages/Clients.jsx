@@ -280,7 +280,7 @@ const Clients = () => {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
 
       <Card>
         <CardContent className="p-0">
