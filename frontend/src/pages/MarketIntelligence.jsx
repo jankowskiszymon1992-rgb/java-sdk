@@ -297,7 +297,13 @@ const MarketIntelligence = () => {
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {products.map((product) => (
+              {products
+                .filter(product => 
+                  productSearchQuery === '' || 
+                  product.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+                  product.category.toLowerCase().includes(productSearchQuery.toLowerCase())
+                )
+                .map((product) => (
                 <div
                   key={product.id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
