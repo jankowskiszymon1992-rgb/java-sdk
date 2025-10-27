@@ -285,7 +285,33 @@ const UniversalMail = () => {
 
       {/* Skrzynka odbiorcza */}
       {selectedAccount && (
-        <Card>
+        <>
+          {/* Foldery */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Inbox className="h-5 w-5" />
+                Foldery
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {folders.map(folder => (
+                  <Button
+                    key={folder.name}
+                    onClick={() => loadInbox(folder.name)}
+                    variant={selectedFolder === folder.name ? "default" : "outline"}
+                    className="w-full"
+                  >
+                    {folder.label}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lista emaili */}
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Inbox className="h-5 w-5" />
