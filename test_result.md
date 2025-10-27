@@ -370,7 +370,19 @@ backend:
     status_history:
       - working: true
         agent: "testing"
-        comment: "✅ MARKET INTELLIGENCE SCRAPING LOGS TESTED 2025-10-27: GET /api/market-intelligence/scraping-logs?limit=10 DZIAŁA POPRAWNIE. Endpoint zwraca logi scrapingu w poprawnej strukturze z logs array. Znaleziono 10 wpisów logów z różnymi dostawcami (kanlux, tme, conrad, rs_components). Struktura logów zawiera wymagane pola: supplier, status, products_scraped, duration_seconds, errors. Logi są zapisywane w bazie danych. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING LOGS TESTED 2025-10-27: GET /api/market-intelligence/scraping-logs?limit=20 DZIAŁA POPRAWNIE. Endpoint zwraca logi scrapingu w poprawnej strukturze z logs array i count field. Znaleziono 20 wpisów logów z różnymi dostawcami (kanlux, tme, conrad, rs_components). Struktura logów zawiera wymagane pola: supplier, status, products_scraped, duration_seconds, started_at. Zidentyfikowano błędy 'search_terms' w starych logach TME/Conrad/RS Components, ale nowe testy pokazują że błędy zostały naprawione. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "Market Intelligence - Kaczmarek Electric Prices Database"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ MARKET INTELLIGENCE PRICES DATABASE ISSUE 2025-10-27: GET /api/market-intelligence/prices/compare endpoint działa (status 200), ale NIE ZNALEZIONO produktów Kaczmarek Electric w bazie danych. Mimo że scraping Kaczmarek Electric zakończył się sukcesem (83 produkty), ceny nie są zapisywane do product_prices collection lub endpoint compare nie znajduje danych. Możliwe przyczyny: 1) Scraping nie zapisuje cen do bazy, 2) Problem z nazwami produktów w porównaniu, 3) Endpoint compare nie obsługuje supplier=kaczmarek_electric. Wymaga naprawy zapisu cen podczas scrapingu lub logiki porównania cen. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
 
 frontend:
   - task: "Client Management - Add Client Functionality"
