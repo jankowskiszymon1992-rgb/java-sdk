@@ -483,6 +483,7 @@ metadata:
 test_plan:
   current_focus:
     - "✅ ROZWIĄZANO: Problem z cache Service Worker - wszystkie nowe funkcje widoczne"
+    - "✅ PRZETESTOWANO: Funkcjonalność dodawania klienta - działa w 100%"
     - "TODO: Asystent AI - zapytać użytkownika czy funkcja zapisu godzin pracy przez chat jest potrzebna"
   stuck_tasks: []
   test_all: false
