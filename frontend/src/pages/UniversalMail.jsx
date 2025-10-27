@@ -106,7 +106,37 @@ const UniversalMail = () => {
     }
   };
 
-  const loadInbox = async () => {
+  const loadFolders = async () => {
+    if (!selectedAccount) return;
+    
+    try {
+      const response = await fetch(`${API}/api/email/folders/${selectedAccount.id}`);
+      const data = await response.json();
+      
+      // Mapuj foldery na przyjazne nazwy
+      const folderMap = {
+        'INBOX': 'Odebrane',
+        'Sent': 'Wysłane',
+        'Sent Items': 'Wysłane',
+        'Drafts': 'Robocze',
+        'Trash': 'Kosz',
+        'Spam': 'Spam',
+        'Junk': 'Spam'
+      };
+      
+      const mappedFolders = (data.folders || ['INBOX']).map(f => ({
+        name: f,
+        label: folderMap[f] || f
+      }));
+      
+      setFolders(mappedFolders);
+    } catch (error) {
+      console.error('Error loading folders:', error);
+      setFolders([{name: 'INBOX', label: 'Odebrane'}]);
+    }
+  };
+
+  const loadInbox = async (folder = selectedFolder) => {
     if (!selectedAccount) {
       toast.error('Wybierz konto');
       return;
@@ -114,10 +144,11 @@ const UniversalMail = () => {
     
     setLoading(true);
     try {
-      const response = await fetch(`${API}/api/email/inbox?account_id=${selectedAccount.id}&limit=50`);
+      const response = await fetch(`${API}/api/email/inbox?account_id=${selectedAccount.id}&folder=${folder}&limit=50`);
       const data = await response.json();
       setEmails(data.emails || []);
-      toast.success(`Wczytano ${data.count} emaili`);
+      setSelectedFolder(folder);
+      toast.success(`Wczytano ${data.count} emaili z ${folder}`);
     } catch (error) {
       toast.error('Nie udało się wczytać emaili');
     } finally {
