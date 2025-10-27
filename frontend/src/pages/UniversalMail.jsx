@@ -55,6 +55,7 @@ const UniversalMail = () => {
       const savedFolder = localStorage.getItem('lastSelectedFolder') || 'INBOX';
       loadInbox(savedFolder);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount]);
   
   // Auto-refresh co 60 sekund
@@ -66,6 +67,7 @@ const UniversalMail = () => {
     }, 60000); // 60 sekund
     
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount, selectedFolder]);
 
   const loadAccounts = async () => {
