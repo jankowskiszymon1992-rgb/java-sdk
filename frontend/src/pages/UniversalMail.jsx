@@ -248,9 +248,15 @@ const UniversalMail = () => {
         <div>
           <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
             <Mail className="h-8 w-8 text-blue-600" />
-            Poczta Uniwersalna
+            Poczta
           </h2>
-          <p className="text-gray-600 mt-1">WP.pl, Gmail, O2, Onet, Interia i więcej</p>
+          <p className="text-gray-600 mt-1">
+            {selectedAccount ? (
+              <>Auto-odświeżanie co 60s • {emails.length} wiadomości</>
+            ) : (
+              <>Zarządzaj swoją pocztą w jednym miejscu</>
+            )}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowAddAccount(true)} className="bg-green-600 hover:bg-green-700">
