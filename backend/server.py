@@ -4333,6 +4333,67 @@ async def add_email_account(account: dict):
             raise HTTPException(status_code=400, detail="Błąd połączenia SMTP - sprawdź email i hasło")
         
         # Zapisz do bazy
+        account_doc = {
+            "id": str(uuid.uuid4()),
+            "email": email_address,
+            "password": encrypt_password(password),
+            "imap_server": provider['imap_server'],
+            "imap_port": provider['imap_port'],
+            "smtp_server": provider['smtp_server'],
+            "smtp_port": provider['smtp_port'],
+            "smtp_use_ssl": provider['smtp_use_ssl'],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Sprawdź czy konto już istnieje
+        existing = await db.email_accounts.find_one({"email": email_address}, {"_id": 0})
+        if existing:
+            raise HTTPException(status_code=400, detail="To konto już zostało dodane")
+        
+        await db.email_accounts.insert_one(account_doc)
+        
+        # Return bez hasła
+        return {
+            "message": "Konto dodane pomyślnie",
+            "account": {
+                "id": account_doc["id"],
+                "email": account_doc["email"],
+                "provider": email_address.split('@')[1]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding email account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/email/accounts")
+async def get_email_accounts():
+    """Pobierz listę kont email"""
+    try:
+        accounts = await db.email_accounts.find({}, {"_id": 0, "password": 0}).to_list(length=100)
+        return {"accounts": accounts}
+    except Exception as e:
+        logger.error(f"Error fetching email accounts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/email/accounts/{account_id}")
+async def delete_email_account(account_id: str):
+    """Usuń konto email"""
+    try:
+        result = await db.email_accounts.delete_one({"id": account_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        return {"message": "Konto usunięte pomyślnie"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting email account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.get("/email/folders/{account_id}")
