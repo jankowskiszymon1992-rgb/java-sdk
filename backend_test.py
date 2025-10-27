@@ -4515,5 +4515,95 @@ if __name__ == "__main__":
             print("Available test modes: reminders, salaries, ai-dates, chat-history, market-intelligence")
             print("Usage: python backend_test.py [reminders|salaries|ai-dates|chat-history|market-intelligence]")
     else:
-        # Default: run market intelligence tests as requested
-        main_market_intelligence()
+        # Default: run comprehensive Market Intelligence tests as requested
+        print("🔍 MARKET INTELLIGENCE COMPREHENSIVE TESTING")
+        print("Testing all suppliers and checking logs as requested")
+        print(f"Backend URL: {BASE_URL}")
+        print(f"API URL: {API_URL}")
+        print("=" * 80)
+        
+        # Test backend health first
+        if not test_backend_health():
+            print("❌ Backend is not responding. Cannot proceed with tests.")
+            exit(1)
+        
+        results = {}
+        
+        print("\n" + "="*80)
+        print("TEST 1: Kaczmarek Electric Scraping (New Supplier)")
+        print("="*80)
+        results['kaczmarek_electric'] = test_market_intelligence_scrape_kaczmarek_electric()
+        
+        print("\n" + "="*80)
+        print("TEST 2: Scraping Logs Check")
+        print("="*80)
+        results['scraping_logs'] = test_market_intelligence_scraping_logs()
+        
+        print("\n" + "="*80)
+        print("TEST 3: TME Scraping (Fixed)")
+        print("="*80)
+        results['tme'] = test_market_intelligence_scrape_tme()
+        
+        print("\n" + "="*80)
+        print("TEST 4: Conrad Scraping (Fixed)")
+        print("="*80)
+        results['conrad'] = test_market_intelligence_scrape_conrad()
+        
+        print("\n" + "="*80)
+        print("TEST 5: RS Components Scraping (Fixed)")
+        print("="*80)
+        results['rs_components'] = test_market_intelligence_scrape_rs_components()
+        
+        print("\n" + "="*80)
+        print("TEST 6: Kaczmarek Electric Prices Check")
+        print("="*80)
+        results['kaczmarek_prices'] = test_market_intelligence_prices_kaczmarek()
+        
+        # Summary
+        print("\n" + "="*80)
+        print("📊 MARKET INTELLIGENCE TEST SUMMARY")
+        print("="*80)
+        
+        passed_tests = 0
+        total_tests = len(results)
+        
+        for test_name, result in results.items():
+            status = "✅ PASSED" if result else "❌ FAILED"
+            print(f"  {test_name}: {status}")
+            if result:
+                passed_tests += 1
+        
+        print(f"\n📈 FINAL RESULT: {passed_tests}/{total_tests} tests passed")
+        
+        if passed_tests == total_tests:
+            print("\n🎉 ALL MARKET INTELLIGENCE TESTS PASSED!")
+            print("\n✅ VERIFICATION COMPLETE:")
+            print("- ✅ Kaczmarek Electric: scraping works, products_scraped > 0")
+            print("- ✅ TME/Conrad/RS: fixed, work without 'search_terms' error")
+            print("- ✅ Logs show recent runs for all suppliers")
+            print("- ✅ Kaczmarek Electric prices are in database")
+        else:
+            print("\n⚠️  SOME MARKET INTELLIGENCE TESTS FAILED!")
+            failed_tests = [name for name, result in results.items() if not result]
+            print(f"Failed tests: {failed_tests}")
+            
+            # Provide specific guidance for failed tests
+            if not results.get('kaczmarek_electric'):
+                print("\n🔧 KACZMAREK ELECTRIC ISSUE:")
+                print("- Check if new supplier was properly added to SCRAPERS dict")
+                print("- Verify scraping function exists and works")
+                
+            if not results.get('tme') or not results.get('conrad') or not results.get('rs_components'):
+                print("\n🔧 SUPPLIER FIX ISSUES:")
+                print("- Check if 'search_terms' error was properly fixed")
+                print("- Verify scraping functions handle missing search_terms")
+                
+            if not results.get('scraping_logs'):
+                print("\n🔧 SCRAPING LOGS ISSUE:")
+                print("- Check if logs are being saved to database")
+                print("- Verify endpoint returns correct structure")
+                
+            if not results.get('kaczmarek_prices'):
+                print("\n🔧 PRICES DATABASE ISSUE:")
+                print("- Check if scraping saves prices to product_prices collection")
+                print("- Verify price comparison endpoint works")
