@@ -27,6 +27,9 @@ const UniversalMail = () => {
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showCompose, setShowCompose] = useState(false);
   const [showEmailDetail, setShowEmailDetail] = useState(false);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [currentAttachment, setCurrentAttachment] = useState(null);
   
   // Forms
   const [newAccount, setNewAccount] = useState({ email: '', password: '' });
