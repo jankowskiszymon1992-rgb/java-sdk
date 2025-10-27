@@ -28,6 +28,22 @@ const TimeCenter = () => {
   const [alarms, setAlarms] = useState([]);
   const [showAlarmDialog, setShowAlarmDialog] = useState(false);
   const [newAlarm, setNewAlarm] = useState({ time: '09:00', label: '' });
+  const [notificationPermission, setNotificationPermission] = useState('default');
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          setNotificationPermission(permission);
+          if (permission === 'granted') {
+            toast.success('Powiadomienia włączone! Budziki będą działać.');
+          }
+        });
+      }
+    }
+  }, []);
 
   // Clock update
   useEffect(() => {
