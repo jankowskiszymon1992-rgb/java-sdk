@@ -1763,15 +1763,19 @@ def test_market_intelligence_scraping_logs():
             response_data = response.json()
             print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
             
-            # Verify response is a list
-            if not isinstance(response_data, list):
-                print("❌ Response is not a list")
+            # Check if response has logs array (new structure) or is a direct list (old structure)
+            if "logs" in response_data and isinstance(response_data["logs"], list):
+                logs = response_data["logs"]
+            elif isinstance(response_data, list):
+                logs = response_data
+            else:
+                print("❌ Response is not a list and doesn't contain 'logs' array")
                 return False
             
-            print(f"✅ Found {len(response_data)} scraping log entries")
+            print(f"✅ Found {len(logs)} scraping log entries")
             
             # If we have logs, verify structure
-            if len(response_data) > 0:
+            if len(logs) > 0:
                 suppliers_found = set()
                 
                 for i, log_entry in enumerate(response_data):
