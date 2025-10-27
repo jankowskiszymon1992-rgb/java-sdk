@@ -3117,7 +3117,8 @@ def generate_mock_price(product_name: str, supplier: str):
         "kanlux": 0.95,  # najtańszy
         "tme": 1.05,
         "conrad": 1.15,
-        "rs_components": 1.20  # najdroższy
+        "rs_components": 1.20,  # najdroższy
+        "kaczmarek_electric": 0.98  # konkurencyjny z Kanlux
     }
     
     final_price = base_price * supplier_multipliers.get(supplier, 1.0)
