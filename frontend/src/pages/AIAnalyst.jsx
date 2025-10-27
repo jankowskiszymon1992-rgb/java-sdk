@@ -531,9 +531,43 @@ const AIAnalyst = () => {
             </div>
           </div>
 
+          {/* Wyszukiwarka Produktów */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Szukaj produktu... (np. przewód, kabel, lampa)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 py-6 text-base"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="text-sm text-gray-600 mt-2">
+                Znaleziono: {comparisonTable?.products?.filter(p => 
+                  p._id.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length || 0} produktów
+              </p>
+            )}
+          </div>
+
           {/* Produkty */}
           <div className="space-y-4">
-            {comparisonTable?.products?.map((product, idx) => (
+            {comparisonTable?.products
+              ?.filter(product => 
+                searchQuery === '' || 
+                product._id.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              ?.map((product, idx) => (
               <div key={idx} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
