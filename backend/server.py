@@ -2889,6 +2889,87 @@ async def delete_note(note_id: str):
     return {"message": "Notatka usunięta pomyślnie"}
 
 
+# ============= NOTIFICATIONS ENDPOINTS =============
+
+@api_router.post("/notifications", response_model=Notification)
+async def create_notification(notification: NotificationCreate):
+    """Webhook endpoint - inne aplikacje mogą wysyłać powiadomienia"""
+    new_notification = Notification(**notification.model_dump())
+    await db.notifications.insert_one(serialize_doc(new_notification.model_dump()))
+    return new_notification
+
+
+@api_router.get("/notifications", response_model=List[Notification])
+async def get_notifications(read: Optional[bool] = None, limit: int = 100):
+    query = {}
+    if read is not None:
+        query["read"] = read
+    
+    notifications = await db.notifications.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return [deserialize_doc(notification) for notification in notifications]
+
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str):
+    result = await db.notifications.update_one(
+        {"id": notification_id},
+        {"$set": {"read": True}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Powiadomienie nie znalezione")
+    return {"message": "Powiadomienie oznaczone jako przeczytane"}
+
+
+@api_router.delete("/notifications/{notification_id}")
+async def delete_notification(notification_id: str):
+    result = await db.notifications.delete_one({"id": notification_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Powiadomienie nie znalezione")
+    return {"message": "Powiadomienie usunięte"}
+
+
+@api_router.delete("/notifications/all")
+async def delete_all_notifications():
+    result = await db.notifications.delete_many({})
+    return {"message": f"Usunięto {result.deleted_count} powiadomień"}
+
+
+# ============= ALARMS ENDPOINTS =============
+
+@api_router.post("/alarms", response_model=Alarm)
+async def create_alarm(alarm: AlarmCreate):
+    new_alarm = Alarm(**alarm.model_dump())
+    await db.alarms.insert_one(serialize_doc(new_alarm.model_dump()))
+    return new_alarm
+
+
+@api_router.get("/alarms", response_model=List[Alarm])
+async def get_alarms():
+    alarms = await db.alarms.find({}, {"_id": 0}).sort("time", 1).to_list(100)
+    return [deserialize_doc(alarm) for alarm in alarms]
+
+
+@api_router.put("/alarms/{alarm_id}", response_model=Alarm)
+async def update_alarm(alarm_id: str, alarm_update: AlarmUpdate):
+    alarm = await db.alarms.find_one({"id": alarm_id}, {"_id": 0})
+    if not alarm:
+        raise HTTPException(status_code=404, detail="Budzik nie znaleziony")
+    
+    update_data = {k: v for k, v in alarm_update.model_dump().items() if v is not None}
+    
+    await db.alarms.update_one({"id": alarm_id}, {"$set": serialize_doc(update_data)})
+    updated_alarm = await db.alarms.find_one({"id": alarm_id}, {"_id": 0})
+    return deserialize_doc(updated_alarm)
+
+
+@api_router.delete("/alarms/{alarm_id}")
+async def delete_alarm(alarm_id: str):
+    result = await db.alarms.delete_one({"id": alarm_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Budzik nie znaleziony")
+    return {"message": "Budzik usunięty"}
+
+
 @api_router.post("/financial-entries/ocr")
 async def create_financial_entry_with_ocr(request: dict):
     """
