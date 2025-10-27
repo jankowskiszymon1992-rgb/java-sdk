@@ -681,11 +681,11 @@ const UniversalMail = () => {
                   🖨️ Drukuj
                 </Button>
                 <Button
-                  onClick={() => downloadAttachment(currentAttachment?.index, currentAttachment?.filename)}
+                  onClick={saveToApp}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-purple-600 hover:bg-purple-700"
                 >
-                  ⬇️ Pobierz
+                  💾 Zapisz do Aplikacji
                 </Button>
                 <Button
                   variant="ghost"
