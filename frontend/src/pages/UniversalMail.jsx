@@ -567,16 +567,45 @@ const UniversalMail = () => {
               </div>
               
               {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Paperclip className="h-4 w-4" />
+                <div className="bg-gray-50 p-4 rounded-lg border-2 border-blue-200">
+                  <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Paperclip className="h-5 w-5 text-blue-600" />
                     Załączniki ({selectedEmail.attachments.length})
                   </p>
-                  {selectedEmail.attachments.map((att, idx) => (
-                    <div key={idx} className="text-sm text-gray-700 mt-1">
-                      📎 {att.filename} ({(att.size / 1024).toFixed(1)} KB)
-                    </div>
-                  ))}
+                  <div className="space-y-2">
+                    {selectedEmail.attachments.map((att, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-white p-3 rounded border hover:border-blue-400 transition-colors">
+                        <div className="flex items-center gap-3 flex-1">
+                          <span className="text-2xl">{getFileIcon(att.filename)}</span>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{att.filename}</p>
+                            <p className="text-xs text-gray-500">{(att.size / 1024).toFixed(1)} KB</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {att.filename.toLowerCase().endsWith('.pdf') && (
+                            <Button
+                              onClick={() => viewPdf(idx, att.filename)}
+                              size="sm"
+                              variant="outline"
+                              className="flex items-center gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Podgląd
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => downloadAttachment(idx, att.filename)}
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            Pobierz
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               
