@@ -34,13 +34,39 @@ const UniversalMail = () => {
 
   useEffect(() => {
     loadAccounts();
+    
+    // Załaduj ostatnio wybrane konto i folder z localStorage
+    const savedAccountId = localStorage.getItem('lastSelectedAccountId');
+    const savedFolder = localStorage.getItem('lastSelectedFolder') || 'INBOX';
+    
+    if (savedAccountId) {
+      setSelectedFolder(savedFolder);
+    }
   }, []);
 
   useEffect(() => {
     if (selectedAccount) {
       loadFolders();
+      
+      // Zapisz wybrane konto do localStorage
+      localStorage.setItem('lastSelectedAccountId', selectedAccount.id);
+      
+      // Automatycznie załaduj ostatni wybrany folder
+      const savedFolder = localStorage.getItem('lastSelectedFolder') || 'INBOX';
+      loadInbox(savedFolder);
     }
   }, [selectedAccount]);
+  
+  // Auto-refresh co 60 sekund
+  useEffect(() => {
+    if (!selectedAccount || !selectedFolder) return;
+    
+    const interval = setInterval(() => {
+      loadInbox(selectedFolder);
+    }, 60000); // 60 sekund
+    
+    return () => clearInterval(interval);
+  }, [selectedAccount, selectedFolder]);
 
   const loadAccounts = async () => {
     try {
