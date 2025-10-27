@@ -45,6 +45,7 @@ const Layout = () => {
     { to: '/notes', icon: StickyNote, label: 'Notatnik', section: 'narzędzia' },
     { to: '/time-center', icon: Timer, label: 'Centrum Czasu', section: 'narzędzia' },
     { to: '/notifications', icon: BellDot, label: 'Powiadomienia', section: 'narzędzia' },
+    { to: '/my-files', icon: FolderOpen, label: 'Moje Pliki', section: 'narzędzia' },
   ];
 
   return (
