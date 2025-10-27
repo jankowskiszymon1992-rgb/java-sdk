@@ -186,6 +186,10 @@ const UniversalMail = () => {
       const data = await response.json();
       setEmails(data.emails || []);
       setSelectedFolder(folder);
+      
+      // Zapisz wybrany folder do localStorage
+      localStorage.setItem('lastSelectedFolder', folder);
+      
       toast.success(`Wczytano ${data.count} emaili z ${folder}`);
     } catch (error) {
       toast.error('Nie udało się wczytać emaili');
