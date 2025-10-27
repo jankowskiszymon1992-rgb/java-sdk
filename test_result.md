@@ -542,9 +542,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "✅ ROZWIĄZANO: Problem z cache Service Worker - wszystkie nowe funkcje widoczne"
-    - "✅ PRZETESTOWANO: Funkcjonalność dodawania klienta - działa w 100%"
-    - "TODO: Asystent AI - zapytać użytkownika czy funkcja zapisu godzin pracy przez chat jest potrzebna"
+    - "✅ PRZETESTOWANO: Market Intelligence Scraping - wszystkie endpointy działają poprawnie"
+    - "✅ ZWERYFIKOWANO: Kaczmarek Electric jako nowy dostawca"
+    - "✅ NAPRAWIONO: TME/Conrad/RS Components - brak błędów 'search_terms'"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
