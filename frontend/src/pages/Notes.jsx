@@ -206,6 +206,15 @@ const Notes = () => {
                   placeholder="Wpisz swoją notatkę..."
                   className="resize-none"
                 />
+                <Button
+                  type="button"
+                  onClick={toggleRecording}
+                  variant="outline"
+                  className={`mt-2 ${isRecording ? 'bg-red-50 border-red-500 text-red-600' : ''}`}
+                >
+                  {isRecording ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
+                  {isRecording ? 'Zatrzymaj nagrywanie' : 'Dyktuj głosem'}
+                </Button>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => handleDialogChange(false)}>
