@@ -19,20 +19,29 @@ const Layout = () => {
   }, []);
 
   const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/clients', icon: Users, label: 'Klienci' },
-    { to: '/projects', icon: Briefcase, label: 'Zlecenia' },
-    { to: '/workhours', icon: Clock, label: 'Godziny pracy' },
-    { to: '/employees', icon: UserCog, label: 'Pracownicy' },
-    { to: '/finances', icon: DollarSign, label: 'Finanse' },
-    { to: '/market-intelligence', icon: TrendingUp, label: 'Analiza Rynku' },
-    { to: '/ai-analyst', icon: Brain, label: 'AI Analityk' },
-    { to: '/reminders', icon: Bell, label: 'Przypomnienia' },
-    { to: '/reports', icon: FileText, label: 'Raporty' },
-    { to: '/ai-assistant', icon: Bot, label: 'Asystent AI' },
-    { to: '/mail', icon: Mail, label: 'Poczta' },
-    { to: '/calculators', icon: Calculator, label: 'Kalkulatory' },
-    { to: '/photos', icon: Camera, label: 'Zdjęcia' },
+    // BIZNES
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', section: 'biznes' },
+    { to: '/clients', icon: Users, label: 'Klienci', section: 'biznes' },
+    { to: '/projects', icon: Briefcase, label: 'Projekty', section: 'biznes' },
+    { to: '/workhours', icon: Clock, label: 'Godziny pracy', section: 'biznes' },
+    
+    // ZARZĄDZANIE
+    { to: '/employees', icon: UserCog, label: 'Pracownicy', section: 'zarządzanie' },
+    { to: '/finances', icon: DollarSign, label: 'Finanse', section: 'zarządzanie' },
+    { to: '/reminders', icon: Bell, label: 'Przypomnienia', section: 'zarządzanie' },
+    
+    // KOMUNIKACJA
+    { to: '/mail', icon: Mail, label: 'Poczta', section: 'komunikacja' },
+    { to: '/reports', icon: FileText, label: 'Raporty', section: 'komunikacja' },
+    
+    // AI I ANALITYKA
+    { to: '/ai-assistant', icon: Bot, label: 'Asystent AI', section: 'ai' },
+    { to: '/ai-analyst', icon: Brain, label: 'Analityk AI', section: 'ai' },
+    { to: '/market-intelligence', icon: TrendingUp, label: 'Inteligencja Rynkowa', section: 'ai' },
+    
+    // NARZĘDZIA
+    { to: '/calculators', icon: Calculator, label: 'Kalkulatory', section: 'narzędzia' },
+    { to: '/photos', icon: Camera, label: 'Zdjęcia', section: 'narzędzia' },
   ];
 
   return (
