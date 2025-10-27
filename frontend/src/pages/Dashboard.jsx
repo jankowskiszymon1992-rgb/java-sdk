@@ -101,6 +101,47 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Simple Chart - Projects Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Status Projektów</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Aktywne</span>
+                <span className="text-sm text-gray-600">{stats.active_projects} projektów</span>
+              </div>
+              <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-yellow-500"
+                  style={{ width: `${stats.total_projects ? (stats.active_projects / stats.total_projects * 100) : 0}%` }}
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Zakończone</span>
+                <span className="text-sm text-gray-600">{stats.completed_projects} projektów</span>
+              </div>
+              <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500"
+                  style={{ width: `${stats.total_projects ? (stats.completed_projects / stats.total_projects * 100) : 0}%` }}
+                ></div>
+              </div>
+            </div>
+            <div className="pt-4 border-t">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{stats.total_projects}</p>
+                <p className="text-sm text-gray-600">Wszystkich projektów</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
