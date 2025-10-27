@@ -18,6 +18,7 @@ const Clients = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
   const [editingClient, setEditingClient] = useState(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
