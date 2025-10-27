@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Przetestuj nowy endpoint scrapingu Market Intelligence z naprawionymi błędami"
+user_problem_statement: "Użytkownik zgłasza: 1) W zakładce Poczta każdorazowo trzeba ładować wiadomości, chce auto-ładowanie i auto-odświeżanie co 60s, 2) Uporządkować menu (klienci, pracownicy itd.) logicznie zamiast alfabetycznie, 3) Przetłumaczyć całą aplikację na język polski (swobodne tłumaczenia)"
 
 backend:
   - task: "Backend API"
