@@ -3001,6 +3001,57 @@ async def delete_alarm(alarm_id: str):
     return {"message": "Budzik usunięty"}
 
 
+# ============= SAVED FILES ENDPOINTS =============
+
+@api_router.post("/saved-files", response_model=SavedFile)
+async def save_file(file: SavedFileCreate):
+    """Zapisz plik do aplikacji"""
+    new_file = SavedFile(**file.model_dump())
+    await db.saved_files.insert_one(serialize_doc(new_file.model_dump()))
+    return new_file
+
+
+@api_router.get("/saved-files", response_model=List[SavedFile])
+async def get_saved_files(folder: Optional[str] = None):
+    """Pobierz zapisane pliki (opcjonalnie filtruj po folderze)"""
+    query = {}
+    if folder:
+        query["folder"] = folder
+    
+    files = await db.saved_files.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return [deserialize_doc(file) for file in files]
+
+
+@api_router.get("/saved-files/{file_id}")
+async def get_saved_file(file_id: str):
+    """Pobierz konkretny plik"""
+    from fastapi.responses import Response
+    import base64
+    
+    file = await db.saved_files.find_one({"id": file_id}, {"_id": 0})
+    if not file:
+        raise HTTPException(status_code=404, detail="Plik nie znaleziony")
+    
+    file_data = base64.b64decode(file['file_data'])
+    
+    return Response(
+        content=file_data,
+        media_type=file['content_type'],
+        headers={
+            'Content-Disposition': f'attachment; filename="{file["filename"]}"'
+        }
+    )
+
+
+@api_router.delete("/saved-files/{file_id}")
+async def delete_saved_file(file_id: str):
+    """Usuń zapisany plik"""
+    result = await db.saved_files.delete_one({"id": file_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Plik nie znaleziony")
+    return {"message": "Plik usunięty pomyślnie"}
+
+
 @api_router.post("/financial-entries/ocr")
 async def create_financial_entry_with_ocr(request: dict):
     """
