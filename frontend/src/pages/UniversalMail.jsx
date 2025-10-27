@@ -174,7 +174,7 @@ const UniversalMail = () => {
     }
   };
 
-  const loadInbox = async (folder = selectedFolder) => {
+  const loadInbox = useCallback(async (folder = selectedFolder) => {
     if (!selectedAccount) {
       toast.error('Wybierz konto');
       return;
@@ -196,7 +196,7 @@ const UniversalMail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAccount, selectedFolder]);
 
   const openEmail = async (email) => {
     setLoading(true);
