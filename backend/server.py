@@ -4215,6 +4215,215 @@ async def get_comparison_table():
     }
 
 
+
+# ============= UNIVERSAL EMAIL (IMAP/SMTP) =============
+
+# Simple encryption for passwords (base64)
+import base64
+
+def encrypt_password(password: str) -> str:
+    """Simple password encryption"""
+    return base64.b64encode(password.encode()).decode()
+
+def decrypt_password(encrypted: str) -> str:
+    """Simple password decryption"""
+    return base64.b64decode(encrypted.encode()).decode()
+
+
+@api_router.post("/email/accounts")
+async def add_email_account(account: dict):
+    """Dodaj nowe konto email"""
+    try:
+        email_address = account.get('email')
+        password = account.get('password')
+        
+        if not email_address or not password:
+            raise HTTPException(status_code=400, detail="Email i hasło są wymagane")
+        
+        # Automatyczne wykrywanie providera
+        provider = email_service.detect_email_provider(email_address)
+        
+        if not provider:
+            raise HTTPException(status_code=400, detail="Nieobsługiwany provider email")
+        
+        # Test połączenia IMAP
+        if not email_service.test_imap_connection(
+            email_address, password, 
+            provider['imap_server'], provider['imap_port']
+        ):
+            raise HTTPException(status_code=400, detail="Błąd połączenia IMAP - sprawdź email i hasło")
+        
+        # Test połączenia SMTP
+        if not email_service.test_smtp_connection(
+            email_address, password,
+            provider['smtp_server'], provider['smtp_port'], provider['smtp_use_ssl']
+        ):
+            raise HTTPException(status_code=400, detail="Błąd połączenia SMTP - sprawdź email i hasło")
+        
+        # Zapisz do bazy
+        account_doc = {
+            "id": str(uuid.uuid4()),
+            "email": email_address,
+            "password": encrypt_password(password),
+            "imap_server": provider['imap_server'],
+            "imap_port": provider['imap_port'],
+            "smtp_server": provider['smtp_server'],
+            "smtp_port": provider['smtp_port'],
+            "smtp_use_ssl": provider['smtp_use_ssl'],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Sprawdź czy konto już istnieje
+        existing = await db.email_accounts.find_one({"email": email_address}, {"_id": 0})
+        if existing:
+            raise HTTPException(status_code=400, detail="To konto już zostało dodane")
+        
+        await db.email_accounts.insert_one(account_doc)
+        
+        # Return bez hasła
+        return {
+            "message": "Konto dodane pomyślnie",
+            "account": {
+                "id": account_doc["id"],
+                "email": account_doc["email"],
+                "provider": email_address.split('@')[1]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding email account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/email/accounts")
+async def get_email_accounts():
+    """Pobierz listę kont email"""
+    try:
+        accounts = await db.email_accounts.find({}, {"_id": 0, "password": 0}).to_list(length=100)
+        return {"accounts": accounts}
+    except Exception as e:
+        logger.error(f"Error fetching email accounts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/email/accounts/{account_id}")
+async def delete_email_account(account_id: str):
+    """Usuń konto email"""
+    try:
+        result = await db.email_accounts.delete_one({"id": account_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        return {"message": "Konto usunięte pomyślnie"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting email account: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/email/inbox")
+async def get_inbox(account_id: str, limit: int = 50):
+    """Pobierz skrzynkę odbiorczą"""
+    try:
+        # Pobierz credentials z bazy
+        account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        
+        # Dekryptuj hasło
+        password = decrypt_password(account['password'])
+        
+        # Pobierz emaile
+        emails = email_service.fetch_emails(
+            account['email'],
+            password,
+            account['imap_server'],
+            account['imap_port'],
+            limit=limit
+        )
+        
+        return {"emails": emails, "count": len(emails)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching inbox: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/email/message/{account_id}/{email_id}")
+async def get_email_message(account_id: str, email_id: str):
+    """Pobierz pełną treść emaila"""
+    try:
+        account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        
+        password = decrypt_password(account['password'])
+        
+        email_data = email_service.get_email_body(
+            account['email'],
+            password,
+            account['imap_server'],
+            account['imap_port'],
+            email_id
+        )
+        
+        return email_data
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching email message: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/email/send")
+async def send_email_message(data: dict):
+    """Wyślij email"""
+    try:
+        account_id = data.get('account_id')
+        to_address = data.get('to')
+        subject = data.get('subject')
+        body = data.get('body')
+        
+        if not all([account_id, to_address, subject, body]):
+            raise HTTPException(status_code=400, detail="Brak wymaganych pól")
+        
+        # Pobierz credentials
+        account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        
+        password = decrypt_password(account['password'])
+        
+        # Wyślij email
+        success = email_service.send_email(
+            account['email'],
+            password,
+            to_address,
+            subject,
+            body,
+            account['smtp_server'],
+            account['smtp_port'],
+            account['smtp_use_ssl']
+        )
+        
+        if success:
+            return {"message": "Email wysłany pomyślnie"}
+        else:
+            raise HTTPException(status_code=500, detail="Nie udało się wysłać emaila")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
