@@ -3286,8 +3286,8 @@ async def trigger_scraping(supplier: Optional[str] = None):
                             "currency": "PLN",
                             "availability": scrape_result.get("availability", True),
                             "url": scrape_result.get("url"),
-                            "scraped_at": datetime.now(timezone.utc),
-                            "created_at": datetime.now(timezone.utc)
+                            "scraped_at": datetime.now(timezone.utc).isoformat(),
+                            "created_at": datetime.now(timezone.utc).isoformat()
                         }
                         await db.product_prices.insert_one(price_doc)
                         products_scraped += 1
