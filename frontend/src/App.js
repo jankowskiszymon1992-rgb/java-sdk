@@ -51,6 +51,10 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
+          {/* Public route for project sharing */}
+          <Route path="/project-share/:projectId" element={<ProjectShare />} />
+          
+          {/* Protected routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
