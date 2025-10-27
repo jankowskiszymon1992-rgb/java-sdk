@@ -217,7 +217,7 @@ const UniversalMail = () => {
           </Button>
           {selectedAccount && (
             <>
-              <Button onClick={loadInbox} disabled={loading}>
+              <Button onClick={() => loadInbox()} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Odśwież
               </Button>
