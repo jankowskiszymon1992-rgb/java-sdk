@@ -168,12 +168,12 @@ const Projects = () => {
           <DialogTrigger asChild>
             <Button className="bg-yellow-500 hover:bg-yellow-600" data-testid="add-project-btn">
               <Plus className="h-4 w-4 mr-2" />
-              Nowe zlecenie
+              Nowy projekt
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingProject ? 'Edytuj zlecenie' : 'Nowe zlecenie'}</DialogTitle>
+              <DialogTitle>{editingProject ? 'Edytuj projekt' : 'Nowy projekt'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
