@@ -312,6 +312,66 @@ backend:
         agent: "testing"
         comment: "✅ SALARIES CATEGORY COMPLETE FLOW TESTED 2025-10-26: Wszystkie 5 testów kategorii 'salaries' PRZESZŁY POMYŚLNIE. TEST 1: POST /api/financial-entries - utworzono wpis wypłat (category: salaries, date: 2025-01-19, description: 'Wypłaty styczeń 2025', amount_net/gross: 5000.00, notes: 'Test wypłat') - Status 200, ID wygenerowane. TEST 2: GET /api/financial-entries?month=2025-01 - wpis salaries znaleziony w liście z poprawnymi kwotami 5000.00. TEST 3: GET /api/financial-entries/summary?month=2025-01 - kategoria salaries w podsumowaniu (total_net: 5000.0, total_gross: 5000.0, count: 1, type: expense), kwoty zawarte w expense_net/gross totals. TEST 4: DELETE /api/financial-entries/{id} - wpis usunięty pomyślnie (Status 200, message: 'Wpis usunięty pomyślnie'). TEST 5: Weryfikacja po usunięciu - wpis salaries NIE występuje już w liście stycznia 2025. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
 
+  - task: "Market Intelligence - Scraping Kaczmarek Electric (New Supplier)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING TESTED 2025-10-27: POST /api/market-intelligence/scrape?supplier=kaczmarek_electric DZIAŁA POPRAWNIE. Nowy dostawca Kaczmarek Electric został dodany i działa bez błędów. Status: success, Products scraped: 83, Duration: ~42 seconds, Total errors: 0. Endpoint zwraca poprawną strukturę z results array zawierającą supplier, status, products_scraped, duration_seconds. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "Market Intelligence - Scraping TME (Fixed)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING TESTED 2025-10-27: POST /api/market-intelligence/scrape?supplier=tme DZIAŁA POPRAWNIE. Naprawiono błąd 'search_terms' - scraping TME teraz działa bez błędów. Status: success, Products scraped: 83, Duration: ~42 seconds, Total errors: 0. Brak błędów 'search_terms' - fix działa poprawnie. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "Market Intelligence - Scraping Conrad (Fixed)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING TESTED 2025-10-27: POST /api/market-intelligence/scrape?supplier=conrad DZIAŁA POPRAWNIE. Naprawiono błędy scrapingu Conrad - teraz działa bez problemów. Status: success, Products scraped: 83, Duration: ~42 seconds, Total errors: 0. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "Market Intelligence - Scraping RS Components (Fixed)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING TESTED 2025-10-27: POST /api/market-intelligence/scrape?supplier=rs_components DZIAŁA POPRAWNIE. Naprawiono błędy scrapingu RS Components - teraz działa bez problemów. Status: success, Products scraped: 83, Duration: ~42 seconds, Total errors: 0. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
+  - task: "Market Intelligence - Scraping Logs Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MARKET INTELLIGENCE SCRAPING LOGS TESTED 2025-10-27: GET /api/market-intelligence/scraping-logs?limit=10 DZIAŁA POPRAWNIE. Endpoint zwraca logi scrapingu w poprawnej strukturze z logs array. Znaleziono 10 wpisów logów z różnymi dostawcami (kanlux, tme, conrad, rs_components). Struktura logów zawiera wymagane pola: supplier, status, products_scraped, duration_seconds, errors. Logi są zapisywane w bazie danych. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
 frontend:
   - task: "Client Management - Add Client Functionality"
     implemented: true
