@@ -233,15 +233,46 @@ const Projects = () => {
                     />
                     <Button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
                         if ("geolocation" in navigator) {
-                          navigator.geolocation.getCurrentPosition((position) => {
-                            setFormData({
-                              ...formData,
-                              gps_lat: position.coords.latitude,
-                              gps_lng: position.coords.longitude
-                            });
-                            toast.success(`📍 Lokalizacja pobrana: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
+                          toast.info('Pobieram lokalizację...');
+                          navigator.geolocation.getCurrentPosition(async (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            
+                            // Reverse geocoding - coords -> adres
+                            try {
+                              const response = await fetch(
+                                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pl`
+                              );
+                              const data = await response.json();
+                              
+                              const address = data.address;
+                              const fullAddress = [
+                                address.road,
+                                address.house_number,
+                                address.postcode,
+                                address.city || address.town || address.village,
+                                address.country
+                              ].filter(Boolean).join(', ');
+                              
+                              setFormData({
+                                ...formData,
+                                location: fullAddress,
+                                gps_lat: lat,
+                                gps_lng: lng
+                              });
+                              
+                              toast.success(`📍 ${address.city || address.town}, ${address.road || ''}`);
+                            } catch (error) {
+                              // Fallback - jeśli reverse geocoding nie działa
+                              setFormData({
+                                ...formData,
+                                gps_lat: lat,
+                                gps_lng: lng
+                              });
+                              toast.success(`📍 GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+                            }
                           }, () => {
                             toast.error('Nie udało się pobrać lokalizacji');
                           });
