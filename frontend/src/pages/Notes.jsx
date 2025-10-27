@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, FileText, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Clock, Mic, MicOff } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -15,10 +15,64 @@ const Notes = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
   });
+
+  useEffect(() => {
+    // Inicjalizuj Web Speech API
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = 'pl-PL';
+      
+      recognitionInstance.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          }
+        }
+        if (finalTranscript) {
+          setFormData(prev => ({
+            ...prev,
+            content: prev.content + finalTranscript
+          }));
+        }
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        toast.error('Błąd rozpoznawania mowy');
+      };
+      
+      setRecognition(recognitionInstance);
+    }
+  }, []);
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      toast.error('Rozpoznawanie mowy nie jest dostępne w tej przeglądarce');
+      return;
+    }
+    
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+      toast.success('Nagrywanie zatrzymane');
+    } else {
+      recognition.start();
+      setIsRecording(true);
+      toast.success('Mów teraz...');
+    }
+  };
 
   useEffect(() => {
     loadNotes();
