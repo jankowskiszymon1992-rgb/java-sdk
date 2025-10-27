@@ -65,6 +65,64 @@ EMAIL_PROVIDERS = {
         'smtp_port': 587,
         'smtp_use_ssl': False
     }
+
+
+
+def html_to_text(html_content: str) -> str:
+    """Konwertuj HTML na czytelny plain text"""
+    try:
+        # Usuń tagi HTML
+        text = re.sub('<style[^>]*>.*?</style>', '', html_content, flags=re.DOTALL)
+        text = re.sub('<script[^>]*>.*?</script>', '', text, flags=re.DOTALL)
+        
+        # Zamień <br> i <p> na nowe linie
+        text = re.sub(r'<br\s*/?>', '\n', text)
+        text = re.sub(r'</p>', '\n\n', text)
+        text = re.sub(r'<p[^>]*>', '', text)
+        
+        # Usuń pozostałe tagi
+        text = re.sub('<[^>]+>', '', text)
+        
+        # Dekoduj HTML entities
+        text = html.unescape(text)
+        
+        # Usuń nadmiar białych znaków
+        text = re.sub(r'\n\s*\n', '\n\n', text)
+        text = text.strip()
+        
+        return text
+    except Exception as e:
+        logger.error(f"Error converting HTML to text: {e}")
+        return html_content
+
+
+def get_available_folders(email_address: str, password: str, imap_server: str, imap_port: int) -> List[str]:
+    """Pobierz listę dostępnych folderów"""
+    try:
+        mail = imaplib.IMAP4_SSL(imap_server, imap_port)
+        mail.login(email_address, password)
+        
+        # Pobierz listę folderów
+        status, folders = mail.list()
+        
+        folder_names = []
+        if status == 'OK':
+            for folder in folders:
+                # Dekoduj nazwę folderu
+                folder_str = folder.decode() if isinstance(folder, bytes) else folder
+                # Wyciągnij nazwę folderu (ostatnia część po spacji)
+                parts = folder_str.split('"')
+                if len(parts) >= 3:
+                    folder_name = parts[-2]
+                    folder_names.append(folder_name)
+        
+        mail.logout()
+        return folder_names
+    except Exception as e:
+        logger.error(f"Error getting folders: {e}")
+        # Fallback do standardowych folderów
+        return ['INBOX', 'Sent', 'Drafts', 'Trash', 'Spam']
+
 }
 
 
