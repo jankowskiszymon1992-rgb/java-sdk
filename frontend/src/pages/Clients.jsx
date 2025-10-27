@@ -130,13 +130,21 @@ const Clients = () => {
           <h2 className="text-3xl font-bold text-gray-900">Klienci</h2>
           <p className="text-gray-600 mt-1">Zarządzaj listą klientów</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
-          <DialogTrigger asChild>
-            <Button className="bg-yellow-500 hover:bg-yellow-600" data-testid="add-client-btn">
-              <Plus className="h-4 w-4 mr-2" />
-              Dodaj klienta
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setShowQRScanner(true)}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Camera className="h-4 w-4 mr-2" />
+            Skanuj QR
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
+            <DialogTrigger asChild>
+              <Button className="bg-yellow-500 hover:bg-yellow-600" data-testid="add-client-btn">
+                <Plus className="h-4 w-4 mr-2" />
+                Dodaj klienta
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingClient ? 'Edytuj klienta' : 'Nowy klient'}</DialogTitle>
