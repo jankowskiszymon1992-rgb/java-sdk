@@ -325,7 +325,7 @@ const UniversalMail = () => {
               <div className="text-center py-8 text-gray-500">
                 <Inbox className="h-12 w-12 mx-auto mb-3 text-gray-400" />
                 <p>Brak emaili</p>
-                <Button onClick={loadInbox} className="mt-4">
+                <Button onClick={() => loadInbox()} className="mt-4">
                   Wczytaj skrzynkę
                 </Button>
               </div>
