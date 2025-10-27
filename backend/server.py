@@ -3476,6 +3476,22 @@ async def get_usd_rate_history(days: int = 30):
     return {"rates": rates, "count": len(rates)}
 
 
+
+
+@api_router.get("/market-intelligence/prices")
+async def get_all_prices(supplier: Optional[str] = None, limit: int = 50):
+    """Pobierz wszystkie ceny z bazy (dla debugowania)"""
+    try:
+        query = {}
+        if supplier:
+            query["supplier"] = supplier
+        
+        prices = await db.product_prices.find(query, {"_id": 0}).sort("scraped_at", -1).limit(limit).to_list(length=limit)
+        return {"prices": prices, "count": len(prices)}
+    except Exception as e:
+        logger.error(f"Error fetching prices: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/market-intelligence/prices/compare")
 async def compare_prices(product_name: Optional[str] = None):
     """Porównanie cen produktu między hurtowniami"""
