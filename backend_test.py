@@ -1778,7 +1778,7 @@ def test_market_intelligence_scraping_logs():
             if len(logs) > 0:
                 suppliers_found = set()
                 
-                for i, log_entry in enumerate(response_data):
+                for i, log_entry in enumerate(logs):
                     required_fields = ["supplier", "status", "products_scraped", "duration_seconds"]
                     missing_fields = [field for field in required_fields if field not in log_entry]
                     
