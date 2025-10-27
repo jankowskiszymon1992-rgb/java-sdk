@@ -188,6 +188,59 @@ class NoteUpdate(BaseModel):
     content: Optional[str] = None
 
 
+# ============= NOTIFICATIONS MODELS =============
+
+class NotificationPriority(str, Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+
+class Notification(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    message: str
+    source: str = "Elektron"  # Źródło powiadomienia
+    priority: NotificationPriority = NotificationPriority.medium
+    read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class NotificationCreate(BaseModel):
+    title: str
+    message: str
+    source: Optional[str] = "Elektron"
+    priority: Optional[NotificationPriority] = NotificationPriority.medium
+
+
+# ============= ALARMS MODELS =============
+
+class Alarm(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    time: str  # Format: HH:MM
+    label: str
+    enabled: bool = True
+    repeat_days: Optional[List[int]] = None  # 0=Niedziela, 1=Poniedziałek... 6=Sobota
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AlarmCreate(BaseModel):
+    time: str
+    label: str
+    repeat_days: Optional[List[int]] = None
+
+
+class AlarmUpdate(BaseModel):
+    time: Optional[str] = None
+    label: Optional[str] = None
+    enabled: Optional[bool] = None
+    repeat_days: Optional[List[int]] = None
+
+
 # ============= FINANCIAL ENTRIES MODELS =============
 
 class FinancialCategory(str, Enum):
