@@ -65,10 +65,10 @@ EMAIL_PROVIDERS = {
         'smtp_port': 587,
         'smtp_use_ssl': False
     }
+}
 
 
-
-def html_to_text(html_content: str) -> str:
+def detect_email_provider(email_address: str) -> Optional[Dict]:
     """Konwertuj HTML na czytelny plain text"""
     try:
         # Usuń tagi HTML
