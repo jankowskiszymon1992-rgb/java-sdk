@@ -108,7 +108,7 @@ const MarketIntelligence = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Analiza Rynku</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Inteligencja Rynkowa</h2>
           <p className="text-gray-600 mt-1">Monitoring cen i trendów rynkowych</p>
         </div>
         <Button 
