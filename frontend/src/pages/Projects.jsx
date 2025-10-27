@@ -38,6 +38,9 @@ const Projects = () => {
     description: '',
     status: 'new',
     start_date: '',
+    location: '', // Adres tekstowy
+    gps_lat: null,
+    gps_lng: null,
     end_date: '',
     location: '',
     estimated_hours: '',
