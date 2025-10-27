@@ -433,8 +433,11 @@ const UniversalMail = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-gray-900">{email.subject}</p>
-                          {email.has_attachments && (
-                            <Paperclip className="h-4 w-4 text-gray-400" />
+                          {email.has_attachments && email.attachments && email.attachments.length > 0 && (
+                            <span className="flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                              <Paperclip className="h-3 w-3" />
+                              {email.attachments.length}
+                            </span>
                           )}
                         </div>
                         <p className="text-sm text-gray-600 mt-1">{email.from}</p>
