@@ -244,6 +244,47 @@ const UniversalMail = () => {
     }
   };
 
+  const downloadAttachment = (attachmentIndex, filename) => {
+    const url = `${API}/api/email/attachment/${selectedAccount.id}/${selectedEmail.id}/${attachmentIndex}?folder=${selectedFolder}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Pobieranie załącznika...');
+  };
+
+  const viewPdf = async (attachmentIndex, filename) => {
+    try {
+      setCurrentAttachment({ index: attachmentIndex, filename });
+      const url = `${API}/api/email/attachment/${selectedAccount.id}/${selectedEmail.id}/${attachmentIndex}?folder=${selectedFolder}`;
+      setPdfUrl(url);
+      setShowPdfViewer(true);
+    } catch (error) {
+      toast.error('Nie udało się otworzyć PDF');
+    }
+  };
+
+  const printPdf = () => {
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
+      setTimeout(() => {
+        window.print();
+      }, 1000);
+    }
+  };
+
+  const getFileIcon = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return '📄';
+    if (['doc', 'docx'].includes(ext)) return '📝';
+    if (['xls', 'xlsx'].includes(ext)) return '📊';
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return '🖼️';
+    if (['zip', 'rar'].includes(ext)) return '📦';
+    return '📎';
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
