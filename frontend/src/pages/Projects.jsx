@@ -73,10 +73,10 @@ const Projects = () => {
       
       if (editingProject) {
         await projectsApi.update(editingProject.id, data);
-        toast.success('Zlecenie zaktualizowane pomyślnie');
+        toast.success('Projekt zaktualizowany pomyślnie');
       } else {
         await projectsApi.create(data);
-        toast.success('Zlecenie dodane pomyślnie');
+        toast.success('Projekt dodany pomyślnie');
       }
       setDialogOpen(false);
       resetForm();
