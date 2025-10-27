@@ -161,8 +161,8 @@ const Projects = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Zlecenia</h2>
-          <p className="text-gray-600 mt-1">Zarządzaj projektami i zleceniami</p>
+          <h2 className="text-3xl font-bold text-gray-900">Projekty</h2>
+          <p className="text-gray-600 mt-1">Zarządzaj swoimi projektami</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
           <DialogTrigger asChild>
