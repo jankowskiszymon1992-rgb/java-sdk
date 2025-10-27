@@ -11,6 +11,7 @@ import Photos from './pages/Photos';
 import Reports from './pages/Reports';
 import VoiceReport from './pages/VoiceReport';
 import Mail from './pages/Mail';
+import UniversalMail from './pages/UniversalMail';
 import AIAssistant from './pages/AIAssistant';
 import Employees from './pages/Employees';
 import Finances from './pages/Finances';
