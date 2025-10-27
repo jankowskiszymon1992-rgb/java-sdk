@@ -68,9 +68,6 @@ EMAIL_PROVIDERS = {
 }
 
 
-}
-
-
 def html_to_text(html_content: str) -> str:
     """Konwertuj HTML na czytelny plain text"""
     try:
