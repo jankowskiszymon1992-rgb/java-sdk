@@ -64,6 +64,7 @@ function App() {
             <Route path="market-intelligence" element={<MarketIntelligence />} />
             <Route path="ai-analyst" element={<AIAnalyst />} />
             <Route path="reminders" element={<Reminders />} />
+            <Route path="notes" element={<Notes />} />
           </Route>
         </Routes>
       </BrowserRouter>
