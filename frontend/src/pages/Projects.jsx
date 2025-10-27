@@ -222,13 +222,44 @@ const Projects = () => {
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="location">Lokalizacja *</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    required
-                    data-testid="project-location-input"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      required
+                      data-testid="project-location-input"
+                      placeholder="np. Warszawa, ul. Przykładowa 123"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if ("geolocation" in navigator) {
+                          navigator.geolocation.getCurrentPosition((position) => {
+                            setFormData({
+                              ...formData,
+                              gps_lat: position.coords.latitude,
+                              gps_lng: position.coords.longitude
+                            });
+                            toast.success(`📍 Lokalizacja pobrana: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
+                          }, () => {
+                            toast.error('Nie udało się pobrać lokalizacji');
+                          });
+                        } else {
+                          toast.error('Geolokalizacja nie jest dostępna');
+                        }
+                      }}
+                      variant="outline"
+                      className="shrink-0"
+                    >
+                      <MapPin className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {formData.gps_lat && formData.gps_lng && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ GPS: {formData.gps_lat.toFixed(4)}, {formData.gps_lng.toFixed(4)}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="status">Status</Label>
