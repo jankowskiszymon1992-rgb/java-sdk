@@ -356,6 +356,7 @@ const UniversalMail = () => {
             )}
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* Modal: Dodaj konto */}
