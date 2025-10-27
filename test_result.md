@@ -104,6 +104,42 @@
 
 user_problem_statement: "Użytkownik zgłasza: 1) W zakładce Poczta każdorazowo trzeba ładować wiadomości, chce auto-ładowanie i auto-odświeżanie co 60s, 2) Uporządkować menu (klienci, pracownicy itd.) logicznie zamiast alfabetycznie, 3) Przetłumaczyć całą aplikację na język polski (swobodne tłumaczenia)"
 
+  - task: "Universal Email - Auto-load & Auto-refresh"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/UniversalMail.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Dodano localStorage do zapamiętywania ostatnio wybranego konta i folderu. Przy otwarciu zakładki Poczta automatycznie ładuje się ostatnio wybrane konto i folder. Dodano auto-refresh co 60 sekund (setInterval). Dodano informację o auto-refresh w UI (nagłówek pokazuje 'Auto-odświeżanie co 60s • X wiadomości'). Użytkownik nie musi już ręcznie klikać 'Odśwież' lub wybierać konta za każdym razem. Wymaga testów frontend."
+  
+  - task: "Layout Menu - Logical Grouping"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/components/Layout.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Uporządkowano menu nawigacji logicznie zamiast alfabetycznie. Nowa struktura: BIZNES (Dashboard, Klienci, Projekty, Godziny pracy), ZARZĄDZANIE (Pracownicy, Finanse, Przypomnienia), KOMUNIKACJA (Poczta, Raporty), AI I ANALITYKA (Asystent AI, Analityk AI, Inteligencja Rynkowa), NARZĘDZIA (Kalkulatory, Zdjęcia). Zmieniono 'Zlecenia' na 'Projekty', 'Analiza Rynku' na 'Inteligencja Rynkowa'. Menu teraz jest bardziej intuicyjne i zgrupowane wg funkcji. Wymaga testów frontend."
+  
+  - task: "Full Polish Translation"
+    implemented: false
+    working: "NA"
+    file: "multiple files"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "W trakcie implementacji - trzeba przetłumaczyć wszystkie komponenty na polski (przyciski, formularze, komunikaty błędów, toasty, modalne). Zaczęto od Layout.jsx i UniversalMail.jsx. Pozostałe pliki do tłumaczenia: Dashboard, Clients, Projects, WorkHours, Employees, Finances, Reminders, Reports, AIAssistant, AIAnalyst, MarketIntelligence, Calculators, Photos, VoiceReport."
+
 backend:
   - task: "Backend API"
     implemented: true
