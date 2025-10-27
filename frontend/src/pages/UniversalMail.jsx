@@ -20,7 +20,7 @@ const UniversalMail = () => {
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [folders, setFolders] = useState(['INBOX']);
+  const [folders, setFolders] = useState([{name: 'INBOX', label: 'Odebrane'}]);
   const [selectedFolder, setSelectedFolder] = useState('INBOX');
   
   // Modals
