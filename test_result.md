@@ -602,6 +602,8 @@ urgent_issues:
         comment: "DODATKOWA NAPRAWA 2025-01-19: Dodano szczegółowe console.log do loadSession() aby debugować ładowanie rozmów. Dodano funkcję deleteSession() z możliwością usuwania pojedynczych rozmów (przycisk Usuń pojawia się na hover). Dodano lepszą obsługę błędów z toast notifications i alertami. Wymaga testów aby zweryfikować czy rozmowy się ładują poprawnie i czy usuwanie działa."
 
 agent_communication:
+  - agent: "testing"
+    message: "✅ TESTOWANIE FUNKCJONALNOŚCI DODAWANIA KLIENTA ZAKOŃCZONE POMYŚLNIE 2025-01-27: Przetestowano kompletny scenariusz zgodnie z wymaganiami użytkownika. Wszystkie 5 kroków testu przeszły w 100%: 1) Ładowanie strony Klienci, 2) Kliknięcie przycisku 'Dodaj klienta' i otwarcie modalu, 3) Wypełnienie formularza danymi testowymi (Jan Kowalski Test, 123456789, jan.test@example.com, ul. Testowa 123, Warszawa, 00-001, Klient testowy), 4) Zapisanie klienta, 5) Weryfikacja toast sukcesu, zamknięcia modalu i pojawienia się klienta na liście. KRYTYCZNE: Wszystkie data-testid działają poprawnie, API endpoints zwracają status 200, brak błędów w console. Funkcjonalność jest w pełni sprawna i gotowa do użycia."
   - agent: "main"
     message: "Wywołano troubleshoot_agent który zidentyfikował root cause: niekompatybilność @radix-ui/react-select 2.2.2 z React 19. Zaktualizowano do wersji 2.2.6. Błąd rozwiązany i zweryfikowany."
   - agent: "testing"
