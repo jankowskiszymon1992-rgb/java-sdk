@@ -111,11 +111,11 @@ const Projects = () => {
     if (projectToDelete) {
       try {
         await projectsApi.delete(projectToDelete);
-        toast.success('Zlecenie usunięte pomyślnie');
+        toast.success('Projekt usunięty pomyślnie');
         loadData();
       } catch (error) {
-        console.error('Błąd usuwania zlecenia:', error);
-        toast.error('Nie udało się usunąć zlecenia');
+        console.error('Błąd usuwania projektu:', error);
+        toast.error('Nie udało się usunąć projektu');
       } finally {
         setDeleteDialogOpen(false);
         setProjectToDelete(null);
