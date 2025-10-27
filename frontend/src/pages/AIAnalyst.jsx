@@ -353,8 +353,42 @@ const AIAnalyst = () => {
             <p className="text-sm text-gray-600 mt-2">{trendAnalysis.summary}</p>
           </CardHeader>
           <CardContent>
+            {/* Wyszukiwarka dla Trendów */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Szukaj w rekomendacjach..."
+                  value={trendSearchQuery}
+                  onChange={(e) => setTrendSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 py-6 text-base"
+                />
+                {trendSearchQuery && (
+                  <button
+                    onClick={() => setTrendSearchQuery('')}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+              {trendSearchQuery && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Znaleziono: {trendAnalysis.products?.filter(p => 
+                    p.nazwa.toLowerCase().includes(trendSearchQuery.toLowerCase())
+                  ).length || 0} rekomendacji
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {trendAnalysis.products?.map((product, idx) => (
+              {trendAnalysis.products
+                ?.filter(product => 
+                  trendSearchQuery === '' || 
+                  product.nazwa.toLowerCase().includes(trendSearchQuery.toLowerCase())
+                )
+                ?.map((product, idx) => (
                 <div 
                   key={idx} 
                   className={`p-4 rounded-lg border-2 ${
