@@ -257,6 +257,36 @@ const MarketIntelligence = () => {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Wyszukiwarka produktów */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Szukaj produktu... (nazwa lub kategoria)"
+                value={productSearchQuery}
+                onChange={(e) => setProductSearchQuery(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {productSearchQuery && (
+                <button
+                  onClick={() => setProductSearchQuery('')}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            {productSearchQuery && (
+              <p className="text-sm text-gray-600 mt-2">
+                Znaleziono: {products.filter(p => 
+                  p.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
+                  p.category.toLowerCase().includes(productSearchQuery.toLowerCase())
+                ).length} produktów
+              </p>
+            )}
+          </div>
+
           {products.length === 0 ? (
             <div className="text-center py-8">
               <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
