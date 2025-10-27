@@ -406,6 +406,18 @@ const Projects = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => {
+                              const link = `${window.location.origin}/project-share/${project.id}`;
+                              navigator.clipboard.writeText(link);
+                              toast.success('Link skopiowany! Wyślij klientowi.');
+                            }}
+                            title="Udostępnij"
+                          >
+                            <Share2 className="h-4 w-4 text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleDelete(project.id)}
                             title="Usuń"
                             data-testid={`delete-project-${project.id}`}
