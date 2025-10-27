@@ -4423,8 +4423,8 @@ async def delete_email_account(account_id: str):
 
 
 @api_router.get("/email/inbox")
-async def get_inbox(account_id: str, limit: int = 50):
-    """Pobierz skrzynkę odbiorczą"""
+async def get_inbox(account_id: str, folder: str = "INBOX", limit: int = 50):
+    """Pobierz skrzynkę odbiorczą lub inny folder"""
     try:
         # Pobierz credentials z bazy
         account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
@@ -4434,16 +4434,17 @@ async def get_inbox(account_id: str, limit: int = 50):
         # Dekryptuj hasło
         password = decrypt_password(account['password'])
         
-        # Pobierz emaile
+        # Pobierz emaile z wybranego folderu
         emails = email_service.fetch_emails(
             account['email'],
             password,
             account['imap_server'],
             account['imap_port'],
+            folder=folder,
             limit=limit
         )
         
-        return {"emails": emails, "count": len(emails)}
+        return {"emails": emails, "count": len(emails), "folder": folder}
         
     except HTTPException:
         raise
