@@ -4333,6 +4333,32 @@ async def add_email_account(account: dict):
             raise HTTPException(status_code=400, detail="Błąd połączenia SMTP - sprawdź email i hasło")
         
         # Zapisz do bazy
+
+
+@api_router.get("/email/folders/{account_id}")
+async def get_email_folders(account_id: str):
+    """Pobierz listę folderów dla konta email"""
+    try:
+        account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        
+        password = decrypt_password(account['password'])
+        
+        folders = email_service.get_available_folders(
+            account['email'],
+            password,
+            account['imap_server'],
+            account['imap_port']
+        )
+        
+        return {"folders": folders}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching folders: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
         account_doc = {
             "id": str(uuid.uuid4()),
             "email": email_address,
