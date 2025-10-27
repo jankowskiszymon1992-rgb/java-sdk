@@ -109,11 +109,13 @@ const TimeCenter = () => {
           // Check if alarm should ring today
           if (!alarm.repeat_days || alarm.repeat_days.length === 0 || alarm.repeat_days.includes(currentDay)) {
             playAlarmSound();
-            toast.success(`⏰ Budzik: ${alarm.label}`);
+            toast.success(`⏰ Budzik: ${alarm.label}`, { duration: 10000 });
             if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`Budzik: ${alarm.label}`, {
+              new Notification(`🔔 Budzik: ${alarm.label}`, {
                 body: `Czas: ${alarm.time}`,
-                icon: '/logo.png'
+                icon: '/logo192.png',
+                requireInteraction: true, // Wymaga akcji użytkownika
+                vibrate: [200, 100, 200] // Wibracje na telefonie
               });
             }
           }
@@ -121,7 +123,8 @@ const TimeCenter = () => {
       });
     };
 
-    const interval = setInterval(checkAlarms, 60000); // Check every minute
+    const interval = setInterval(checkAlarms, 10000); // Check every 10 seconds
+    checkAlarms(); // Sprawdź od razu przy załadowaniu
     return () => clearInterval(interval);
   }, [alarms]);
 
