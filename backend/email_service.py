@@ -376,3 +376,53 @@ def get_email_body(email_address: str, password: str, imap_server: str,
     except Exception as e:
         logger.error(f"Error fetching email body: {e}")
         raise Exception(f"Nie udało się pobrać treści emaila: {str(e)}")
+
+
+def get_email_attachment(email_address: str, password: str, imap_server: str, 
+                         imap_port: int, email_id: str, attachment_index: int, 
+                         folder: str = 'INBOX') -> Dict:
+    """Pobierz konkretny załącznik z emaila"""
+    try:
+        mail = imaplib.IMAP4_SSL(imap_server, imap_port)
+        mail.login(email_address, password)
+        mail.select(folder)
+        
+        status, msg_data = mail.fetch(email_id.encode(), '(RFC822)')
+        
+        for response_part in msg_data:
+            if isinstance(response_part, tuple):
+                msg = email.message_from_bytes(response_part[1])
+                
+                attachment_count = 0
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        content_disposition = str(part.get("Content-Disposition"))
+                        
+                        if "attachment" in content_disposition:
+                            if attachment_count == attachment_index:
+                                filename = part.get_filename()
+                                if filename:
+                                    # Dekoduj nazwę pliku
+                                    decoded_filename = decode_header(filename)[0][0]
+                                    if isinstance(decoded_filename, bytes):
+                                        decoded_filename = decoded_filename.decode()
+                                    
+                                    content = part.get_payload(decode=True)
+                                    content_type = part.get_content_type()
+                                    
+                                    mail.logout()
+                                    return {
+                                        'filename': decoded_filename,
+                                        'content': content,
+                                        'content_type': content_type,
+                                        'size': len(content)
+                                    }
+                            attachment_count += 1
+        
+        mail.logout()
+        raise Exception("Załącznik nie znaleziony")
+        
+    except Exception as e:
+        logger.error(f"Error fetching attachment: {e}")
+        raise Exception(f"Nie udało się pobrać załącznika: {str(e)}")
+
