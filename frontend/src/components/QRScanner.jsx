@@ -11,30 +11,38 @@ const QRScanner = ({ isOpen, onClose, onScan, title = "Skanuj QR Kod" }) => {
 
   useEffect(() => {
     if (isOpen && !scanner) {
-      const newScanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { 
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0
-        },
-        false
-      );
-
-      newScanner.render(
-        (decodedText, decodedResult) => {
-          // Sukces skanowania
-          toast.success('QR kod zeskanowany!');
-          onScan(decodedText, decodedResult);
-          newScanner.clear();
-          onClose();
-        },
-        (errorMessage) => {
-          // Błąd skanowania - ignoruj (ciągłe skanowanie)
+      // Wait for DOM to be ready
+      setTimeout(() => {
+        const element = document.getElementById("qr-reader");
+        if (!element) {
+          console.error("QR reader element not found");
+          return;
         }
-      );
 
-      setScanner(newScanner);
+        const newScanner = new Html5QrcodeScanner(
+          "qr-reader",
+          { 
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+          },
+          false
+        );
+
+        newScanner.render(
+          (decodedText, decodedResult) => {
+            toast.success('QR kod zeskanowany!');
+            onScan(decodedText, decodedResult);
+            newScanner.clear();
+            onClose();
+          },
+          (errorMessage) => {
+            // Ignore continuous scanning errors
+          }
+        );
+
+        setScanner(newScanner);
+      }, 100);
     }
 
     return () => {
