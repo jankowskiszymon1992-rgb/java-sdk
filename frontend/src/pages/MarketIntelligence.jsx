@@ -23,6 +23,7 @@ const MarketIntelligence = () => {
     category: 'przewody',
     usd_sensitive: false
   });
+  const [productSearchQuery, setProductSearchQuery] = useState('');
 
   useEffect(() => {
     loadDashboard();
