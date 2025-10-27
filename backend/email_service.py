@@ -68,7 +68,10 @@ EMAIL_PROVIDERS = {
 }
 
 
-def detect_email_provider(email_address: str) -> Optional[Dict]:
+}
+
+
+def html_to_text(html_content: str) -> str:
     """Konwertuj HTML na czytelny plain text"""
     try:
         # Usuń tagi HTML
@@ -122,8 +125,6 @@ def get_available_folders(email_address: str, password: str, imap_server: str, i
         logger.error(f"Error getting folders: {e}")
         # Fallback do standardowych folderów
         return ['INBOX', 'Sent', 'Drafts', 'Trash', 'Spam']
-
-}
 
 
 def detect_email_provider(email_address: str) -> Optional[Dict]:
