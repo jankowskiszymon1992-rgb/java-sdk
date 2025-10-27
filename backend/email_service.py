@@ -357,6 +357,10 @@ def get_email_body(email_address: str, password: str, imap_server: str,
                 
                 mail.logout()
                 
+                # Jeśli nie ma plain text, konwertuj HTML
+                if not body_text and body_html:
+                    body_text = html_to_text(body_html)
+                
                 return {
                     'id': email_id,
                     'subject': subject,
