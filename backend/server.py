@@ -1323,7 +1323,11 @@ async def gmail_auth_callback(request: Request):
         )
         
         # Redirect to frontend mail page
-        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '')
+        # Pobierz GMAIL_REDIRECT_URI i wyciągnij base URL
+        redirect_uri = os.environ.get('GMAIL_REDIRECT_URI', '')
+        # Z https://pwa-troubleshoot-1.preview.emergentagent.com/api/gmail/auth/callback
+        # Wyciągnij https://pwa-troubleshoot-1.preview.emergentagent.com
+        frontend_url = redirect_uri.replace('/api/gmail/auth/callback', '')
         return RedirectResponse(url=f"{frontend_url}/mail?connected=true")
         
     except Exception as e:
