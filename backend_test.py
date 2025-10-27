@@ -1623,28 +1623,40 @@ def test_market_intelligence_scrape_conrad():
             response_data = response.json()
             print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
             
+            # Check if response has results array
+            if "results" not in response_data or not isinstance(response_data["results"], list):
+                print("❌ Response missing 'results' array")
+                return False
+            
+            if len(response_data["results"]) == 0:
+                print("❌ No results in response")
+                return False
+            
+            # Get the first result (should be conrad)
+            result = response_data["results"][0]
+            
             # Verify supplier
-            if response_data.get("supplier") != "conrad":
-                print(f"❌ Supplier mismatch. Expected: conrad, Got: {response_data.get('supplier')}")
+            if result.get("supplier") != "conrad":
+                print(f"❌ Supplier mismatch. Expected: conrad, Got: {result.get('supplier')}")
                 return False
             
             # Verify status is success (should be fixed now)
-            if response_data.get("status") != "success":
-                print(f"❌ Status not success. Got: {response_data.get('status')}")
-                if "error_message" in response_data:
-                    print(f"Error message: {response_data.get('error_message')}")
+            if result.get("status") != "success":
+                print(f"❌ Status not success. Got: {result.get('status')}")
+                if "error_message" in result:
+                    print(f"Error message: {result.get('error_message')}")
                 return False
             
             # Verify products_scraped > 0
-            products_scraped = response_data.get("products_scraped", 0)
+            products_scraped = result.get("products_scraped", 0)
             if products_scraped <= 0:
                 print(f"❌ No products scraped. Got: {products_scraped}")
                 return False
             
             print(f"✅ Conrad scraping successful (fixed):")
-            print(f"   Status: {response_data.get('status')}")
+            print(f"   Status: {result.get('status')}")
             print(f"   Products scraped: {products_scraped}")
-            print(f"   Duration: {response_data.get('duration_seconds')} seconds")
+            print(f"   Duration: {result.get('duration_seconds')} seconds")
             
             return True
             
