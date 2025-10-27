@@ -371,6 +371,14 @@ const Clients = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* QR Scanner */}
+      <QRScanner
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={handleQRScan}
+        title="Skanuj wizytówkę klienta"
+      />
     </div>
   );
 };
