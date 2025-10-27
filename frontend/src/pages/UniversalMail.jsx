@@ -486,9 +486,9 @@ const UniversalMail = () => {
               )}
               
               <div className="bg-white border rounded-lg p-4">
-                <pre className="whitespace-pre-wrap text-sm text-gray-900 font-sans">
-                  {selectedEmail.body_text || selectedEmail.body_html}
-                </pre>
+                <div className="whitespace-pre-wrap text-sm text-gray-900 font-sans break-words">
+                  {selectedEmail.body_text || 'Brak treści'}
+                </div>
               </div>
             </div>
           )}
