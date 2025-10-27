@@ -42,6 +42,7 @@ const Layout = () => {
     // NARZĘDZIA
     { to: '/calculators', icon: Calculator, label: 'Kalkulatory', section: 'narzędzia' },
     { to: '/photos', icon: Camera, label: 'Zdjęcia', section: 'narzędzia' },
+    { to: '/notes', icon: StickyNote, label: 'Notatnik', section: 'narzędzia' },
   ];
 
   return (
