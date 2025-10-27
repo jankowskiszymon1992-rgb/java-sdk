@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, DollarSign, RefreshCw, Package, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { TrendingUp, DollarSign, RefreshCw, Package, AlertCircle, Plus, Trash2, Search, X } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
