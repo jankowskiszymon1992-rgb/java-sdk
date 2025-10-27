@@ -3321,6 +3321,20 @@ async def trigger_scraping(supplier: Optional[str] = None):
     return {"results": results, "total_suppliers": len(results)}
 
 
+
+@api_router.get("/market-intelligence/scraping-logs")
+async def get_scraping_logs(limit: int = 50):
+    """Pobierz logi scrapingu"""
+    try:
+        logs = await db.scraping_logs.find(
+            {}, {"_id": 0}
+        ).sort("started_at", -1).limit(limit).to_list(length=limit)
+        return {"logs": logs, "count": len(logs)}
+    except Exception as e:
+        logger.error(f"Error fetching scraping logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/market-intelligence/usd-rate")
 async def get_usd_rate_current():
     """Pobierz aktualny kurs USD/PLN"""
