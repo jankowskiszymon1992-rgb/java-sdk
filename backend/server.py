@@ -3178,12 +3178,24 @@ async def scrape_rs_components(product_name: str, search_term: str):
         return None
 
 
+# Helper: Scraping Kaczmarek Electric (MOCK)
+async def scrape_kaczmarek_electric(product_name: str, search_term: str):
+    """Scraper dla Kaczmarek Electric - OBECNIE: DANE TESTOWE"""
+    try:
+        await asyncio.sleep(0.5)
+        return generate_mock_price(product_name, "kaczmarek_electric")
+    except Exception as e:
+        logger.error(f"Kaczmarek Electric scraping error for {product_name}: {e}")
+        return None
+
+
 # Mapa scraperów
 SCRAPERS = {
     "kanlux": scrape_kanlux,
     "tme": scrape_tme,
     "conrad": scrape_conrad,
-    "rs_components": scrape_rs_components
+    "rs_components": scrape_rs_components,
+    "kaczmarek_electric": scrape_kaczmarek_electric
 }
 
 
