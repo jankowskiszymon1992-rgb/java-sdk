@@ -12,6 +12,7 @@ from datetime import datetime, timezone, date, timedelta
 from enum import Enum
 import asyncio
 import re
+import email_service
 
 
 ROOT_DIR = Path(__file__).parent
