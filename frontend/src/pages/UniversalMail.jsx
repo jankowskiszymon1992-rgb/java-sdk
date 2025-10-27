@@ -278,6 +278,45 @@ const UniversalMail = () => {
     }
   };
 
+  const saveToApp = async () => {
+    setShowFolderDialog(true);
+  };
+
+  const confirmSaveToApp = async () => {
+    try {
+      // Pobierz załącznik
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      
+      // Konwertuj na base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = reader.result.split(',')[1];
+        
+        // Zapisz do aplikacji
+        await axios.post(`${API}/api/saved-files`, {
+          filename: currentAttachment.filename,
+          folder: selectedSaveFolder,
+          content_type: blob.type,
+          size: blob.size,
+          source: `Email od ${selectedEmail.from}`,
+          file_data: base64data
+        });
+        
+        // Równocześnie pobierz na komputer
+        downloadAttachment(currentAttachment.index, currentAttachment.filename);
+        
+        toast.success(`Plik zapisany w folderze "${selectedSaveFolder === 'email' ? 'Z Emaili' : selectedSaveFolder === 'ai' ? 'Z AI' : selectedSaveFolder === 'roboty' ? 'Roboty' : 'Inne'}" i pobrany na komputer!`);
+        setShowFolderDialog(false);
+        setShowPdfViewer(false);
+      };
+    } catch (error) {
+      console.error('Błąd zapisywania pliku:', error);
+      toast.error('Nie udało się zapisać pliku');
+    }
+  };
+
   const getFileIcon = (filename) => {
     const ext = filename.split('.').pop().toLowerCase();
     if (ext === 'pdf') return '📄';
