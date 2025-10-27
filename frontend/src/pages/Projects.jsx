@@ -197,7 +197,7 @@ const Projects = () => {
                   </Select>
                 </div>
                 <div className="col-span-2">
-                  <Label htmlFor="title">Tytuł zlecenia *</Label>
+                  <Label htmlFor="title">Tytuł projektu *</Label>
                   <Input
                     id="title"
                     value={formData.title}
