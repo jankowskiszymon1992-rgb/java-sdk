@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Plus, Trash2, RefreshCw, Send, Inbox, Paperclip, X, Eye, Loader2 } from 'lucide-react';
+import { Mail, Plus, Trash2, RefreshCw, Send, Inbox, Paperclip, X, Eye, Loader2, Save, FolderOpen } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
 
