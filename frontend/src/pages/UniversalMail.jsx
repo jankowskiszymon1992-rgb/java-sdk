@@ -714,6 +714,60 @@ const UniversalMail = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Modal: Wybór folderu do zapisu */}
+      <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Gdzie zapisać plik?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600">Wybierz folder do zapisania pliku:</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setSelectedSaveFolder('email')}
+                variant={selectedSaveFolder === 'email' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+              >
+                <Mail className="h-6 w-6 mb-2" />
+                Z Emaili
+              </Button>
+              <Button
+                onClick={() => setSelectedSaveFolder('ai')}
+                variant={selectedSaveFolder === 'ai' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+              >
+                <FolderOpen className="h-6 w-6 mb-2" />
+                Z AI
+              </Button>
+              <Button
+                onClick={() => setSelectedSaveFolder('roboty')}
+                variant={selectedSaveFolder === 'roboty' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+              >
+                <FolderOpen className="h-6 w-6 mb-2" />
+                Roboty
+              </Button>
+              <Button
+                onClick={() => setSelectedSaveFolder('inne')}
+                variant={selectedSaveFolder === 'inne' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+              >
+                <FolderOpen className="h-6 w-6 mb-2" />
+                Inne
+              </Button>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowFolderDialog(false)}>
+                Anuluj
+              </Button>
+              <Button onClick={confirmSaveToApp} className="bg-purple-600 hover:bg-purple-700">
+                Zapisz
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
