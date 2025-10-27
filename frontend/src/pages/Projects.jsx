@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, MapPin, Calendar, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Calendar, FileText, Share2 } from 'lucide-react';
 import { projectsApi, clientsApi } from '../api/api';
 import { toast } from 'sonner';
 import MaterialsNotesModal from '../components/MaterialsNotesModal';
