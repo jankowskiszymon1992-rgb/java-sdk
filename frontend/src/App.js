@@ -67,6 +67,8 @@ function App() {
             <Route path="ai-analyst" element={<AIAnalyst />} />
             <Route path="reminders" element={<Reminders />} />
             <Route path="notes" element={<Notes />} />
+            <Route path="time-center" element={<TimeCenter />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         </Routes>
       </BrowserRouter>
