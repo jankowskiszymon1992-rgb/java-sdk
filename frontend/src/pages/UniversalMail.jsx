@@ -296,7 +296,9 @@ const UniversalMail = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                {folders.map(folder => (
+                {Array.isArray(folders) && folders
+                  .filter(folder => folder && typeof folder === 'object' && folder.name && folder.label)
+                  .map(folder => (
                   <Button
                     key={folder.name}
                     onClick={() => loadInbox(folder.name)}
