@@ -313,6 +313,18 @@ backend:
         comment: "✅ SALARIES CATEGORY COMPLETE FLOW TESTED 2025-10-26: Wszystkie 5 testów kategorii 'salaries' PRZESZŁY POMYŚLNIE. TEST 1: POST /api/financial-entries - utworzono wpis wypłat (category: salaries, date: 2025-01-19, description: 'Wypłaty styczeń 2025', amount_net/gross: 5000.00, notes: 'Test wypłat') - Status 200, ID wygenerowane. TEST 2: GET /api/financial-entries?month=2025-01 - wpis salaries znaleziony w liście z poprawnymi kwotami 5000.00. TEST 3: GET /api/financial-entries/summary?month=2025-01 - kategoria salaries w podsumowaniu (total_net: 5000.0, total_gross: 5000.0, count: 1, type: expense), kwoty zawarte w expense_net/gross totals. TEST 4: DELETE /api/financial-entries/{id} - wpis usunięty pomyślnie (Status 200, message: 'Wpis usunięty pomyślnie'). TEST 5: Weryfikacja po usunięciu - wpis salaries NIE występuje już w liście stycznia 2025. Backend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
 
 frontend:
+  - task: "Client Management - Add Client Functionality"
+    implemented: true
+    working: true
+    file: "/frontend/src/pages/Clients.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ FUNKCJONALNOŚĆ DODAWANIA KLIENTA PRZETESTOWANA POMYŚLNIE 2025-01-27: Wszystkie kroki testu przeszły w 100%. KROK 1 ✅: Strona Klienci ładuje się poprawnie, KROK 2 ✅: Przycisk 'Dodaj klienta' (data-testid='add-client-btn') otwiera modal z tytułem 'Nowy klient', KROK 3 ✅: Formularz wypełnia się poprawnie wszystkimi danymi testowymi (Jan Kowalski Test, 123456789, jan.test@example.com, ul. Testowa 123, Warszawa, 00-001, Klient testowy), KROK 4 ✅: Przycisk 'Dodaj' (data-testid='client-submit-btn') zapisuje klienta, KROK 5 ✅: Toast 'Klient dodany pomyślnie' pojawia się, modal się zamyka, klient pojawia się na liście. NETWORK: POST /api/clients (200), GET /api/clients (200). Brak błędów w console. Wszystkie data-testid działają poprawnie. Frontend URL: https://pwa-troubleshoot-1.preview.emergentagent.com"
+
   - task: "React removeChild Error Fix"
     implemented: true
     working: true
