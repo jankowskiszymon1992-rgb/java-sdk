@@ -2791,6 +2791,51 @@ async def setup_recurring_reminders():
     }
 
 
+# ============= NOTES ENDPOINTS =============
+
+@api_router.post("/notes", response_model=Note)
+async def create_note(note: NoteCreate):
+    new_note = Note(**note.model_dump())
+    await db.notes.insert_one(serialize_doc(new_note.model_dump()))
+    return new_note
+
+
+@api_router.get("/notes", response_model=List[Note])
+async def get_notes():
+    notes = await db.notes.find({}, {"_id": 0}).sort("updated_at", -1).to_list(1000)
+    return [deserialize_doc(note) for note in notes]
+
+
+@api_router.get("/notes/{note_id}", response_model=Note)
+async def get_note(note_id: str):
+    note = await db.notes.find_one({"id": note_id}, {"_id": 0})
+    if not note:
+        raise HTTPException(status_code=404, detail="Notatka nie znaleziona")
+    return deserialize_doc(note)
+
+
+@api_router.put("/notes/{note_id}", response_model=Note)
+async def update_note(note_id: str, note_update: NoteUpdate):
+    note = await db.notes.find_one({"id": note_id}, {"_id": 0})
+    if not note:
+        raise HTTPException(status_code=404, detail="Notatka nie znaleziona")
+    
+    update_data = {k: v for k, v in note_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.notes.update_one({"id": note_id}, {"$set": serialize_doc(update_data)})
+    updated_note = await db.notes.find_one({"id": note_id}, {"_id": 0})
+    return deserialize_doc(updated_note)
+
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(note_id: str):
+    result = await db.notes.delete_one({"id": note_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notatka nie znaleziona")
+    return {"message": "Notatka usunięta pomyślnie"}
+
+
 @api_router.post("/financial-entries/ocr")
 async def create_financial_entry_with_ocr(request: dict):
     """
