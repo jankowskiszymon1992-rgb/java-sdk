@@ -420,6 +420,18 @@ backend:
         agent: "testing"
         comment: "❌ MARKET INTELLIGENCE PRICES DATABASE ISSUE 2025-10-27: GET /api/market-intelligence/prices/compare endpoint działa (status 200), ale NIE ZNALEZIONO produktów Kaczmarek Electric w bazie danych. Mimo że scraping Kaczmarek Electric zakończył się sukcesem (83 produkty), ceny nie są zapisywane do product_prices collection lub endpoint compare nie znajduje danych. Możliwe przyczyny: 1) Scraping nie zapisuje cen do bazy, 2) Problem z nazwami produktów w porównaniu, 3) Endpoint compare nie obsługuje supplier=kaczmarek_electric. Wymaga naprawy zapisu cen podczas scrapingu lub logiki porównania cen. Backend URL: https://elektron-hub.preview.emergentagent.com"
 
+  - task: "AI Analyst - Search Functionality"
+    implemented: true
+    working: "NA"
+    file: "/frontend/src/pages/AIAnalyst.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "✅ WYSZUKIWARKA DODANA: Dodano pole wyszukiwania w Analityk AI aby łatwo znaleźć produkty. FEATURES: 1) Pole wyszukiwania z ikoną lupy, 2) Real-time filtrowanie podczas pisania, 3) Przycisk X do czyszczenia, 4) Licznik znalezionych produktów (np. 'Znaleziono: 2 produktów'), 5) Działa dla obu sekcji: 'Tabela Porównawcza' (comparisonTable.products) i 'Analiza Trendów' (trendAnalysis.products). UŻYCIE: Wpisz 'kabel', 'lampa', 'przewód', 'gniazdko' itp. - filtruje na bieżąco. Wykonano build i restart. Wymaga testów frontend."
+
 frontend:
   - task: "Client Management - Add Client Functionality"
     implemented: true
