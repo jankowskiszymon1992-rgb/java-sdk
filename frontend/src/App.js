@@ -19,6 +19,8 @@ import Reminders from './pages/Reminders';
 import MarketIntelligence from './pages/MarketIntelligence';
 import AIAnalyst from './pages/AIAnalyst';
 import Notes from './pages/Notes';
+import TimeCenter from './pages/TimeCenter';
+import Notifications from './pages/Notifications';
 import Layout from './components/Layout';
 import InstallPWA from './components/InstallPWA';
 import { requestNotificationPermission, startReminderService, scheduleDailyReportReminder, startRemindersCheckService } from './utils/notifications';
