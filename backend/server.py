@@ -3204,13 +3204,14 @@ SCRAPERS = {
 async def trigger_scraping(supplier: Optional[str] = None):
     """
     Ręczne uruchomienie scrapingu cen
-    supplier: opcjonalnie - nazwa hurtowni (kanlux, tme, conrad, rs_components)
+    supplier: opcjonalnie - nazwa hurtowni (kanlux, tme, conrad, rs_components, kaczmarek_electric)
     """
     results = []
     suppliers_to_scrape = [supplier] if supplier else list(SCRAPERS.keys())
     
     for supp in suppliers_to_scrape:
         if supp not in SCRAPERS:
+            logger.warning(f"Nieznany dostawca: {supp}")
             continue
             
         log_entry = {
@@ -3224,44 +3225,88 @@ async def trigger_scraping(supplier: Optional[str] = None):
         try:
             scraper_func = SCRAPERS[supp]
             products_scraped = 0
+            errors = []
             
             # Pobierz produkty z bazy zamiast hardcoded listy
             monitored_products = await db.monitored_products.find({}, {"_id": 0}).to_list(1000)
             if not monitored_products:
                 # Fallback do hardcoded jeśli baza pusta
-                monitored_products = MONITORED_PRODUCTS
+                logger.warning(f"Brak produktów w bazie - używam fallback listy")
+                monitored_products = MONITORED_PRODUCTS if 'MONITORED_PRODUCTS' in globals() else []
+            
+            if not monitored_products:
+                raise Exception("Brak produktów do scrapowania")
+            
+            logger.info(f"Scraping {supp}: {len(monitored_products)} produktów")
             
             for product in monitored_products:
-                # Automatyczne generowanie search term z nazwy produktu
-                product_name = product["name"]
-                # Użyj nazwy produktu jako search term (prosta normalizacja)
-                search_term = product_name.lower().strip()
+                try:
+                    # Walidacja struktury produktu
+                    if not isinstance(product, dict):
+                        logger.error(f"Nieprawidłowy format produktu: {type(product)}")
+                        continue
+                    
+                    product_name = product.get("name")
+                    if not product_name:
+                        logger.error(f"Brak nazwy produktu w: {product}")
+                        continue
+                    
+                    # Automatyczne generowanie search term z nazwy produktu
+                    # Użyj nazwy produktu jako search term (prosta normalizacja)
+                    search_term = product_name.lower().strip()
+                    
+                    # Retry logic (3 próby)
+                    scrape_result = None
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        try:
+                            scrape_result = await asyncio.wait_for(
+                                scraper_func(product_name, search_term),
+                                timeout=10.0  # 10 sekund timeout
+                            )
+                            if scrape_result:
+                                break
+                        except asyncio.TimeoutError:
+                            logger.warning(f"Timeout dla {product_name} (próba {attempt+1}/{max_retries})")
+                            if attempt == max_retries - 1:
+                                errors.append(f"{product_name}: timeout")
+                        except Exception as e:
+                            logger.error(f"Błąd scrapingu {product_name} (próba {attempt+1}/{max_retries}): {e}")
+                            if attempt == max_retries - 1:
+                                errors.append(f"{product_name}: {str(e)}")
+                    
+                    if scrape_result and scrape_result.get("price"):
+                        # Zapisz cenę do bazy
+                        price_doc = {
+                            "id": str(uuid.uuid4()),
+                            "product_name": product["name"],
+                            "product_category": product.get("category", "inne"),
+                            "supplier": supp,
+                            "price": scrape_result["price"],
+                            "currency": "PLN",
+                            "availability": scrape_result.get("availability", True),
+                            "url": scrape_result.get("url"),
+                            "scraped_at": datetime.now(timezone.utc),
+                            "created_at": datetime.now(timezone.utc)
+                        }
+                        await db.product_prices.insert_one(price_doc)
+                        products_scraped += 1
                 
-                scrape_result = await scraper_func(product_name, search_term)
-                
-                if scrape_result and scrape_result.get("price"):
-                    # Zapisz cenę do bazy
-                    price_doc = {
-                        "id": str(uuid.uuid4()),
-                        "product_name": product["name"],
-                        "product_category": product["category"],
-                        "supplier": supp,
-                        "price": scrape_result["price"],
-                        "currency": "PLN",
-                        "availability": scrape_result.get("availability", True),
-                        "url": scrape_result.get("url"),
-                        "scraped_at": datetime.now(timezone.utc),
-                        "created_at": datetime.now(timezone.utc)
-                    }
-                    await db.product_prices.insert_one(price_doc)
-                    products_scraped += 1
+                except Exception as e:
+                    error_msg = f"{product.get('name', 'UNKNOWN')}: {str(e)}"
+                    logger.error(f"Błąd przetwarzania produktu: {error_msg}")
+                    errors.append(error_msg)
+                    continue
             
-            log_entry["status"] = "success"
+            log_entry["status"] = "success" if products_scraped > 0 else "partial_failure"
             log_entry["products_scraped"] = products_scraped
+            log_entry["errors"] = errors[:10]  # Pierwsze 10 błędów
+            log_entry["total_errors"] = len(errors)
             log_entry["completed_at"] = datetime.now(timezone.utc)
             log_entry["duration_seconds"] = (log_entry["completed_at"] - log_entry["started_at"]).total_seconds()
             
         except Exception as e:
+            logger.error(f"Krytyczny błąd scrapingu {supp}: {e}")
             log_entry["status"] = "failed"
             log_entry["error_message"] = str(e)
             log_entry["completed_at"] = datetime.now(timezone.utc)
