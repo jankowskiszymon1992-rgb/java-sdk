@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Przetestuj nowy system finansowy z OCR dla faktur - wszystkie endpointy finansowe"
+user_problem_statement: "Przetestuj nowy endpoint scrapingu Market Intelligence z naprawionymi błędami"
 
 backend:
   - task: "Backend API"
