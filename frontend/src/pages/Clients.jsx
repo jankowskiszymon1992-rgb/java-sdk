@@ -280,7 +280,8 @@ const Clients = () => {
             </form>
           </DialogContent>
         </Dialog>
-        </div>
+        </div> {/* Close flex gap-2 div */}
+      </div> {/* Close header section */}
 
       <Card>
         <CardContent className="p-0">
