@@ -554,10 +554,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "✅ PRZETESTOWANO: Market Intelligence Scraping - wszystkie endpointy działają poprawnie"
-    - "✅ ZWERYFIKOWANO: Kaczmarek Electric jako nowy dostawca"
-    - "✅ NAPRAWIONO: TME/Conrad/RS Components - brak błędów 'search_terms'"
-  stuck_tasks: []
+    - "✅ PRZETESTOWANO: Market Intelligence Scraping - wszystkie endpointy scrapingu działają poprawnie"
+    - "✅ ZWERYFIKOWANO: Kaczmarek Electric jako nowy dostawca - scraping działa (83 produkty)"
+    - "✅ NAPRAWIONO: TME/Conrad/RS Components - brak błędów 'search_terms' - wszystkie działają"
+    - "❌ DO NAPRAWY: Market Intelligence Prices Database - ceny nie są zapisywane do bazy"
+  stuck_tasks: 
+    - "Market Intelligence - Kaczmarek Electric Prices Database"
   test_all: false
   test_priority: "high_first"
   
