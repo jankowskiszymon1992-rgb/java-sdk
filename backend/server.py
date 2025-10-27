@@ -4801,6 +4801,46 @@ async def send_email_message(data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/email/attachment/{account_id}/{email_id}/{attachment_index}")
+async def get_email_attachment_endpoint(account_id: str, email_id: str, attachment_index: int, folder: str = "INBOX"):
+    """Pobierz załącznik z emaila"""
+    try:
+        from fastapi.responses import Response
+        
+        # Pobierz credentials
+        account = await db.email_accounts.find_one({"id": account_id}, {"_id": 0})
+        if not account:
+            raise HTTPException(status_code=404, detail="Konto nie znalezione")
+        
+        password = decrypt_password(account['password'])
+        
+        # Pobierz załącznik
+        attachment = email_service.get_email_attachment(
+            account['email'],
+            password,
+            account['imap_server'],
+            account['imap_port'],
+            email_id,
+            attachment_index,
+            folder
+        )
+        
+        # Zwróć plik
+        return Response(
+            content=attachment['content'],
+            media_type=attachment['content_type'],
+            headers={
+                'Content-Disposition': f'attachment; filename="{attachment["filename"]}"'
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting attachment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
