@@ -166,6 +166,28 @@ class ReminderUpdate(BaseModel):
     is_completed: Optional[bool] = None
 
 
+# ============= NOTES MODELS =============
+
+class Note(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: Optional[str] = None
+    content: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class NoteCreate(BaseModel):
+    title: Optional[str] = None
+    content: str
+
+
+class NoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+
+
 # ============= FINANCIAL ENTRIES MODELS =============
 
 class FinancialCategory(str, Enum):
