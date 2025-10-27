@@ -119,6 +119,53 @@ const Clients = () => {
     }
   };
 
+  const handleQRScan = (decodedText) => {
+    try {
+      // Próbuj parsować jako JSON (vCard lub JSON)
+      let data = {};
+      
+      if (decodedText.startsWith('BEGIN:VCARD')) {
+        // Format vCard (wizytówka)
+        const lines = decodedText.split('\n');
+        lines.forEach(line => {
+          if (line.startsWith('FN:')) data.name = line.substring(3).trim();
+          if (line.startsWith('TEL:')) data.phone = line.substring(4).trim();
+          if (line.startsWith('EMAIL:')) data.email = line.substring(6).trim();
+          if (line.startsWith('ADR:')) {
+            const parts = line.substring(4).split(';');
+            data.address = parts[2] || '';
+            data.city = parts[3] || '';
+            data.postal_code = parts[5] || '';
+          }
+        });
+      } else {
+        try {
+          // Spróbuj jako JSON
+          data = JSON.parse(decodedText);
+        } catch {
+          // Jeśli nie JSON, może być po prostu tekst (np. numer telefonu)
+          if (/^\d{9,}$/.test(decodedText)) {
+            data.phone = decodedText;
+          } else {
+            data.notes = decodedText;
+          }
+        }
+      }
+      
+      // Ustaw dane w formularzu
+      setFormData(prev => ({
+        ...prev,
+        ...data
+      }));
+      
+      setDialogOpen(true); // Otwórz formularz z wypełnionymi danymi
+      toast.success('Dane z QR kodu wczytane!');
+    } catch (error) {
+      console.error('Błąd parsowania QR:', error);
+      toast.error('Nie udało się odczytać danych z QR kodu');
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12">Ładowanie...</div>;
   }
