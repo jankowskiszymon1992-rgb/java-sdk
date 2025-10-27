@@ -201,6 +201,7 @@ def fetch_emails(email_address: str, password: str, imap_server: str, imap_port:
                         
                         # Pobierz treść
                         body = ""
+                        body_html = ""
                         attachments = []
                         
                         if msg.is_multipart():
@@ -221,16 +222,20 @@ def fetch_emails(email_address: str, password: str, imap_server: str, imap_port:
                                         body = part.get_payload(decode=True).decode()
                                     except:
                                         body = str(part.get_payload())
-                                elif content_type == "text/html" and not body:
+                                elif content_type == "text/html":
                                     try:
-                                        body = part.get_payload(decode=True).decode()
+                                        body_html = part.get_payload(decode=True).decode()
                                     except:
-                                        body = str(part.get_payload())
+                                        body_html = str(part.get_payload())
                         else:
                             try:
                                 body = msg.get_payload(decode=True).decode()
                             except:
                                 body = str(msg.get_payload())
+                        
+                        # Jeśli nie ma plain text, konwertuj HTML
+                        if not body and body_html:
+                            body = html_to_text(body_html)
                         
                         emails.append({
                             'id': email_id.decode(),
