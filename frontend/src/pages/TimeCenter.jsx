@@ -398,11 +398,29 @@ const TimeCenter = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Budziki</CardTitle>
-                <Button onClick={() => setShowAlarmDialog(true)} className="bg-purple-600 hover:bg-purple-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Dodaj budzik
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={testAlarm} 
+                    variant="outline"
+                    size="sm"
+                    className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Testuj Budzik
+                  </Button>
+                  <Button onClick={() => setShowAlarmDialog(true)} className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Dodaj budzik
+                  </Button>
+                </div>
               </div>
+              {notificationPermission !== 'granted' && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ Powiadomienia wyłączone! Kliknij "Testuj Budzik" aby włączyć.
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {alarms.length === 0 ? (
