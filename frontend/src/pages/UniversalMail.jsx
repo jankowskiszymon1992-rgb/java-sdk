@@ -74,6 +74,18 @@ const UniversalMail = () => {
       const data = await response.json();
       setAccounts(data.accounts || []);
       
+      // Próbuj załadować ostatnio wybrane konto z localStorage
+      const savedAccountId = localStorage.getItem('lastSelectedAccountId');
+      
+      if (savedAccountId && data.accounts) {
+        const savedAccount = data.accounts.find(acc => acc.id === savedAccountId);
+        if (savedAccount) {
+          setSelectedAccount(savedAccount);
+          return;
+        }
+      }
+      
+      // Jeśli nie ma zapisanego konta, wybierz pierwsze
       if (data.accounts && data.accounts.length > 0 && !selectedAccount) {
         setSelectedAccount(data.accounts[0]);
       }
