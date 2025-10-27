@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { Plus, Edit, Trash2, Phone, Mail, MapPin, Camera } from 'lucide-react';
 import { clientsApi } from '../api/api';
 import { toast } from 'sonner';
+import QRScanner from '../components/QRScanner';
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
