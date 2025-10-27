@@ -29,6 +29,7 @@ const AIAnalyst = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [trendSearchQuery, setTrendSearchQuery] = useState('');
 
   useEffect(() => {
     loadData();
