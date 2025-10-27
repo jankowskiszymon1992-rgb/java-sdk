@@ -315,7 +315,7 @@ const UniversalMail = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Inbox className="h-5 w-5" />
-              Skrzynka: {selectedAccount.email}
+              {folders.find(f => f.name === selectedFolder)?.label || selectedFolder}: {selectedAccount.email}
             </CardTitle>
           </CardHeader>
           <CardContent>
