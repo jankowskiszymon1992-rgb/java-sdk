@@ -82,8 +82,8 @@ const Projects = () => {
       resetForm();
       loadData();
     } catch (error) {
-      console.error('Błąd zapisywania zlecenia:', error);
-      toast.error('Nie udało się zapisać zlecenia');
+      console.error('Błąd zapisywania projektu:', error);
+      toast.error('Nie udało się zapisać projektu');
     }
   };
 
