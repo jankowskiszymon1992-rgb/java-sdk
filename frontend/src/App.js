@@ -70,6 +70,7 @@ function App() {
             <Route path="notes" element={<Notes />} />
             <Route path="time-center" element={<TimeCenter />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="my-files" element={<MyFiles />} />
           </Route>
         </Routes>
       </BrowserRouter>
