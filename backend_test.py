@@ -3829,6 +3829,602 @@ def main_chat_history():
     print("\n" + "=" * 80)
     print("💬 AI CHAT HISTORY TESTING COMPLETED")
 
+# ============= NEW MARKET INTELLIGENCE TESTS =============
+
+def test_market_intelligence_scrape_kaczmarek_electric():
+    """TEST 1: POST /api/market-intelligence/scrape?supplier=kaczmarek_electric (nowy dostawca)"""
+    print("\n=== TEST 1: Market Intelligence Scrape - Kaczmarek Electric (New Supplier) ===")
+    
+    url = f"{API_URL}/market-intelligence/scrape?supplier=kaczmarek_electric"
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        
+        response = requests.post(url, timeout=60)  # Longer timeout for scraping
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has results array
+            if "results" not in response_data or not isinstance(response_data["results"], list):
+                print("❌ Response missing 'results' array")
+                return False
+            
+            if len(response_data["results"]) == 0:
+                print("❌ No results in response")
+                return False
+            
+            # Get the first result (should be kaczmarek_electric)
+            result = response_data["results"][0]
+            
+            # Verify response structure
+            required_fields = ["supplier", "status", "products_scraped", "duration_seconds"]
+            missing_fields = [field for field in required_fields if field not in result]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify supplier
+            if result.get("supplier") != "kaczmarek_electric":
+                print(f"❌ Supplier mismatch. Expected: kaczmarek_electric, Got: {result.get('supplier')}")
+                return False
+            
+            # Verify status is success
+            if result.get("status") != "success":
+                print(f"❌ Status not success. Got: {result.get('status')}")
+                if "error_message" in result:
+                    print(f"Error message: {result.get('error_message')}")
+                return False
+            
+            # Verify products_scraped > 0 (should be ~83 as mentioned in request)
+            products_scraped = result.get("products_scraped", 0)
+            if products_scraped <= 0:
+                print(f"❌ No products scraped. Got: {products_scraped}")
+                return False
+            
+            # Check if it's around expected 83 products
+            if products_scraped < 50:
+                print(f"⚠️  Lower than expected products scraped: {products_scraped} (expected ~83)")
+            
+            # Verify duration_seconds exists and is reasonable
+            duration = result.get("duration_seconds", 0)
+            if duration <= 0:
+                print(f"❌ Invalid duration. Got: {duration}")
+                return False
+            
+            # Check for errors
+            total_errors = result.get("total_errors", 0)
+            if total_errors > 0:
+                print(f"⚠️  Found {total_errors} errors during scraping")
+            
+            print(f"✅ Kaczmarek Electric scraping successful:")
+            print(f"   Status: {result.get('status')}")
+            print(f"   Products scraped: {products_scraped}")
+            print(f"   Duration: {duration} seconds")
+            print(f"   Errors: {total_errors}")
+            
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (60s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_market_intelligence_scraping_logs():
+    """TEST 2: GET /api/market-intelligence/scraping-logs?limit=20"""
+    print("\n=== TEST 2: Market Intelligence Scraping Logs ===")
+    
+    url = f"{API_URL}/market-intelligence/scraping-logs?limit=20"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=30)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has logs array and count
+            if "logs" not in response_data or "count" not in response_data:
+                print("❌ Response missing 'logs' or 'count' field")
+                return False
+            
+            logs = response_data["logs"]
+            count = response_data["count"]
+            
+            if not isinstance(logs, list):
+                print("❌ Logs is not a list")
+                return False
+            
+            print(f"✅ Found {count} scraping logs")
+            
+            # Verify log structure if we have logs
+            if len(logs) > 0:
+                for i, log in enumerate(logs[:5]):  # Check first 5 logs
+                    required_fields = ["supplier", "status", "products_scraped", "duration_seconds", "started_at"]
+                    missing_fields = [field for field in required_fields if field not in log]
+                    
+                    if missing_fields:
+                        print(f"❌ Log {i} missing fields: {missing_fields}")
+                        return False
+                    
+                    print(f"   Log {i+1}: {log.get('supplier')} - {log.get('status')} - {log.get('products_scraped')} products")
+                    
+                    # Check for failed logs with error messages
+                    if log.get("status") == "failed" and "error_message" in log:
+                        error_msg = log.get("error_message", "")
+                        if "search_terms" in error_msg.lower():
+                            print(f"   ⚠️  Found 'search_terms' error in {log.get('supplier')}: {error_msg}")
+                
+                # Check which suppliers have recent logs
+                suppliers_in_logs = set(log.get("supplier") for log in logs)
+                expected_suppliers = ["kaczmarek_electric", "tme", "conrad", "rs_components"]
+                
+                print(f"   Suppliers in logs: {list(suppliers_in_logs)}")
+                
+                for supplier in expected_suppliers:
+                    if supplier in suppliers_in_logs:
+                        print(f"   ✅ {supplier} found in logs")
+                    else:
+                        print(f"   ⚠️  {supplier} not found in recent logs")
+            
+            else:
+                print("⚠️  No scraping logs found")
+            
+            print("✅ Scraping logs endpoint working correctly")
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (30s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_market_intelligence_scrape_tme():
+    """TEST 3: POST /api/market-intelligence/scrape?supplier=tme (naprawiony)"""
+    print("\n=== TEST 3: Market Intelligence Scrape - TME (Fixed) ===")
+    
+    url = f"{API_URL}/market-intelligence/scrape?supplier=tme"
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        
+        response = requests.post(url, timeout=60)  # Longer timeout for scraping
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has results array
+            if "results" not in response_data or not isinstance(response_data["results"], list):
+                print("❌ Response missing 'results' array")
+                return False
+            
+            if len(response_data["results"]) == 0:
+                print("❌ No results in response")
+                return False
+            
+            # Get the first result (should be tme)
+            result = response_data["results"][0]
+            
+            # Verify response structure
+            required_fields = ["supplier", "status", "products_scraped", "duration_seconds"]
+            missing_fields = [field for field in required_fields if field not in result]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify supplier
+            if result.get("supplier") != "tme":
+                print(f"❌ Supplier mismatch. Expected: tme, Got: {result.get('supplier')}")
+                return False
+            
+            # Verify status is success (should be fixed now)
+            if result.get("status") != "success":
+                print(f"❌ Status not success. Got: {result.get('status')}")
+                if "error_message" in result:
+                    error_msg = result.get("error_message", "")
+                    print(f"Error message: {error_msg}")
+                    # Check if it's the old "search_terms" error
+                    if "search_terms" in error_msg.lower():
+                        print("❌ CRITICAL: 'search_terms' error still exists - fix not working!")
+                return False
+            
+            # Verify products_scraped > 0
+            products_scraped = result.get("products_scraped", 0)
+            if products_scraped <= 0:
+                print(f"❌ No products scraped. Got: {products_scraped}")
+                return False
+            
+            # Verify duration_seconds exists and is reasonable
+            duration = result.get("duration_seconds", 0)
+            if duration <= 0:
+                print(f"❌ Invalid duration. Got: {duration}")
+                return False
+            
+            # Check for errors
+            total_errors = result.get("total_errors", 0)
+            if total_errors > 0:
+                print(f"⚠️  Found {total_errors} errors during scraping")
+            
+            print(f"✅ TME scraping successful (search_terms error fixed):")
+            print(f"   Status: {result.get('status')}")
+            print(f"   Products scraped: {products_scraped}")
+            print(f"   Duration: {duration} seconds")
+            print(f"   Errors: {total_errors}")
+            
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (60s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_market_intelligence_scrape_conrad():
+    """TEST 4: POST /api/market-intelligence/scrape?supplier=conrad (naprawiony)"""
+    print("\n=== TEST 4: Market Intelligence Scrape - Conrad (Fixed) ===")
+    
+    url = f"{API_URL}/market-intelligence/scrape?supplier=conrad"
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        
+        response = requests.post(url, timeout=60)  # Longer timeout for scraping
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has results array
+            if "results" not in response_data or not isinstance(response_data["results"], list):
+                print("❌ Response missing 'results' array")
+                return False
+            
+            if len(response_data["results"]) == 0:
+                print("❌ No results in response")
+                return False
+            
+            # Get the first result (should be conrad)
+            result = response_data["results"][0]
+            
+            # Verify response structure
+            required_fields = ["supplier", "status", "products_scraped", "duration_seconds"]
+            missing_fields = [field for field in required_fields if field not in result]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify supplier
+            if result.get("supplier") != "conrad":
+                print(f"❌ Supplier mismatch. Expected: conrad, Got: {result.get('supplier')}")
+                return False
+            
+            # Verify status is success (should be fixed now)
+            if result.get("status") != "success":
+                print(f"❌ Status not success. Got: {result.get('status')}")
+                if "error_message" in result:
+                    print(f"Error message: {result.get('error_message')}")
+                return False
+            
+            # Verify products_scraped > 0
+            products_scraped = result.get("products_scraped", 0)
+            if products_scraped <= 0:
+                print(f"❌ No products scraped. Got: {products_scraped}")
+                return False
+            
+            # Verify duration_seconds exists and is reasonable
+            duration = result.get("duration_seconds", 0)
+            if duration <= 0:
+                print(f"❌ Invalid duration. Got: {duration}")
+                return False
+            
+            # Check for errors
+            total_errors = result.get("total_errors", 0)
+            if total_errors > 0:
+                print(f"⚠️  Found {total_errors} errors during scraping")
+            
+            print(f"✅ Conrad scraping successful:")
+            print(f"   Status: {result.get('status')}")
+            print(f"   Products scraped: {products_scraped}")
+            print(f"   Duration: {duration} seconds")
+            print(f"   Errors: {total_errors}")
+            
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (60s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_market_intelligence_scrape_rs_components():
+    """TEST 5: POST /api/market-intelligence/scrape?supplier=rs_components (naprawiony)"""
+    print("\n=== TEST 5: Market Intelligence Scrape - RS Components (Fixed) ===")
+    
+    url = f"{API_URL}/market-intelligence/scrape?supplier=rs_components"
+    
+    try:
+        print(f"Sending POST request to: {url}")
+        
+        response = requests.post(url, timeout=60)  # Longer timeout for scraping
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has results array
+            if "results" not in response_data or not isinstance(response_data["results"], list):
+                print("❌ Response missing 'results' array")
+                return False
+            
+            if len(response_data["results"]) == 0:
+                print("❌ No results in response")
+                return False
+            
+            # Get the first result (should be rs_components)
+            result = response_data["results"][0]
+            
+            # Verify response structure
+            required_fields = ["supplier", "status", "products_scraped", "duration_seconds"]
+            missing_fields = [field for field in required_fields if field not in result]
+            
+            if missing_fields:
+                print(f"❌ Missing required fields: {missing_fields}")
+                return False
+            
+            # Verify supplier
+            if result.get("supplier") != "rs_components":
+                print(f"❌ Supplier mismatch. Expected: rs_components, Got: {result.get('supplier')}")
+                return False
+            
+            # Verify status is success (should be fixed now)
+            if result.get("status") != "success":
+                print(f"❌ Status not success. Got: {result.get('status')}")
+                if "error_message" in result:
+                    print(f"Error message: {result.get('error_message')}")
+                return False
+            
+            # Verify products_scraped > 0
+            products_scraped = result.get("products_scraped", 0)
+            if products_scraped <= 0:
+                print(f"❌ No products scraped. Got: {products_scraped}")
+                return False
+            
+            # Verify duration_seconds exists and is reasonable
+            duration = result.get("duration_seconds", 0)
+            if duration <= 0:
+                print(f"❌ Invalid duration. Got: {duration}")
+                return False
+            
+            # Check for errors
+            total_errors = result.get("total_errors", 0)
+            if total_errors > 0:
+                print(f"⚠️  Found {total_errors} errors during scraping")
+            
+            print(f"✅ RS Components scraping successful:")
+            print(f"   Status: {result.get('status')}")
+            print(f"   Products scraped: {products_scraped}")
+            print(f"   Duration: {duration} seconds")
+            print(f"   Errors: {total_errors}")
+            
+            return True
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (60s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_market_intelligence_prices_kaczmarek():
+    """TEST 6: GET /api/market-intelligence/prices/compare - Check Kaczmarek Electric prices"""
+    print("\n=== TEST 6: Market Intelligence Prices - Kaczmarek Electric ===")
+    
+    # Since there's no direct prices endpoint with supplier parameter, 
+    # we'll use the compare endpoint to check for Kaczmarek Electric prices
+    url = f"{API_URL}/market-intelligence/prices/compare"
+    
+    try:
+        print(f"Sending GET request to: {url}")
+        
+        response = requests.get(url, timeout=30)
+        
+        print(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"Response data: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+            
+            # Check if response has products array and count
+            if "products" not in response_data or "count" not in response_data:
+                print("❌ Response missing 'products' or 'count' field")
+                return False
+            
+            products = response_data["products"]
+            count = response_data["count"]
+            
+            if not isinstance(products, list):
+                print("❌ Products is not a list")
+                return False
+            
+            print(f"✅ Found {count} products with price comparisons")
+            
+            # Look for Kaczmarek Electric prices and specific products mentioned in request
+            kaczmarek_products_found = 0
+            expected_products = [
+                "Przewód YDYp 3x1.5 mm²",
+                "Rozdzielnica natynkowa 24M", 
+                "Peszel 32mm"
+            ]
+            
+            for product in products:
+                if "suppliers" in product:
+                    suppliers = product.get("suppliers", [])
+                    kaczmarek_supplier = next(
+                        (s for s in suppliers if s.get("supplier") == "kaczmarek_electric"), 
+                        None
+                    )
+                    
+                    if kaczmarek_supplier:
+                        kaczmarek_products_found += 1
+                        product_name = product.get("product_name", "")
+                        price = kaczmarek_supplier.get("price", 0)
+                        
+                        print(f"   ✅ Kaczmarek Electric product: {product_name} - {price} PLN")
+                        
+                        # Check for specific expected products
+                        for expected in expected_products:
+                            if expected.lower() in product_name.lower():
+                                print(f"      🎯 Found expected product: {expected}")
+                                
+                                # Check expected prices from request
+                                if "przewód" in expected.lower() and "1.5" in expected:
+                                    if abs(price - 174.09) < 50:  # Allow some variance
+                                        print(f"      ✅ Price close to expected ~174.09 PLN")
+                                    else:
+                                        print(f"      ⚠️  Price {price} differs from expected ~174.09 PLN")
+                                
+                                elif "rozdzielnica" in expected.lower() and "24m" in expected.lower():
+                                    if abs(price - 223.47) < 50:
+                                        print(f"      ✅ Price close to expected ~223.47 PLN")
+                                    else:
+                                        print(f"      ⚠️  Price {price} differs from expected ~223.47 PLN")
+                                
+                                elif "peszel" in expected.lower() and "32mm" in expected.lower():
+                                    if abs(price - 190.21) < 50:
+                                        print(f"      ✅ Price close to expected ~190.21 PLN")
+                                    else:
+                                        print(f"      ⚠️  Price {price} differs from expected ~190.21 PLN")
+            
+            if kaczmarek_products_found > 0:
+                print(f"✅ Found {kaczmarek_products_found} Kaczmarek Electric products in database")
+                
+                # Check if Kaczmarek has competitive prices
+                competitive_count = 0
+                for product in products:
+                    if "suppliers" in product and len(product["suppliers"]) > 1:
+                        kaczmarek_supplier = next(
+                            (s for s in product["suppliers"] if s.get("supplier") == "kaczmarek_electric"), 
+                            None
+                        )
+                        if kaczmarek_supplier:
+                            min_price = product.get("min_price", float('inf'))
+                            kaczmarek_price = kaczmarek_supplier.get("price", float('inf'))
+                            
+                            if kaczmarek_price == min_price:
+                                competitive_count += 1
+                
+                if competitive_count > 0:
+                    print(f"✅ Kaczmarek Electric has lowest prices for {competitive_count} products")
+                else:
+                    print("⚠️  Kaczmarek Electric doesn't have the lowest prices for any products")
+                
+                return True
+            else:
+                print("❌ No Kaczmarek Electric products found in database")
+                print("   This might indicate scraping didn't save data or database issue")
+                return False
+            
+        else:
+            print(f"❌ Request failed with status {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"Error details: {json.dumps(error_data, indent=2, ensure_ascii=False)}")
+            except:
+                print(f"Error text: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out (30s)")
+        return False
+    except requests.exceptions.ConnectionError:
+        print("❌ Connection error - backend may not be running")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
 def main_market_intelligence():
     """Main function for Market Intelligence scraping tests"""
     print("🔍 MARKET INTELLIGENCE SCRAPING TESTING STARTED")
