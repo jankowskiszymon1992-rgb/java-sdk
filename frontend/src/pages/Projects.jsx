@@ -288,7 +288,7 @@ const Projects = () => {
                   </div>
                   {formData.gps_lat && formData.gps_lng && (
                     <p className="text-xs text-green-600 mt-1">
-                      ✓ GPS: {formData.gps_lat.toFixed(4)}, {formData.gps_lng.toFixed(4)}
+                      ✓ Lokalizacja pobrana automatycznie
                     </p>
                   )}
                 </div>
