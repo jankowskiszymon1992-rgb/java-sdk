@@ -20,6 +20,8 @@ const UniversalMail = () => {
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [folders, setFolders] = useState(['INBOX']);
+  const [selectedFolder, setSelectedFolder] = useState('INBOX');
   
   // Modals
   const [showAddAccount, setShowAddAccount] = useState(false);
@@ -33,6 +35,12 @@ const UniversalMail = () => {
   useEffect(() => {
     loadAccounts();
   }, []);
+
+  useEffect(() => {
+    if (selectedAccount) {
+      loadFolders();
+    }
+  }, [selectedAccount]);
 
   const loadAccounts = async () => {
     try {
