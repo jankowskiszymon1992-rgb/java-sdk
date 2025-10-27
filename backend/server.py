@@ -241,6 +241,37 @@ class AlarmUpdate(BaseModel):
     repeat_days: Optional[List[int]] = None
 
 
+# ============= SAVED FILES MODELS =============
+
+class FileFolder(str, Enum):
+    email = "email"
+    ai = "ai"
+    roboty = "roboty"
+    inne = "inne"
+
+
+class SavedFile(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    filename: str
+    folder: FileFolder
+    content_type: str
+    size: int
+    source: str  # Skąd pochodzi (np. "email od Jan@wp.pl" lub "AI Analyst")
+    file_data: str  # Base64 encoded file content
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class SavedFileCreate(BaseModel):
+    filename: str
+    folder: FileFolder
+    content_type: str
+    size: int
+    source: str
+    file_data: str  # Base64 encoded
+
+
 # ============= FINANCIAL ENTRIES MODELS =============
 
 class FinancialCategory(str, Enum):
