@@ -618,6 +618,57 @@ const UniversalMail = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Modal: Podgląd PDF */}
+      <Dialog open={showPdfViewer} onOpenChange={setShowPdfViewer}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                📄 {currentAttachment?.filename}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  onClick={printPdf}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  🖨️ Drukuj
+                </Button>
+                <Button
+                  onClick={() => downloadAttachment(currentAttachment?.index, currentAttachment?.filename)}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  ⬇️ Pobierz
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowPdfViewer(false);
+                    setPdfUrl(null);
+                    setCurrentAttachment(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {pdfUrl && (
+            <div className="flex-1 mt-4 overflow-hidden">
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0 rounded"
+                style={{ minHeight: '70vh' }}
+                title="PDF Viewer"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
