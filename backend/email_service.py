@@ -1,7 +1,3 @@
-"""
-Universal Email Service - IMAP/SMTP
-Obsługuje wszystkie popularne providery email
-"""
 import imaplib
 import smtplib
 import email
@@ -13,6 +9,8 @@ from email.header import decode_header
 import base64
 from typing import List, Dict, Optional
 import logging
+import html
+import re
 
 logger = logging.getLogger(__name__)
 
