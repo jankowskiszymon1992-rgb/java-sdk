@@ -126,8 +126,59 @@ const TimeCenter = () => {
   }, [alarms]);
 
   const playAlarmSound = () => {
-    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAzvLZiToIGme67OKSRw==');
-    audio.play().catch(() => {});
+    // Lepszy dźwięk budzika - 3 sekundy dzwonka
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800; // Częstotliwość dźwięku
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    
+    // Odtwórz 3 razy (bip-bip-bip)
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.frequency.value = 800 + (i * 200);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + 0.3);
+      }, i * 500);
+    }
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  };
+
+  const testAlarm = () => {
+    playAlarmSound();
+    toast.success('🔔 Test budzika!');
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Test Budzika', {
+        body: 'Jeśli widzisz to powiadomienie, budziki będą działać!',
+        icon: '/logo192.png',
+        requireInteraction: true
+      });
+    } else if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification('Test Budzika', {
+            body: 'Powiadomienia włączone!',
+            icon: '/logo192.png'
+          });
+        }
+      });
+    } else {
+      toast.error('Powiadomienia zablokowane! Włącz je w ustawieniach przeglądarki.');
+    }
   };
 
   const loadAlarms = async () => {
