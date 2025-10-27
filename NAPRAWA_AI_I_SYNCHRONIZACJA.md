@@ -76,7 +76,7 @@ if (event.request.url.includes('/api/')) {
 6. Otwórz Firefox ponownie
 7. Wpisz w pasek: `about:serviceworkers`
 8. Znajdź "elektron-smart" → kliknij **Unregister**
-9. Wejdź na aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
+9. Wejdź na aplikację: https://elektron-hub.preview.emergentagent.com
 
 ---
 

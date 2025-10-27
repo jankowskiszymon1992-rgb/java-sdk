@@ -5,13 +5,13 @@
 ### Firefox:
 1. Pobierz Firefox: https://www.mozilla.org/pl/firefox/new/
 2. Zainstaluj
-3. Otwórz aplikację: https://pwa-troubleshoot-1.preview.emergentagent.com
+3. Otwórz aplikację: https://elektron-hub.preview.emergentagent.com
 4. **DevTools NIE będą się otwierać** (to jest problem tylko Chrome)
 
 ### Microsoft Edge:
 1. Już masz zainstalowany w Windows
 2. Otwórz Edge
-3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
+3. Wejdź na: https://elektron-hub.preview.emergentagent.com
 4. Powinno działać
 
 ---
@@ -82,7 +82,7 @@ Jeśli w trybie incognito działa:
 
 1. Otwórz Chrome
 2. Naciśnij **Ctrl + Shift + N** (tryb incognito)
-3. Wejdź na: https://pwa-troubleshoot-1.preview.emergentagent.com
+3. Wejdź na: https://elektron-hub.preview.emergentagent.com
 4. Dodaj do zakładek
 5. **Używaj zawsze w trybie incognito**
 

@@ -35,7 +35,7 @@ Jeśli uprawnienia są włączone ale powiadomienia nadal nie działają:
 
 1. **Usuń aplikację z ekranu głównego**
 2. **Otwórz przeglądarkę** (Chrome/Safari)
-3. **Wejdź na stronę:** `https://pwa-troubleshoot-1.preview.emergentagent.com`
+3. **Wejdź na stronę:** `https://elektron-hub.preview.emergentagent.com`
 4. **Zainstaluj ponownie:**
    - Android: Kliknij ikonę "Dodaj do ekranu głównego"
    - iOS: Kliknij "Udostępnij" → "Dodaj do ekranu głównego"
@@ -55,7 +55,7 @@ Jeśli uprawnienia są włączone ale powiadomienia nadal nie działają:
 ## 💻 JAK PRZETESTOWAĆ NA KOMPUTERZE (Przeglądarka)
 
 ### CHROME/EDGE:
-1. Otwórz stronę: `https://pwa-troubleshoot-1.preview.emergentagent.com`
+1. Otwórz stronę: `https://elektron-hub.preview.emergentagent.com`
 2. **W pasku adresu** zobaczysz ikonę 🔒 lub 🔔
 3. **Kliknij ikonę** i znajdź **"Powiadomienia"**
 4. Ustaw na **"Zezwól"**
@@ -63,7 +63,7 @@ Jeśli uprawnienia są włączone ale powiadomienia nadal nie działają:
 6. Przejdź do **"Przypomnienia"** → Kliknij **"Test powiadomień"**
 
 ### FIREFOX:
-1. Otwórz stronę: `https://pwa-troubleshoot-1.preview.emergentagent.com`
+1. Otwórz stronę: `https://elektron-hub.preview.emergentagent.com`
 2. W pasku adresu kliknij **ikonę 🛈**
 3. Przejdź do **"Uprawnienia"** → **"Powiadomienia"**
 4. Zmień na **"Zezwól"**
