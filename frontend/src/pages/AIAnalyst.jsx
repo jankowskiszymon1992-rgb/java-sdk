@@ -297,7 +297,7 @@ const AIAnalyst = () => {
         <div>
           <h2 className="text-3xl font-bold text-gray-900 flex items-center">
             <Brain className="h-8 w-8 mr-3 text-purple-600" />
-            AI Analityk
+            Analityk AI
           </h2>
           <p className="text-gray-600 mt-1">Inteligentna analiza rynku i rekomendacje</p>
         </div>
