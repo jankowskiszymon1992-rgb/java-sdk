@@ -30,6 +30,8 @@ const UniversalMail = () => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [currentAttachment, setCurrentAttachment] = useState(null);
+  const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const [selectedSaveFolder, setSelectedSaveFolder] = useState('email');
   
   // Forms
   const [newAccount, setNewAccount] = useState({ email: '', password: '' });
